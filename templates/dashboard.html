@@ -1,0 +1,533 @@
+{% extends "base/base.html" %}
+
+{% block title %}Dashboard | PharmaCare{% endblock %}
+
+{% block content %}
+
+<div class="dashboard-page">
+
+    <!-- Page Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+
+        <div>
+            <h4 class="fw-bold mb-1">Dashboard</h4>
+            <p class="text-muted mb-0">
+                Here's what's happening in your pharmacy today.
+            </p>
+        </div>
+
+        <div class="d-flex gap-2">
+            <button class="btn btn-outline-secondary">
+                <i class="fa-solid fa-download me-2"></i>
+                Export
+            </button>
+
+            <button class="btn btn-success">
+                <i class="fa-solid fa-plus me-2"></i>
+                New Sale
+            </button>
+        </div>
+
+    </div>
+
+
+    <!-- Statistics -->
+    <div class="row g-3 mb-4">
+
+        <!-- Today's Sales -->
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="dashboard-stat-card">
+
+                <div class="stat-card-top">
+                    <div>
+                        <div class="stat-label">Today's Sales</div>
+                        <div class="stat-value">Rs. 84,520</div>
+                    </div>
+
+                    <div class="stat-icon stat-icon-teal">
+                        <i class="fa-solid fa-chart-line"></i>
+                    </div>
+                </div>
+
+                <div class="stat-footer">
+                    <span class="stat-positive">
+                        <i class="fa-solid fa-arrow-up"></i>
+                        12.5%
+                    </span>
+
+                    <span>vs yesterday</span>
+                </div>
+
+            </div>
+        </div>
+
+
+        <!-- Total Orders -->
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="dashboard-stat-card">
+
+                <div class="stat-card-top">
+                    <div>
+                        <div class="stat-label">Total Orders</div>
+                        <div class="stat-value">186</div>
+                    </div>
+
+                    <div class="stat-icon stat-icon-blue">
+                        <i class="fa-solid fa-receipt"></i>
+                    </div>
+                </div>
+
+                <div class="stat-footer">
+                    <span class="stat-positive">
+                        <i class="fa-solid fa-arrow-up"></i>
+                        8.2%
+                    </span>
+
+                    <span>vs yesterday</span>
+                </div>
+
+            </div>
+        </div>
+
+
+        <!-- Low Stock -->
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="dashboard-stat-card">
+
+                <div class="stat-card-top">
+                    <div>
+                        <div class="stat-label">Low Stock</div>
+                        <div class="stat-value">42</div>
+                    </div>
+
+                    <div class="stat-icon stat-icon-orange">
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                    </div>
+                </div>
+
+                <div class="stat-footer">
+                    <span class="stat-warning">
+                        Needs attention
+                    </span>
+                </div>
+
+            </div>
+        </div>
+
+
+        <!-- Expiring Soon -->
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="dashboard-stat-card">
+
+                <div class="stat-card-top">
+                    <div>
+                        <div class="stat-label">Expiring Soon</div>
+                        <div class="stat-value">22</div>
+                    </div>
+
+                    <div class="stat-icon stat-icon-red">
+                        <i class="fa-solid fa-calendar-xmark"></i>
+                    </div>
+                </div>
+
+                <div class="stat-footer">
+                    <span class="stat-danger">
+                        Within 30 days
+                    </span>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+
+    <!-- Main Dashboard Row -->
+    <div class="row g-3 mb-4">
+
+        <!-- Sales Overview -->
+        <div class="col-12 col-xl-8">
+
+            <div class="dashboard-card h-100">
+
+                <div class="dashboard-card-header">
+
+                    <div>
+                        <h6 class="dashboard-card-title">
+                            Sales Overview
+                        </h6>
+
+                        <p class="dashboard-card-subtitle">
+                            Sales performance over the last 7 days
+                        </p>
+                    </div>
+
+                    <select class="form-select form-select-sm dashboard-select">
+                        <option>Last 7 Days</option>
+                        <option>Last 30 Days</option>
+                        <option>Last 3 Months</option>
+                    </select>
+
+                </div>
+
+                <div class="sales-chart-placeholder">
+
+                    <div class="chart-y-axis">
+                        <span>100K</span>
+                        <span>75K</span>
+                        <span>50K</span>
+                        <span>25K</span>
+                        <span>0</span>
+                    </div>
+
+                    <div class="chart-area">
+
+                        <div class="chart-grid">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
+
+                        <div class="chart-bars">
+
+                            <div class="chart-bar" style="height: 55%;">
+                                <span>Mon</span>
+                            </div>
+
+                            <div class="chart-bar" style="height: 72%;">
+                                <span>Tue</span>
+                            </div>
+
+                            <div class="chart-bar" style="height: 63%;">
+                                <span>Wed</span>
+                            </div>
+
+                            <div class="chart-bar" style="height: 84%;">
+                                <span>Thu</span>
+                            </div>
+
+                            <div class="chart-bar" style="height: 70%;">
+                                <span>Fri</span>
+                            </div>
+
+                            <div class="chart-bar" style="height: 92%;">
+                                <span>Sat</span>
+                            </div>
+
+                            <div class="chart-bar" style="height: 76%;">
+                                <span>Sun</span>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Quick Actions -->
+        <div class="col-12 col-xl-4">
+
+            <div class="dashboard-card h-100">
+
+                <div class="dashboard-card-header">
+                    <div>
+                        <h6 class="dashboard-card-title">
+                            Quick Actions
+                        </h6>
+
+                        <p class="dashboard-card-subtitle">
+                            Frequently used actions
+                        </p>
+                    </div>
+                </div>
+
+                <div class="quick-actions">
+
+                    <button class="quick-action">
+                        <span class="quick-action-icon teal">
+                            <i class="fa-solid fa-cart-plus"></i>
+                        </span>
+
+                        <span>
+                            <strong>New Sale</strong>
+                            <small>Create a new POS sale</small>
+                        </span>
+
+                        <i class="fa-solid fa-chevron-right ms-auto"></i>
+                    </button>
+
+
+                    <button class="quick-action">
+                        <span class="quick-action-icon blue">
+                            <i class="fa-solid fa-pills"></i>
+                        </span>
+
+                        <span>
+                            <strong>Add Medicine</strong>
+                            <small>Add a new medicine</small>
+                        </span>
+
+                        <i class="fa-solid fa-chevron-right ms-auto"></i>
+                    </button>
+
+
+                    <button class="quick-action">
+                        <span class="quick-action-icon orange">
+                            <i class="fa-solid fa-truck"></i>
+                        </span>
+
+                        <span>
+                            <strong>New Purchase</strong>
+                            <small>Create purchase order</small>
+                        </span>
+
+                        <i class="fa-solid fa-chevron-right ms-auto"></i>
+                    </button>
+
+
+                    <button class="quick-action">
+                        <span class="quick-action-icon purple">
+                            <i class="fa-solid fa-file-lines"></i>
+                        </span>
+
+                        <span>
+                            <strong>View Reports</strong>
+                            <small>Analyze pharmacy data</small>
+                        </span>
+
+                        <i class="fa-solid fa-chevron-right ms-auto"></i>
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Bottom Row -->
+    <div class="row g-3">
+
+        <!-- Recent Sales -->
+        <div class="col-12 col-xl-7">
+
+            <div class="dashboard-card">
+
+                <div class="dashboard-card-header">
+
+                    <div>
+                        <h6 class="dashboard-card-title">
+                            Recent Sales
+                        </h6>
+
+                        <p class="dashboard-card-subtitle">
+                            Latest transactions
+                        </p>
+                    </div>
+
+                    <a href="#" class="view-all-link">
+                        View All
+                        <i class="fa-solid fa-arrow-right ms-1"></i>
+                    </a>
+
+                </div>
+
+
+                <div class="table-responsive">
+
+                    <table class="table dashboard-table align-middle mb-0">
+
+                        <thead>
+                            <tr>
+                                <th>Invoice</th>
+                                <th>Customer</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+                            <tr>
+                                <td>
+                                    <span class="invoice-number">
+                                        INV-10248
+                                    </span>
+                                </td>
+
+                                <td>Walk-in Customer</td>
+
+                                <td class="fw-semibold">
+                                    Rs. 4,850
+                                </td>
+
+                                <td>
+                                    <span class="status-badge status-success">
+                                        Paid
+                                    </span>
+                                </td>
+                            </tr>
+
+
+                            <tr>
+                                <td>
+                                    <span class="invoice-number">
+                                        INV-10247
+                                    </span>
+                                </td>
+
+                                <td>Muhammad Ali</td>
+
+                                <td class="fw-semibold">
+                                    Rs. 2,340
+                                </td>
+
+                                <td>
+                                    <span class="status-badge status-success">
+                                        Paid
+                                    </span>
+                                </td>
+                            </tr>
+
+
+                            <tr>
+                                <td>
+                                    <span class="invoice-number">
+                                        INV-10246
+                                    </span>
+                                </td>
+
+                                <td>Fatima Zahra</td>
+
+                                <td class="fw-semibold">
+                                    Rs. 7,620
+                                </td>
+
+                                <td>
+                                    <span class="status-badge status-warning">
+                                        Partial
+                                    </span>
+                                </td>
+                            </tr>
+
+
+                            <tr>
+                                <td>
+                                    <span class="invoice-number">
+                                        INV-10245
+                                    </span>
+                                </td>
+
+                                <td>Walk-in Customer</td>
+
+                                <td class="fw-semibold">
+                                    Rs. 1,980
+                                </td>
+
+                                <td>
+                                    <span class="status-badge status-success">
+                                        Paid
+                                    </span>
+                                </td>
+                            </tr>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Alerts -->
+        <div class="col-12 col-xl-5">
+
+            <div class="dashboard-card">
+
+                <div class="dashboard-card-header">
+
+                    <div>
+                        <h6 class="dashboard-card-title">
+                            Inventory Alerts
+                        </h6>
+
+                        <p class="dashboard-card-subtitle">
+                            Items requiring attention
+                        </p>
+                    </div>
+
+                    <a href="#" class="view-all-link">
+                        View All
+                    </a>
+
+                </div>
+
+
+                <div class="inventory-alert">
+
+                    <div class="alert-icon alert-danger">
+                        <i class="fa-solid fa-calendar-xmark"></i>
+                    </div>
+
+                    <div class="alert-content">
+                        <strong>Expiring Medicines</strong>
+                        <span>22 medicines expire within 30 days</span>
+                    </div>
+
+                    <i class="fa-solid fa-chevron-right alert-arrow"></i>
+
+                </div>
+
+
+                <div class="inventory-alert">
+
+                    <div class="alert-icon alert-warning">
+                        <i class="fa-solid fa-box-open"></i>
+                    </div>
+
+                    <div class="alert-content">
+                        <strong>Low Stock</strong>
+                        <span>42 medicines are below minimum stock</span>
+                    </div>
+
+                    <i class="fa-solid fa-chevron-right alert-arrow"></i>
+
+                </div>
+
+
+                <div class="inventory-alert">
+
+                    <div class="alert-icon alert-info">
+                        <i class="fa-solid fa-truck"></i>
+                    </div>
+
+                    <div class="alert-content">
+                        <strong>Pending Purchases</strong>
+                        <span>8 purchase orders need attention</span>
+                    </div>
+
+                    <i class="fa-solid fa-chevron-right alert-arrow"></i>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
