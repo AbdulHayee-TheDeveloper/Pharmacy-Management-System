@@ -1,0 +1,1996 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Users & Roles - PharmaCare</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+    <style>
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Inter", sans-serif;
+            background: #f5f7f9;
+            color: #172033;
+        }
+
+        button,
+        input,
+        select {
+            font-family: inherit;
+        }
+
+        /* ================= SIDEBAR ================= */
+
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 250px;
+            height: 100vh;
+            background: #ffffff;
+            border-right: 1px solid #e7eaee;
+            z-index: 1000;
+            transition: 0.3s;
+        }
+
+        .brand {
+            height: 75px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 0 22px;
+            border-bottom: 1px solid #e7eaee;
+        }
+
+        .brand-icon {
+            width: 40px;
+            height: 40px;
+            background: #0f766e;
+            color: white;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 19px;
+        }
+
+        .brand h2 {
+            font-size: 18px;
+            font-weight: 700;
+            color: #115e59;
+        }
+
+        .brand span {
+            display: block;
+            font-size: 9px;
+            letter-spacing: 1px;
+            color: #667085;
+            margin-top: 2px;
+        }
+
+        .menu {
+            padding: 22px 14px;
+            height: calc(100vh - 75px);
+            overflow-y: auto;
+        }
+
+        .menu-title {
+            font-size: 10px;
+            font-weight: 700;
+            color: #98a2b3;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 0 12px;
+            margin-bottom: 8px;
+            margin-top: 18px;
+        }
+
+        .menu-title:first-child {
+            margin-top: 0;
+        }
+
+        .menu a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: #667085;
+            padding: 11px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            margin-bottom: 3px;
+            transition: 0.2s;
+        }
+
+        .menu a i {
+            width: 18px;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .menu a:hover {
+            background: #f0fdfa;
+            color: #0f766e;
+        }
+
+        .menu a.active {
+            background: #ccfbf1;
+            color: #0f766e;
+            font-weight: 600;
+        }
+
+        .logout {
+            color: #dc2626 !important;
+            margin-top: 20px;
+        }
+
+        .logout:hover {
+            background: #fef2f2 !important;
+            color: #dc2626 !important;
+        }
+
+        /* ================= MAIN ================= */
+
+        .main {
+            margin-left: 250px;
+            min-height: 100vh;
+        }
+
+        /* ================= TOPBAR ================= */
+
+        .topbar {
+            height: 75px;
+            background: white;
+            border-bottom: 1px solid #e7eaee;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 30px;
+        }
+
+        .topbar-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .menu-toggle {
+            display: none;
+            border: none;
+            background: none;
+            font-size: 20px;
+            color: #172033;
+            cursor: pointer;
+        }
+
+        .search-box {
+            width: 300px;
+            position: relative;
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 13px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #98a2b3;
+            font-size: 13px;
+        }
+
+        .search-box input {
+            width: 100%;
+            height: 38px;
+            border: 1px solid #e7eaee;
+            border-radius: 8px;
+            outline: none;
+            padding: 0 12px 0 37px;
+            font-size: 12px;
+            background: #f9fafb;
+        }
+
+        .search-box input:focus {
+            border-color: #0f766e;
+            background: white;
+        }
+
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .notification {
+            position: relative;
+            color: #667085;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .notification-badge {
+            position: absolute;
+            width: 7px;
+            height: 7px;
+            background: #ef4444;
+            border-radius: 50%;
+            top: -2px;
+            right: -3px;
+            border: 1px solid white;
+        }
+
+        .profile {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .profile-avatar {
+            width: 36px;
+            height: 36px;
+            background: #ccfbf1;
+            color: #0f766e;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .profile-info strong {
+            display: block;
+            font-size: 12px;
+        }
+
+        .profile-info span {
+            font-size: 10px;
+            color: #98a2b3;
+        }
+
+        /* ================= CONTENT ================= */
+
+        .content {
+            padding: 28px 30px;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 25px;
+        }
+
+        .page-header h1 {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        .page-header p {
+            color: #667085;
+            font-size: 13px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            height: 40px;
+            padding: 0 15px;
+            border-radius: 7px;
+            border: 1px solid #e7eaee;
+            background: white;
+            color: #344054;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn:hover {
+            background: #f9fafb;
+        }
+
+        .btn-primary {
+            background: #0f766e;
+            color: white;
+            border-color: #0f766e;
+        }
+
+        .btn-primary:hover {
+            background: #115e59;
+        }
+
+        /* ================= SUMMARY ================= */
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 18px;
+            margin-bottom: 22px;
+        }
+
+        .summary-card {
+            background: white;
+            border: 1px solid #e7eaee;
+            border-radius: 10px;
+            padding: 18px;
+        }
+
+        .summary-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .summary-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 9px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+
+        .icon-teal {
+            background: #ccfbf1;
+            color: #0f766e;
+        }
+
+        .icon-blue {
+            background: #dbeafe;
+            color: #2563eb;
+        }
+
+        .icon-green {
+            background: #dcfce7;
+            color: #16a34a;
+        }
+
+        .icon-orange {
+            background: #ffedd5;
+            color: #ea580c;
+        }
+
+        .summary-label {
+            font-size: 11px;
+            color: #667085;
+        }
+
+        .summary-value {
+            font-size: 21px;
+            font-weight: 700;
+            margin-top: 5px;
+        }
+
+        /* ================= TOOLBAR ================= */
+
+        .toolbar {
+            background: white;
+            border: 1px solid #e7eaee;
+            border-radius: 10px 10px 0 0;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .toolbar-left {
+            display: flex;
+            gap: 10px;
+            flex: 1;
+        }
+
+        .input-search {
+            position: relative;
+            width: 270px;
+        }
+
+        .input-search i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #98a2b3;
+            font-size: 12px;
+        }
+
+        .input-search input {
+            width: 100%;
+            height: 37px;
+            border: 1px solid #dfe3e8;
+            border-radius: 7px;
+            padding-left: 35px;
+            outline: none;
+            font-size: 11px;
+        }
+
+        .input-search input:focus {
+            border-color: #0f766e;
+        }
+
+        .select-filter {
+            height: 37px;
+            border: 1px solid #dfe3e8;
+            border-radius: 7px;
+            padding: 0 10px;
+            font-size: 11px;
+            color: #475467;
+            outline: none;
+        }
+
+        /* ================= TABLE ================= */
+
+        .table-card {
+            background: white;
+            border: 1px solid #e7eaee;
+            border-top: none;
+            border-radius: 0 0 10px 10px;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 850px;
+        }
+
+        th {
+            text-align: left;
+            padding: 13px 15px;
+            background: #f9fafb;
+            color: #667085;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            border-bottom: 1px solid #e7eaee;
+        }
+
+        td {
+            padding: 14px 15px;
+            border-bottom: 1px solid #f0f2f4;
+            font-size: 11px;
+            color: #344054;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .user-cell {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .user-avatar {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: 700;
+            background: #ccfbf1;
+            color: #0f766e;
+        }
+
+        .user-name {
+            font-weight: 600;
+            color: #172033;
+        }
+
+        .user-email {
+            font-size: 9px;
+            color: #98a2b3;
+            margin-top: 2px;
+        }
+
+        .role-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 5px 8px;
+            border-radius: 5px;
+            font-size: 9px;
+            font-weight: 600;
+        }
+
+        .role-admin {
+            background: #ede9fe;
+            color: #6d28d9;
+        }
+
+        .role-pharmacist {
+            background: #ccfbf1;
+            color: #0f766e;
+        }
+
+        .role-cashier {
+            background: #dbeafe;
+            color: #2563eb;
+        }
+
+        .role-inventory {
+            background: #ffedd5;
+            color: #c2410c;
+        }
+
+        .status {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 10px;
+            font-weight: 600;
+        }
+
+        .status::before {
+            content: "";
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+        }
+
+        .status.active {
+            color: #16a34a;
+        }
+
+        .status.active::before {
+            background: #22c55e;
+        }
+
+        .status.inactive {
+            color: #dc2626;
+        }
+
+        .status.inactive::before {
+            background: #ef4444;
+        }
+
+        .actions {
+            display: flex;
+            gap: 6px;
+        }
+
+        .action-btn {
+            width: 29px;
+            height: 29px;
+            border: 1px solid #e7eaee;
+            background: white;
+            color: #667085;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .action-btn:hover {
+            color: #0f766e;
+            background: #f0fdfa;
+            border-color: #99f6e4;
+        }
+
+        /* ================= MODAL ================= */
+
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.45);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            padding: 20px;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .modal {
+            width: 650px;
+            max-width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+        }
+
+        .modal-header {
+            padding: 20px 22px;
+            border-bottom: 1px solid #e7eaee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            font-size: 16px;
+        }
+
+        .close-btn {
+            width: 30px;
+            height: 30px;
+            border: none;
+            background: #f2f4f7;
+            border-radius: 6px;
+            cursor: pointer;
+            color: #667085;
+        }
+
+        .modal-body {
+            padding: 22px;
+        }
+
+        .form-section {
+            margin-bottom: 22px;
+        }
+
+        .form-section-title {
+            font-size: 12px;
+            font-weight: 700;
+            color: #115e59;
+            margin-bottom: 14px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #eef0f3;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 14px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 10px;
+            font-weight: 600;
+            color: #475467;
+            margin-bottom: 6px;
+        }
+
+        .form-control {
+            width: 100%;
+            height: 38px;
+            border: 1px solid #dfe3e8;
+            border-radius: 7px;
+            outline: none;
+            padding: 0 10px;
+            font-size: 11px;
+            color: #344054;
+        }
+
+        .form-control:focus {
+            border-color: #0f766e;
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        .permissions {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+
+        .permission {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid #e7eaee;
+            border-radius: 7px;
+            padding: 9px;
+            font-size: 10px;
+            color: #475467;
+        }
+
+        .permission input {
+            accent-color: #0f766e;
+        }
+
+        .modal-footer {
+            padding: 15px 22px;
+            border-top: 1px solid #e7eaee;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        /* ================= RESPONSIVE ================= */
+
+        @media (max-width: 1100px) {
+
+            .summary-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+        }
+
+        @media (max-width: 768px) {
+
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.show {
+                transform: translateX(0);
+            }
+
+            .main {
+                margin-left: 0;
+            }
+
+            .menu-toggle {
+                display: block;
+            }
+
+            .search-box {
+                display: none;
+            }
+
+            .content {
+                padding: 20px 15px;
+            }
+
+            .topbar {
+                padding: 0 15px;
+            }
+
+            .profile-info {
+                display: none;
+            }
+
+            .page-header {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .summary-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .toolbar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .toolbar-left {
+                flex-direction: column;
+            }
+
+            .input-search {
+                width: 100%;
+            }
+
+            .form-grid,
+            .permissions {
+                grid-template-columns: 1fr;
+            }
+
+        }
+
+    </style>
+</head>
+
+<body>
+
+
+<!-- ================= SIDEBAR ================= -->
+
+<aside class="sidebar" id="sidebar">
+
+    <div class="brand">
+
+        <div class="brand-icon">
+            <i class="fa-solid fa-prescription-bottle-medical"></i>
+        </div>
+
+        <div>
+            <h2>PharmaCare</h2>
+            <span>PHARMACY MANAGEMENT</span>
+        </div>
+
+    </div>
+
+
+    <div class="menu">
+
+        <div class="menu-title">Main Menu</div>
+
+        <a href="#">
+            <i class="fa-solid fa-gauge-high"></i>
+            Dashboard
+        </a>
+
+        <a href="#">
+            <i class="fa-solid fa-cash-register"></i>
+            Sales / POS
+        </a>
+
+        <a href="#">
+            <i class="fa-solid fa-pills"></i>
+            Medicines
+        </a>
+
+        <a href="#">
+            <i class="fa-solid fa-boxes-stacked"></i>
+            Inventory
+        </a>
+
+        <a href="#">
+            <i class="fa-solid fa-cart-shopping"></i>
+            Purchases
+        </a>
+
+        <a href="#">
+            <i class="fa-solid fa-truck-field"></i>
+            Suppliers
+        </a>
+
+        <a href="#">
+            <i class="fa-solid fa-users"></i>
+            Customers
+        </a>
+
+
+        <div class="menu-title">Analytics</div>
+
+        <a href="#">
+            <i class="fa-solid fa-chart-column"></i>
+            Reports
+        </a>
+
+
+        <div class="menu-title">Administration</div>
+
+        <a href="#" class="active">
+            <i class="fa-solid fa-user-shield"></i>
+            Users & Roles
+        </a>
+
+        <a href="#">
+            <i class="fa-solid fa-gear"></i>
+            Settings
+        </a>
+
+
+        <a href="#" class="logout">
+            <i class="fa-solid fa-right-from-bracket"></i>
+            Logout
+        </a>
+
+    </div>
+
+</aside>
+
+
+<!-- ================= MAIN ================= -->
+
+<main class="main">
+
+
+    <!-- TOPBAR -->
+
+    <header class="topbar">
+
+        <div class="topbar-left">
+
+            <button class="menu-toggle" onclick="toggleSidebar()">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+
+            <div class="search-box">
+
+                <i class="fa-solid fa-magnifying-glass"></i>
+
+                <input
+                    type="text"
+                    placeholder="Search users..."
+                >
+
+            </div>
+
+        </div>
+
+
+        <div class="topbar-right">
+
+            <div class="notification">
+
+                <i class="fa-regular fa-bell"></i>
+
+                <span class="notification-badge"></span>
+
+            </div>
+
+
+            <div class="profile">
+
+                <div class="profile-avatar">
+                    AH
+                </div>
+
+                <div class="profile-info">
+
+                    <strong>Abdul Hayee</strong>
+
+                    <span>Administrator</span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </header>
+
+
+    <!-- CONTENT -->
+
+    <section class="content">
+
+
+        <!-- PAGE HEADER -->
+
+        <div class="page-header">
+
+            <div>
+
+                <h1>Users & Roles</h1>
+
+                <p>
+                    Manage system users, roles and access permissions.
+                </p>
+
+            </div>
+
+
+            <div class="header-actions">
+
+                <button class="btn">
+                    <i class="fa-solid fa-download"></i>
+                    Export
+                </button>
+
+                <button
+                    class="btn btn-primary"
+                    onclick="openModal()"
+                >
+                    <i class="fa-solid fa-user-plus"></i>
+                    Add User
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <!-- SUMMARY -->
+
+        <div class="summary-grid">
+
+
+            <div class="summary-card">
+
+                <div class="summary-top">
+
+                    <div>
+
+                        <div class="summary-label">
+                            Total Users
+                        </div>
+
+                        <div class="summary-value">
+                            24
+                        </div>
+
+                    </div>
+
+                    <div class="summary-icon icon-teal">
+
+                        <i class="fa-solid fa-users"></i>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="summary-card">
+
+                <div class="summary-top">
+
+                    <div>
+
+                        <div class="summary-label">
+                            Active Users
+                        </div>
+
+                        <div class="summary-value">
+                            21
+                        </div>
+
+                    </div>
+
+                    <div class="summary-icon icon-green">
+
+                        <i class="fa-solid fa-user-check"></i>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="summary-card">
+
+                <div class="summary-top">
+
+                    <div>
+
+                        <div class="summary-label">
+                            Roles
+                        </div>
+
+                        <div class="summary-value">
+                            5
+                        </div>
+
+                    </div>
+
+                    <div class="summary-icon icon-blue">
+
+                        <i class="fa-solid fa-user-shield"></i>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="summary-card">
+
+                <div class="summary-top">
+
+                    <div>
+
+                        <div class="summary-label">
+                            Inactive Users
+                        </div>
+
+                        <div class="summary-value">
+                            3
+                        </div>
+
+                    </div>
+
+                    <div class="summary-icon icon-orange">
+
+                        <i class="fa-solid fa-user-clock"></i>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- TOOLBAR -->
+
+        <div class="toolbar">
+
+            <div class="toolbar-left">
+
+                <div class="input-search">
+
+                    <i class="fa-solid fa-magnifying-glass"></i>
+
+                    <input
+                        type="text"
+                        id="userSearch"
+                        placeholder="Search by name or email..."
+                        onkeyup="searchUsers()"
+                    >
+
+                </div>
+
+
+                <select
+                    class="select-filter"
+                    id="roleFilter"
+                    onchange="filterUsers()"
+                >
+
+                    <option value="">All Roles</option>
+                    <option value="Administrator">Administrator</option>
+                    <option value="Pharmacist">Pharmacist</option>
+                    <option value="Cashier">Cashier</option>
+                    <option value="Inventory Manager">Inventory Manager</option>
+
+                </select>
+
+
+                <select
+                    class="select-filter"
+                    id="statusFilter"
+                    onchange="filterUsers()"
+                >
+
+                    <option value="">All Status</option>
+                    <option value="Active">Active</option>
+                    <option value="Inactive">Inactive</option>
+
+                </select>
+
+            </div>
+
+        </div>
+
+
+        <!-- USERS TABLE -->
+
+        <div class="table-card">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+
+                        <th>User</th>
+
+                        <th>Role</th>
+
+                        <th>Phone</th>
+
+                        <th>Last Login</th>
+
+                        <th>Status</th>
+
+                        <th>Actions</th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody id="userTable">
+
+
+                    <tr data-role="Administrator" data-status="Active">
+
+                        <td>
+
+                            <div class="user-cell">
+
+                                <div class="user-avatar">
+                                    AH
+                                </div>
+
+                                <div>
+
+                                    <div class="user-name">
+                                        Abdul Hayee
+                                    </div>
+
+                                    <div class="user-email">
+                                        admin@pharmacare.com
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </td>
+
+
+                        <td>
+                            <span class="role-badge role-admin">
+                                Administrator
+                            </span>
+                        </td>
+
+
+                        <td>
+                            0300-1234567
+                        </td>
+
+
+                        <td>
+                            Today, 10:42 AM
+                        </td>
+
+
+                        <td>
+
+                            <span class="status active">
+                                Active
+                            </span>
+
+                        </td>
+
+
+                        <td>
+
+                            <div class="actions">
+
+                                <button
+                                    class="action-btn"
+                                    title="View"
+                                    onclick="viewUser('Abdul Hayee')"
+                                >
+                                    <i class="fa-regular fa-eye"></i>
+                                </button>
+
+                                <button
+                                    class="action-btn"
+                                    title="Edit"
+                                    onclick="openModal()"
+                                >
+                                    <i class="fa-solid fa-pen"></i>
+                                </button>
+
+                                <button
+                                    class="action-btn"
+                                    title="More"
+                                >
+                                    <i class="fa-solid fa-ellipsis"></i>
+                                </button>
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+
+                    <tr data-role="Pharmacist" data-status="Active">
+
+                        <td>
+
+                            <div class="user-cell">
+
+                                <div class="user-avatar"
+                                     style="background:#dbeafe;color:#2563eb;">
+                                    MK
+                                </div>
+
+                                <div>
+
+                                    <div class="user-name">
+                                        Muhammad Khan
+                                    </div>
+
+                                    <div class="user-email">
+                                        pharmacist@pharmacare.com
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </td>
+
+
+                        <td>
+
+                            <span class="role-badge role-pharmacist">
+                                Pharmacist
+                            </span>
+
+                        </td>
+
+
+                        <td>
+                            0312-4567890
+                        </td>
+
+
+                        <td>
+                            Today, 09:18 AM
+                        </td>
+
+
+                        <td>
+
+                            <span class="status active">
+                                Active
+                            </span>
+
+                        </td>
+
+
+                        <td>
+
+                            <div class="actions">
+
+                                <button class="action-btn">
+                                    <i class="fa-regular fa-eye"></i>
+                                </button>
+
+                                <button
+                                    class="action-btn"
+                                    onclick="openModal()"
+                                >
+                                    <i class="fa-solid fa-pen"></i>
+                                </button>
+
+                                <button class="action-btn">
+                                    <i class="fa-solid fa-ellipsis"></i>
+                                </button>
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+
+                    <tr data-role="Cashier" data-status="Active">
+
+                        <td>
+
+                            <div class="user-cell">
+
+                                <div class="user-avatar"
+                                     style="background:#dbeafe;color:#2563eb;">
+                                    AR
+                                </div>
+
+                                <div>
+
+                                    <div class="user-name">
+                                        Ali Raza
+                                    </div>
+
+                                    <div class="user-email">
+                                        cashier@pharmacare.com
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </td>
+
+
+                        <td>
+
+                            <span class="role-badge role-cashier">
+                                Cashier
+                            </span>
+
+                        </td>
+
+
+                        <td>
+                            0333-7890123
+                        </td>
+
+
+                        <td>
+                            Today, 08:52 AM
+                        </td>
+
+
+                        <td>
+
+                            <span class="status active">
+                                Active
+                            </span>
+
+                        </td>
+
+
+                        <td>
+
+                            <div class="actions">
+
+                                <button class="action-btn">
+                                    <i class="fa-regular fa-eye"></i>
+                                </button>
+
+                                <button
+                                    class="action-btn"
+                                    onclick="openModal()"
+                                >
+                                    <i class="fa-solid fa-pen"></i>
+                                </button>
+
+                                <button class="action-btn">
+                                    <i class="fa-solid fa-ellipsis"></i>
+                                </button>
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+
+                    <tr data-role="Inventory Manager" data-status="Active">
+
+                        <td>
+
+                            <div class="user-cell">
+
+                                <div class="user-avatar"
+                                     style="background:#ffedd5;color:#c2410c;">
+                                    HS
+                                </div>
+
+                                <div>
+
+                                    <div class="user-name">
+                                        Hassan Shah
+                                    </div>
+
+                                    <div class="user-email">
+                                        inventory@pharmacare.com
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </td>
+
+
+                        <td>
+
+                            <span class="role-badge role-inventory">
+                                Inventory Manager
+                            </span>
+
+                        </td>
+
+
+                        <td>
+                            0321-5554321
+                        </td>
+
+
+                        <td>
+                            Yesterday, 06:30 PM
+                        </td>
+
+
+                        <td>
+
+                            <span class="status active">
+                                Active
+                            </span>
+
+                        </td>
+
+
+                        <td>
+
+                            <div class="actions">
+
+                                <button class="action-btn">
+                                    <i class="fa-regular fa-eye"></i>
+                                </button>
+
+                                <button
+                                    class="action-btn"
+                                    onclick="openModal()"
+                                >
+                                    <i class="fa-solid fa-pen"></i>
+                                </button>
+
+                                <button class="action-btn">
+                                    <i class="fa-solid fa-ellipsis"></i>
+                                </button>
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+
+                    <tr data-role="Cashier" data-status="Inactive">
+
+                        <td>
+
+                            <div class="user-cell">
+
+                                <div class="user-avatar"
+                                     style="background:#f2f4f7;color:#667085;">
+                                    SA
+                                </div>
+
+                                <div>
+
+                                    <div class="user-name">
+                                        Sana Ahmed
+                                    </div>
+
+                                    <div class="user-email">
+                                        sana@pharmacare.com
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </td>
+
+
+                        <td>
+
+                            <span class="role-badge role-cashier">
+                                Cashier
+                            </span>
+
+                        </td>
+
+
+                        <td>
+                            0345-9876543
+                        </td>
+
+
+                        <td>
+                            18 Sep 2026
+                        </td>
+
+
+                        <td>
+
+                            <span class="status inactive">
+                                Inactive
+                            </span>
+
+                        </td>
+
+
+                        <td>
+
+                            <div class="actions">
+
+                                <button class="action-btn">
+                                    <i class="fa-regular fa-eye"></i>
+                                </button>
+
+                                <button
+                                    class="action-btn"
+                                    onclick="openModal()"
+                                >
+                                    <i class="fa-solid fa-pen"></i>
+                                </button>
+
+                                <button class="action-btn">
+                                    <i class="fa-solid fa-ellipsis"></i>
+                                </button>
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </section>
+
+</main>
+
+
+<!-- ================= ADD USER MODAL ================= -->
+
+<div class="modal-overlay" id="userModal">
+
+    <div class="modal">
+
+
+        <div class="modal-header">
+
+            <h2>
+                <i class="fa-solid fa-user-plus"
+                   style="color:#0f766e;margin-right:7px;"></i>
+
+                Add New User
+            </h2>
+
+            <button
+                class="close-btn"
+                onclick="closeModal()"
+            >
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+        </div>
+
+
+        <div class="modal-body">
+
+
+            <!-- BASIC INFORMATION -->
+
+            <div class="form-section">
+
+                <div class="form-section-title">
+                    Basic Information
+                </div>
+
+
+                <div class="form-grid">
+
+                    <div class="form-group">
+
+                        <label>Full Name</label>
+
+                        <input
+                            type="text"
+                            class="form-control"
+                            placeholder="Enter full name"
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label>Email Address</label>
+
+                        <input
+                            type="email"
+                            class="form-control"
+                            placeholder="Enter email address"
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label>Phone Number</label>
+
+                        <input
+                            type="text"
+                            class="form-control"
+                            placeholder="03XX-XXXXXXX"
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label>Role</label>
+
+                        <select class="form-control">
+
+                            <option>Select Role</option>
+
+                            <option>Administrator</option>
+
+                            <option>Pharmacist</option>
+
+                            <option>Cashier</option>
+
+                            <option>Inventory Manager</option>
+
+                            <option>Sales Manager</option>
+
+                        </select>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- LOGIN INFORMATION -->
+
+            <div class="form-section">
+
+                <div class="form-section-title">
+                    Login Information
+                </div>
+
+
+                <div class="form-grid">
+
+                    <div class="form-group">
+
+                        <label>Username</label>
+
+                        <input
+                            type="text"
+                            class="form-control"
+                            placeholder="Enter username"
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label>Password</label>
+
+                        <input
+                            type="password"
+                            class="form-control"
+                            placeholder="Enter password"
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label>Account Status</label>
+
+                        <select class="form-control">
+
+                            <option>Active</option>
+
+                            <option>Inactive</option>
+
+                        </select>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- PERMISSIONS -->
+
+            <div class="form-section">
+
+                <div class="form-section-title">
+                    Module Permissions
+                </div>
+
+
+                <div class="permissions">
+
+                    <label class="permission">
+                        <input type="checkbox" checked>
+                        Dashboard
+                    </label>
+
+                    <label class="permission">
+                        <input type="checkbox">
+                        Sales / POS
+                    </label>
+
+                    <label class="permission">
+                        <input type="checkbox">
+                        Medicines
+                    </label>
+
+                    <label class="permission">
+                        <input type="checkbox">
+                        Inventory
+                    </label>
+
+                    <label class="permission">
+                        <input type="checkbox">
+                        Purchases
+                    </label>
+
+                    <label class="permission">
+                        <input type="checkbox">
+                        Suppliers
+                    </label>
+
+                    <label class="permission">
+                        <input type="checkbox">
+                        Customers
+                    </label>
+
+                    <label class="permission">
+                        <input type="checkbox">
+                        Reports
+                    </label>
+
+                    <label class="permission">
+                        <input type="checkbox">
+                        Users & Roles
+                    </label>
+
+                    <label class="permission">
+                        <input type="checkbox">
+                        Settings
+                    </label>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="modal-footer">
+
+            <button
+                class="btn"
+                onclick="closeModal()"
+            >
+                Cancel
+            </button>
+
+            <button
+                class="btn btn-primary"
+                onclick="saveUser()"
+            >
+                <i class="fa-solid fa-check"></i>
+                Create User
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+    function toggleSidebar() {
+
+        document
+            .getElementById("sidebar")
+            .classList.toggle("show");
+
+    }
+
+
+    function openModal() {
+
+        document
+            .getElementById("userModal")
+            .classList.add("show");
+
+    }
+
+
+    function closeModal() {
+
+        document
+            .getElementById("userModal")
+            .classList.remove("show");
+
+    }
+
+
+    function saveUser() {
+
+        alert(
+            "User created successfully!\n\n" +
+            "The new user account has been added."
+        );
+
+        closeModal();
+
+    }
+
+
+    function viewUser(name) {
+
+        alert(
+            "User Profile\n\n" +
+            "Name: " + name
+        );
+
+    }
+
+
+    function searchUsers() {
+
+        const search =
+            document
+            .getElementById("userSearch")
+            .value
+            .toLowerCase();
+
+        const rows =
+            document.querySelectorAll("#userTable tr");
+
+        rows.forEach(row => {
+
+            const text =
+                row.innerText.toLowerCase();
+
+            row.style.display =
+                text.includes(search)
+                ? ""
+                : "none";
+
+        });
+
+    }
+
+
+    function filterUsers() {
+
+        const role =
+            document
+            .getElementById("roleFilter")
+            .value;
+
+        const status =
+            document
+            .getElementById("statusFilter")
+            .value;
+
+        const rows =
+            document.querySelectorAll("#userTable tr");
+
+        rows.forEach(row => {
+
+            const rowRole =
+                row.dataset.role;
+
+            const rowStatus =
+                row.dataset.status;
+
+            const roleMatch =
+                !role || rowRole === role;
+
+            const statusMatch =
+                !status || rowStatus === status;
+
+            row.style.display =
+                roleMatch && statusMatch
+                ? ""
+                : "none";
+
+        });
+
+    }
+
+
+    window.onclick = function(event) {
+
+        const modal =
+            document.getElementById("userModal");
+
+        if (event.target === modal) {
+            closeModal();
+        }
+
+    };
+
+</script>
+
+</body>
+</html>

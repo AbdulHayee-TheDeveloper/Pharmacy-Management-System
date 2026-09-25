@@ -1,0 +1,1296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reports - PharmaCare</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Inter", sans-serif;
+            background: #f5f7f9;
+            color: #172033;
+        }
+
+        button,
+        input,
+        select {
+            font-family: inherit;
+        }
+
+        /* ================= SIDEBAR ================= */
+
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 250px;
+            height: 100vh;
+            background: #ffffff;
+            border-right: 1px solid #e7eaee;
+            z-index: 1000;
+            transition: 0.3s;
+        }
+
+        .brand {
+            height: 75px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 0 22px;
+            border-bottom: 1px solid #e7eaee;
+        }
+
+        .brand-icon {
+            width: 40px;
+            height: 40px;
+            background: #0f766e;
+            color: white;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 19px;
+        }
+
+        .brand h2 {
+            font-size: 18px;
+            font-weight: 700;
+            color: #115e59;
+        }
+
+        .brand span {
+            display: block;
+            font-size: 9px;
+            letter-spacing: 1px;
+            color: #667085;
+            margin-top: 2px;
+        }
+
+        .menu {
+            padding: 22px 14px;
+            height: calc(100vh - 75px);
+            overflow-y: auto;
+        }
+
+        .menu-title {
+            font-size: 10px;
+            font-weight: 700;
+            color: #98a2b3;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 0 12px;
+            margin-bottom: 8px;
+            margin-top: 18px;
+        }
+
+        .menu-title:first-child {
+            margin-top: 0;
+        }
+
+        .menu a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: #667085;
+            padding: 11px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            margin-bottom: 3px;
+            transition: 0.2s;
+        }
+
+        .menu a i {
+            width: 18px;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .menu a:hover {
+            background: #f0fdfa;
+            color: #0f766e;
+        }
+
+        .menu a.active {
+            background: #ccfbf1;
+            color: #0f766e;
+            font-weight: 600;
+        }
+
+        .logout {
+            color: #dc2626 !important;
+            margin-top: 20px;
+        }
+
+        .logout:hover {
+            background: #fef2f2 !important;
+            color: #dc2626 !important;
+        }
+
+        /* ================= MAIN ================= */
+
+        .main {
+            margin-left: 250px;
+            min-height: 100vh;
+        }
+
+        /* ================= TOPBAR ================= */
+
+        .topbar {
+            height: 75px;
+            background: white;
+            border-bottom: 1px solid #e7eaee;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 30px;
+        }
+
+        .topbar-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .menu-toggle {
+            display: none;
+            border: none;
+            background: none;
+            font-size: 20px;
+            color: #172033;
+            cursor: pointer;
+        }
+
+        .search-box {
+            width: 300px;
+            position: relative;
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 13px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #98a2b3;
+            font-size: 13px;
+        }
+
+        .search-box input {
+            width: 100%;
+            height: 38px;
+            border: 1px solid #e7eaee;
+            border-radius: 8px;
+            outline: none;
+            padding: 0 12px 0 37px;
+            font-size: 12px;
+            background: #f9fafb;
+        }
+
+        .search-box input:focus {
+            border-color: #0f766e;
+            background: white;
+        }
+
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .notification {
+            position: relative;
+            color: #667085;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .notification-badge {
+            position: absolute;
+            width: 7px;
+            height: 7px;
+            background: #ef4444;
+            border-radius: 50%;
+            top: -2px;
+            right: -3px;
+            border: 1px solid white;
+        }
+
+        .profile {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .profile-avatar {
+            width: 36px;
+            height: 36px;
+            background: #ccfbf1;
+            color: #0f766e;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .profile-info strong {
+            display: block;
+            font-size: 12px;
+        }
+
+        .profile-info span {
+            font-size: 10px;
+            color: #98a2b3;
+        }
+
+        /* ================= CONTENT ================= */
+
+        .content {
+            padding: 28px 30px;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 25px;
+        }
+
+        .page-header h1 {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        .page-header p {
+            color: #667085;
+            font-size: 13px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            height: 40px;
+            padding: 0 15px;
+            border-radius: 7px;
+            border: 1px solid #e7eaee;
+            background: white;
+            color: #344054;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn:hover {
+            background: #f9fafb;
+        }
+
+        .btn-primary {
+            background: #0f766e;
+            color: white;
+            border-color: #0f766e;
+        }
+
+        .btn-primary:hover {
+            background: #115e59;
+        }
+
+        /* ================= FILTER ================= */
+
+        .filter-card {
+            background: white;
+            border: 1px solid #e7eaee;
+            border-radius: 10px;
+            padding: 18px;
+            margin-bottom: 22px;
+        }
+
+        .filter-title {
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 14px;
+        }
+
+        .filters {
+            display: grid;
+            grid-template-columns: 1.4fr 1fr 1fr 1fr auto;
+            gap: 12px;
+            align-items: end;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 11px;
+            font-weight: 600;
+            color: #475467;
+            margin-bottom: 6px;
+        }
+
+        .form-control {
+            width: 100%;
+            height: 38px;
+            border: 1px solid #dfe3e8;
+            border-radius: 7px;
+            outline: none;
+            padding: 0 11px;
+            font-size: 12px;
+            color: #344054;
+            background: white;
+        }
+
+        .form-control:focus {
+            border-color: #0f766e;
+        }
+
+        .filter-btn {
+            height: 38px;
+            border: none;
+            background: #0f766e;
+            color: white;
+            padding: 0 18px;
+            border-radius: 7px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        /* ================= SUMMARY ================= */
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 18px;
+            margin-bottom: 22px;
+        }
+
+        .summary-card {
+            background: white;
+            border: 1px solid #e7eaee;
+            border-radius: 10px;
+            padding: 18px;
+        }
+
+        .summary-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .summary-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 9px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+
+        .icon-teal {
+            background: #ccfbf1;
+            color: #0f766e;
+        }
+
+        .icon-blue {
+            background: #dbeafe;
+            color: #2563eb;
+        }
+
+        .icon-orange {
+            background: #ffedd5;
+            color: #ea580c;
+        }
+
+        .icon-green {
+            background: #dcfce7;
+            color: #16a34a;
+        }
+
+        .summary-label {
+            margin-top: 15px;
+            font-size: 11px;
+            color: #667085;
+        }
+
+        .summary-value {
+            font-size: 21px;
+            font-weight: 700;
+            margin-top: 5px;
+        }
+
+        .summary-change {
+            font-size: 10px;
+            margin-top: 6px;
+            color: #16a34a;
+        }
+
+        /* ================= REPORT CARDS ================= */
+
+        .section-title {
+            font-size: 15px;
+            font-weight: 700;
+            margin-bottom: 14px;
+        }
+
+        .report-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 18px;
+            margin-bottom: 22px;
+        }
+
+        .report-card {
+            background: white;
+            border: 1px solid #e7eaee;
+            border-radius: 10px;
+            padding: 20px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .report-card:hover {
+            border-color: #99f6e4;
+            box-shadow: 0 5px 18px rgba(15, 118, 110, 0.06);
+            transform: translateY(-1px);
+        }
+
+        .report-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 9px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 14px;
+            font-size: 17px;
+        }
+
+        .report-card h3 {
+            font-size: 13px;
+            margin-bottom: 6px;
+        }
+
+        .report-card p {
+            font-size: 11px;
+            color: #667085;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .report-link {
+            color: #0f766e;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        /* ================= CHART / TABLE ================= */
+
+        .bottom-grid {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr;
+            gap: 20px;
+        }
+
+        .panel {
+            background: white;
+            border: 1px solid #e7eaee;
+            border-radius: 10px;
+            padding: 20px;
+        }
+
+        .panel-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .panel-header h2 {
+            font-size: 14px;
+        }
+
+        .panel-header span {
+            font-size: 10px;
+            color: #667085;
+        }
+
+        .chart {
+            height: 235px;
+            display: flex;
+            align-items: flex-end;
+            gap: 12px;
+            padding: 10px 5px 0;
+            border-bottom: 1px solid #e7eaee;
+            position: relative;
+        }
+
+        .chart::before,
+        .chart::after {
+            content: "";
+            position: absolute;
+            left: 0;
+            right: 0;
+            border-top: 1px dashed #eef0f3;
+        }
+
+        .chart::before {
+            top: 28%;
+        }
+
+        .chart::after {
+            top: 58%;
+        }
+
+        .bar-wrap {
+            flex: 1;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 7px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .bar {
+            width: 65%;
+            max-width: 38px;
+            background: #0f766e;
+            border-radius: 5px 5px 0 0;
+            min-height: 10px;
+        }
+
+        .bar-label {
+            font-size: 9px;
+            color: #98a2b3;
+        }
+
+        .mini-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .mini-table th {
+            text-align: left;
+            padding: 9px 7px;
+            font-size: 10px;
+            color: #667085;
+            border-bottom: 1px solid #e7eaee;
+        }
+
+        .mini-table td {
+            padding: 11px 7px;
+            font-size: 10px;
+            border-bottom: 1px solid #f0f2f4;
+        }
+
+        .mini-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .profit {
+            color: #16a34a;
+            font-weight: 600;
+        }
+
+        /* ================= RESPONSIVE ================= */
+
+        @media (max-width: 1100px) {
+            .summary-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .filters {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .report-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .bottom-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.show {
+                transform: translateX(0);
+            }
+
+            .main {
+                margin-left: 0;
+            }
+
+            .menu-toggle {
+                display: block;
+            }
+
+            .search-box {
+                display: none;
+            }
+
+            .content {
+                padding: 20px 15px;
+            }
+
+            .topbar {
+                padding: 0 15px;
+            }
+
+            .profile-info {
+                display: none;
+            }
+
+            .page-header {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .summary-grid,
+            .report-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .filters {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- ================= SIDEBAR ================= -->
+
+<aside class="sidebar" id="sidebar">
+
+    <div class="brand">
+        <div class="brand-icon">
+            <i class="fa-solid fa-prescription-bottle-medical"></i>
+        </div>
+
+        <div>
+            <h2>PharmaCare</h2>
+            <span>PHARMACY MANAGEMENT</span>
+        </div>
+    </div>
+
+    <div class="menu">
+
+        <div class="menu-title">Main Menu</div>
+
+        <a href="#">
+            <i class="fa-solid fa-gauge-high"></i>
+            Dashboard
+        </a>
+
+        <a href="#">
+            <i class="fa-solid fa-cash-register"></i>
+            Sales / POS
+        </a>
+
+        <a href="#">
+            <i class="fa-solid fa-pills"></i>
+            Medicines
+        </a>
+
+        <a href="#">
+            <i class="fa-solid fa-boxes-stacked"></i>
+            Inventory
+        </a>
+
+        <a href="#">
+            <i class="fa-solid fa-cart-shopping"></i>
+            Purchases
+        </a>
+
+        <a href="#">
+            <i class="fa-solid fa-truck-field"></i>
+            Suppliers
+        </a>
+
+        <a href="#">
+            <i class="fa-solid fa-users"></i>
+            Customers
+        </a>
+
+        <div class="menu-title">Analytics</div>
+
+        <a href="#" class="active">
+            <i class="fa-solid fa-chart-column"></i>
+            Reports
+        </a>
+
+        <div class="menu-title">Administration</div>
+
+        <a href="#">
+            <i class="fa-solid fa-user-shield"></i>
+            Users & Roles
+        </a>
+
+        <a href="#">
+            <i class="fa-solid fa-gear"></i>
+            Settings
+        </a>
+
+        <a href="#" class="logout">
+            <i class="fa-solid fa-right-from-bracket"></i>
+            Logout
+        </a>
+
+    </div>
+</aside>
+
+
+<!-- ================= MAIN ================= -->
+
+<main class="main">
+
+    <!-- TOPBAR -->
+
+    <header class="topbar">
+
+        <div class="topbar-left">
+
+            <button class="menu-toggle" onclick="toggleSidebar()">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+
+            <div class="search-box">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" placeholder="Search reports...">
+            </div>
+
+        </div>
+
+        <div class="topbar-right">
+
+            <div class="notification">
+                <i class="fa-regular fa-bell"></i>
+                <span class="notification-badge"></span>
+            </div>
+
+            <div class="profile">
+
+                <div class="profile-avatar">
+                    AH
+                </div>
+
+                <div class="profile-info">
+                    <strong>Abdul Hayee</strong>
+                    <span>Administrator</span>
+                </div>
+
+            </div>
+
+        </div>
+
+    </header>
+
+
+    <!-- CONTENT -->
+
+    <section class="content">
+
+        <!-- PAGE HEADER -->
+
+        <div class="page-header">
+
+            <div>
+                <h1>Reports</h1>
+                <p>Analyze pharmacy sales, purchases, inventory and profitability.</p>
+            </div>
+
+            <div class="header-actions">
+
+                <button class="btn">
+                    <i class="fa-solid fa-file-export"></i>
+                    Export Report
+                </button>
+
+                <button class="btn btn-primary">
+                    <i class="fa-solid fa-print"></i>
+                    Print
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <!-- FILTER -->
+
+        <div class="filter-card">
+
+            <div class="filter-title">
+                <i class="fa-solid fa-filter" style="color:#0f766e; margin-right:6px;"></i>
+                Report Filters
+            </div>
+
+            <div class="filters">
+
+                <div class="form-group">
+
+                    <label>Report Type</label>
+
+                    <select class="form-control">
+                        <option>Sales Report</option>
+                        <option>Purchase Report</option>
+                        <option>Inventory Report</option>
+                        <option>Profit & Loss</option>
+                        <option>Expiry Report</option>
+                        <option>Customer Report</option>
+                    </select>
+
+                </div>
+
+                <div class="form-group">
+
+                    <label>From Date</label>
+
+                    <input
+                        type="date"
+                        class="form-control"
+                        value="2026-09-01"
+                    >
+
+                </div>
+
+                <div class="form-group">
+
+                    <label>To Date</label>
+
+                    <input
+                        type="date"
+                        class="form-control"
+                        value="2026-09-25"
+                    >
+
+                </div>
+
+                <div class="form-group">
+
+                    <label>Category</label>
+
+                    <select class="form-control">
+                        <option>All Categories</option>
+                        <option>Tablets</option>
+                        <option>Capsules</option>
+                        <option>Syrups</option>
+                        <option>Injections</option>
+                        <option>Other</option>
+                    </select>
+
+                </div>
+
+                <button class="filter-btn" onclick="generateReport()">
+                    <i class="fa-solid fa-chart-line"></i>
+                    Generate
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <!-- SUMMARY -->
+
+        <div class="summary-grid">
+
+            <div class="summary-card">
+
+                <div class="summary-top">
+
+                    <div>
+                        <div class="summary-label">Total Sales</div>
+                        <div class="summary-value">Rs. 2.48M</div>
+                    </div>
+
+                    <div class="summary-icon icon-teal">
+                        <i class="fa-solid fa-money-bill-trend-up"></i>
+                    </div>
+
+                </div>
+
+                <div class="summary-change">
+                    <i class="fa-solid fa-arrow-up"></i>
+                    12.8% compared to last month
+                </div>
+
+            </div>
+
+
+            <div class="summary-card">
+
+                <div class="summary-top">
+
+                    <div>
+                        <div class="summary-label">Total Purchases</div>
+                        <div class="summary-value">Rs. 1.84M</div>
+                    </div>
+
+                    <div class="summary-icon icon-blue">
+                        <i class="fa-solid fa-cart-shopping"></i>
+                    </div>
+
+                </div>
+
+                <div class="summary-change">
+                    <i class="fa-solid fa-arrow-up"></i>
+                    8.4% compared to last month
+                </div>
+
+            </div>
+
+
+            <div class="summary-card">
+
+                <div class="summary-top">
+
+                    <div>
+                        <div class="summary-label">Gross Profit</div>
+                        <div class="summary-value">Rs. 642K</div>
+                    </div>
+
+                    <div class="summary-icon icon-green">
+                        <i class="fa-solid fa-chart-line"></i>
+                    </div>
+
+                </div>
+
+                <div class="summary-change">
+                    <i class="fa-solid fa-arrow-up"></i>
+                    15.2% compared to last month
+                </div>
+
+            </div>
+
+
+            <div class="summary-card">
+
+                <div class="summary-top">
+
+                    <div>
+                        <div class="summary-label">Profit Margin</div>
+                        <div class="summary-value">25.8%</div>
+                    </div>
+
+                    <div class="summary-icon icon-orange">
+                        <i class="fa-solid fa-percent"></i>
+                    </div>
+
+                </div>
+
+                <div class="summary-change">
+                    <i class="fa-solid fa-arrow-up"></i>
+                    2.1% compared to last month
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- REPORT TYPES -->
+
+        <div class="section-title">
+            Available Reports
+        </div>
+
+        <div class="report-grid">
+
+            <div class="report-card">
+
+                <div class="report-icon icon-teal">
+                    <i class="fa-solid fa-cash-register"></i>
+                </div>
+
+                <h3>Sales Report</h3>
+
+                <p>
+                    View daily, weekly and monthly sales,
+                    invoices, payment methods and top-selling medicines.
+                </p>
+
+                <span class="report-link">
+                    View Report →
+                </span>
+
+            </div>
+
+
+            <div class="report-card">
+
+                <div class="report-icon icon-blue">
+                    <i class="fa-solid fa-cart-shopping"></i>
+                </div>
+
+                <h3>Purchase Report</h3>
+
+                <p>
+                    Analyze purchases by supplier, medicine,
+                    date range and total purchase amount.
+                </p>
+
+                <span class="report-link">
+                    View Report →
+                </span>
+
+            </div>
+
+
+            <div class="report-card">
+
+                <div class="report-icon icon-green">
+                    <i class="fa-solid fa-boxes-stacked"></i>
+                </div>
+
+                <h3>Inventory Report</h3>
+
+                <p>
+                    Track current stock, stock value,
+                    low-stock medicines and stock movements.
+                </p>
+
+                <span class="report-link">
+                    View Report →
+                </span>
+
+            </div>
+
+
+            <div class="report-card">
+
+                <div class="report-icon icon-orange">
+                    <i class="fa-solid fa-chart-pie"></i>
+                </div>
+
+                <h3>Profit & Loss</h3>
+
+                <p>
+                    Analyze revenue, purchase cost,
+                    gross profit and overall profitability.
+                </p>
+
+                <span class="report-link">
+                    View Report →
+                </span>
+
+            </div>
+
+
+            <div class="report-card">
+
+                <div class="report-icon"
+                     style="background:#fee2e2;color:#dc2626;">
+                    <i class="fa-solid fa-calendar-xmark"></i>
+                </div>
+
+                <h3>Expiry Report</h3>
+
+                <p>
+                    Identify medicines that are expired
+                    or approaching their expiry date.
+                </p>
+
+                <span class="report-link">
+                    View Report →
+                </span>
+
+            </div>
+
+
+            <div class="report-card">
+
+                <div class="report-icon"
+                     style="background:#ede9fe;color:#7c3aed;">
+                    <i class="fa-solid fa-users"></i>
+                </div>
+
+                <h3>Customer Report</h3>
+
+                <p>
+                    Analyze customer purchases, spending,
+                    outstanding balances and purchase frequency.
+                </p>
+
+                <span class="report-link">
+                    View Report →
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <!-- BOTTOM -->
+
+        <div class="bottom-grid">
+
+            <!-- SALES CHART -->
+
+            <div class="panel">
+
+                <div class="panel-header">
+
+                    <h2>Sales Overview</h2>
+
+                    <span>September 2026</span>
+
+                </div>
+
+                <div class="chart">
+
+                    <div class="bar-wrap">
+                        <div class="bar" style="height:35%;"></div>
+                        <span class="bar-label">1 Sep</span>
+                    </div>
+
+                    <div class="bar-wrap">
+                        <div class="bar" style="height:48%;"></div>
+                        <span class="bar-label">5 Sep</span>
+                    </div>
+
+                    <div class="bar-wrap">
+                        <div class="bar" style="height:42%;"></div>
+                        <span class="bar-label">9 Sep</span>
+                    </div>
+
+                    <div class="bar-wrap">
+                        <div class="bar" style="height:62%;"></div>
+                        <span class="bar-label">13 Sep</span>
+                    </div>
+
+                    <div class="bar-wrap">
+                        <div class="bar" style="height:55%;"></div>
+                        <span class="bar-label">17 Sep</span>
+                    </div>
+
+                    <div class="bar-wrap">
+                        <div class="bar" style="height:76%;"></div>
+                        <span class="bar-label">21 Sep</span>
+                    </div>
+
+                    <div class="bar-wrap">
+                        <div class="bar" style="height:90%;"></div>
+                        <span class="bar-label">25 Sep</span>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- TOP PRODUCTS -->
+
+            <div class="panel">
+
+                <div class="panel-header">
+
+                    <h2>Top Selling Medicines</h2>
+
+                    <span>This Month</span>
+
+                </div>
+
+                <table class="mini-table">
+
+                    <thead>
+
+                        <tr>
+                            <th>Medicine</th>
+                            <th>Sold</th>
+                            <th>Profit</th>
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        <tr>
+                            <td>Panadol 500mg</td>
+                            <td>842</td>
+                            <td class="profit">Rs. 18,240</td>
+                        </tr>
+
+                        <tr>
+                            <td>Brufen 400mg</td>
+                            <td>624</td>
+                            <td class="profit">Rs. 15,680</td>
+                        </tr>
+
+                        <tr>
+                            <td>Augmentin 625mg</td>
+                            <td>418</td>
+                            <td class="profit">Rs. 13,450</td>
+                        </tr>
+
+                        <tr>
+                            <td>Cetirizine 10mg</td>
+                            <td>385</td>
+                            <td class="profit">Rs. 9,820</td>
+                        </tr>
+
+                        <tr>
+                            <td>Vitamin C 500mg</td>
+                            <td>342</td>
+                            <td class="profit">Rs. 8,640</td>
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </section>
+
+</main>
+
+
+<script>
+
+    function toggleSidebar() {
+        document.getElementById("sidebar").classList.toggle("show");
+    }
+
+    function generateReport() {
+        alert(
+            "Report generated successfully!\n\n" +
+            "Selected report filters have been applied."
+        );
+    }
+
+</script>
+
+</body>
+</html>

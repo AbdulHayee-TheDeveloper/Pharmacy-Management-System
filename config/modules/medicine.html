@@ -1,0 +1,1976 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PharmaCare — Medicine Management</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    >
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #0f766e;
+            --primary-dark: #115e59;
+            --primary-light: #ccfbf1;
+
+            --bg: #f5f7f9;
+            --white: #ffffff;
+            --text: #172033;
+            --muted: #667085;
+            --border: #e7eaee;
+
+            --success: #16a34a;
+            --success-bg: #dcfce7;
+
+            --warning: #d97706;
+            --warning-bg: #fef3c7;
+
+            --danger: #dc2626;
+            --danger-bg: #fee2e2;
+
+            --blue: #2563eb;
+            --blue-bg: #dbeafe;
+
+            --sidebar-width: 250px;
+        }
+
+        body {
+            font-family: "Inter", sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        /* =========================
+           SIDEBAR
+        ========================== */
+
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: var(--white);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            z-index: 1000;
+        }
+
+        .brand {
+            height: 76px;
+            display: flex;
+            align-items: center;
+            padding: 0 24px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .brand-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            margin-right: 11px;
+        }
+
+        .brand-text h2 {
+            font-size: 17px;
+            font-weight: 700;
+        }
+
+        .brand-text span {
+            display: block;
+            font-size: 10px;
+            color: var(--muted);
+            margin-top: 2px;
+            letter-spacing: 0.5px;
+        }
+
+        .sidebar-content {
+            padding: 20px 14px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .menu-title {
+            font-size: 10px;
+            font-weight: 600;
+            color: #98a2b3;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            padding: 0 12px;
+            margin: 12px 0 8px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 11px 12px;
+            margin-bottom: 3px;
+            border-radius: 8px;
+            text-decoration: none;
+            color: #667085;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .nav-item i:first-child {
+            width: 18px;
+            text-align: center;
+            font-size: 15px;
+        }
+
+        .nav-item:hover {
+            background: #f2f8f7;
+            color: var(--primary);
+        }
+
+        .nav-item.active {
+            background: var(--primary-light);
+            color: var(--primary-dark);
+            font-weight: 600;
+        }
+
+        .nav-arrow {
+            margin-left: auto;
+            font-size: 10px !important;
+        }
+
+        .sidebar-footer {
+            border-top: 1px solid var(--border);
+            padding: 14px;
+        }
+
+        /* =========================
+           MAIN
+        ========================== */
+
+        .main {
+            margin-left: var(--sidebar-width);
+            min-height: 100vh;
+        }
+
+        /* =========================
+           TOPBAR
+        ========================== */
+
+        .topbar {
+            height: 76px;
+            background: var(--white);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 30px;
+        }
+
+        .topbar-left {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+        }
+
+        .mobile-menu {
+            display: none;
+            border: none;
+            background: none;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .global-search {
+            width: 320px;
+            height: 40px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            padding: 0 13px;
+            gap: 9px;
+            color: #98a2b3;
+            background: #fafbfc;
+        }
+
+        .global-search input {
+            border: none;
+            outline: none;
+            background: transparent;
+            width: 100%;
+            font-size: 12px;
+            font-family: inherit;
+        }
+
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+        }
+
+        .notification {
+            position: relative;
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #667085;
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: 3px;
+            right: 3px;
+            width: 7px;
+            height: 7px;
+            background: var(--danger);
+            border-radius: 50%;
+            border: 1px solid white;
+        }
+
+        .profile {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .avatar {
+            width: 36px;
+            height: 36px;
+            background: var(--primary);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .profile-info strong {
+            display: block;
+            font-size: 12px;
+        }
+
+        .profile-info span {
+            display: block;
+            font-size: 10px;
+            color: var(--muted);
+            margin-top: 2px;
+        }
+
+        .profile > i {
+            font-size: 10px;
+            color: #98a2b3;
+        }
+
+        /* =========================
+           CONTENT
+        ========================== */
+
+        .content {
+            padding: 28px 30px 40px;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .page-title h1 {
+            font-size: 23px;
+            font-weight: 700;
+            letter-spacing: -0.4px;
+        }
+
+        .page-title p {
+            color: var(--muted);
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        .btn {
+            height: 39px;
+            padding: 0 15px;
+            border-radius: 7px;
+            border: none;
+            font-family: inherit;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        /* =========================
+           SUMMARY CARDS
+        ========================== */
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 18px;
+        }
+
+        .summary-card {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 9px;
+            padding: 15px 17px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .summary-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+
+        .green {
+            background: var(--success-bg);
+            color: var(--success);
+        }
+
+        .orange {
+            background: var(--warning-bg);
+            color: var(--warning);
+        }
+
+        .red {
+            background: var(--danger-bg);
+            color: var(--danger);
+        }
+
+        .blue {
+            background: var(--blue-bg);
+            color: var(--blue);
+        }
+
+        .summary-info span {
+            display: block;
+            color: var(--muted);
+            font-size: 10px;
+        }
+
+        .summary-info strong {
+            display: block;
+            font-size: 18px;
+            margin-top: 3px;
+        }
+
+        /* =========================
+           MAIN CARD
+        ========================== */
+
+        .card {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .filter-section {
+            padding: 17px 18px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .filter-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .search-box {
+            width: 310px;
+            height: 38px;
+            border: 1px solid var(--border);
+            border-radius: 7px;
+            display: flex;
+            align-items: center;
+            padding: 0 12px;
+            gap: 8px;
+            color: #98a2b3;
+        }
+
+        .search-box input {
+            border: none;
+            outline: none;
+            width: 100%;
+            font-family: inherit;
+            font-size: 11px;
+        }
+
+        .filter-select {
+            height: 38px;
+            border: 1px solid var(--border);
+            border-radius: 7px;
+            padding: 0 10px;
+            color: #475467;
+            background: white;
+            font-family: inherit;
+            font-size: 10px;
+            outline: none;
+        }
+
+        .filter-spacer {
+            flex: 1;
+        }
+
+        .export-btn {
+            height: 38px;
+            padding: 0 12px;
+            border: 1px solid var(--border);
+            border-radius: 7px;
+            background: white;
+            color: #475467;
+            font-family: inherit;
+            font-size: 10px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        /* =========================
+           TABLE
+        ========================== */
+
+        .table-header {
+            padding: 15px 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .table-header h3 {
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .table-header span {
+            font-size: 10px;
+            color: var(--muted);
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: #fafbfc;
+            color: #667085;
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+            padding: 11px 15px;
+            text-align: left;
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 13px 15px;
+            border-bottom: 1px solid #f0f2f4;
+            font-size: 10px;
+            color: #344054;
+            white-space: nowrap;
+        }
+
+        tbody tr:hover {
+            background: #fafcfc;
+        }
+
+        .medicine-cell {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .medicine-icon {
+            width: 34px;
+            height: 34px;
+            border-radius: 7px;
+            background: #f0fdfa;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+        }
+
+        .medicine-name {
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .medicine-generic {
+            display: block;
+            color: var(--muted);
+            font-size: 8px;
+            margin-top: 3px;
+        }
+
+        .price {
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .stock-number {
+            font-weight: 600;
+        }
+
+        .status {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 8px;
+            border-radius: 5px;
+            font-size: 8px;
+            font-weight: 600;
+        }
+
+        .status-in-stock {
+            background: var(--success-bg);
+            color: #15803d;
+        }
+
+        .status-low {
+            background: var(--warning-bg);
+            color: #b45309;
+        }
+
+        .status-expiring {
+            background: #ffedd5;
+            color: #c2410c;
+        }
+
+        .status-out {
+            background: var(--danger-bg);
+            color: #b91c1c;
+        }
+
+        .actions {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .action-btn {
+            width: 28px;
+            height: 28px;
+            border: 1px solid var(--border);
+            background: white;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #667085;
+            cursor: pointer;
+            font-size: 10px;
+        }
+
+        .action-btn:hover {
+            color: var(--primary);
+            border-color: #b7d9d5;
+            background: #f2f8f7;
+        }
+
+        .pagination {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px 18px;
+        }
+
+        .pagination-info {
+            font-size: 9px;
+            color: var(--muted);
+        }
+
+        .pages {
+            display: flex;
+            gap: 4px;
+        }
+
+        .page-btn {
+            width: 28px;
+            height: 28px;
+            border: 1px solid var(--border);
+            background: white;
+            border-radius: 5px;
+            font-size: 9px;
+            color: #475467;
+            cursor: pointer;
+        }
+
+        .page-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        /* =========================
+           MODAL
+        ========================== */
+
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.45);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .modal {
+            width: 650px;
+            max-width: 92%;
+            max-height: 90vh;
+            overflow-y: auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+        }
+
+        .modal-header {
+            padding: 18px 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .modal-header h2 {
+            font-size: 16px;
+        }
+
+        .modal-header p {
+            font-size: 10px;
+            color: var(--muted);
+            margin-top: 3px;
+        }
+
+        .close-btn {
+            width: 30px;
+            height: 30px;
+            border: none;
+            background: #f5f7f9;
+            border-radius: 6px;
+            cursor: pointer;
+            color: #667085;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .form-section-title {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 14px;
+            margin-bottom: 22px;
+        }
+
+        .form-group.full {
+            grid-column: 1 / -1;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 10px;
+            font-weight: 600;
+            color: #475467;
+            margin-bottom: 6px;
+        }
+
+        .required {
+            color: var(--danger);
+        }
+
+        .form-control {
+            width: 100%;
+            height: 37px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 0 10px;
+            font-family: inherit;
+            font-size: 10px;
+            outline: none;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary);
+        }
+
+        .modal-footer {
+            padding: 14px 20px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+        }
+
+        .btn-secondary {
+            background: white;
+            border: 1px solid var(--border);
+            color: #475467;
+        }
+
+        /* =========================
+           RESPONSIVE
+        ========================== */
+
+        @media (max-width: 1200px) {
+            .summary-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 850px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: 0.25s;
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .main {
+                margin-left: 0;
+            }
+
+            .mobile-menu {
+                display: block;
+            }
+
+            .global-search {
+                width: 230px;
+            }
+
+            .filter-row {
+                flex-wrap: wrap;
+            }
+
+            .search-box {
+                width: 100%;
+            }
+
+            .filter-spacer {
+                display: none;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .content {
+                padding: 20px 15px;
+            }
+
+            .topbar {
+                padding: 0 15px;
+            }
+
+            .global-search {
+                display: none;
+            }
+
+            .profile-info {
+                display: none;
+            }
+
+            .summary-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .page-header {
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-group.full {
+                grid-column: auto;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- =========================
+         SIDEBAR
+    ========================== -->
+
+    <aside class="sidebar" id="sidebar">
+
+        <div class="brand">
+            <div class="brand-icon">
+                <i class="fa-solid fa-prescription-bottle-medical"></i>
+            </div>
+
+            <div class="brand-text">
+                <h2>PharmaCare</h2>
+                <span>PHARMACY MANAGEMENT</span>
+            </div>
+        </div>
+
+        <div class="sidebar-content">
+
+            <div class="menu-title">Main Menu</div>
+
+            <a href="#" class="nav-item">
+                <i class="fa-solid fa-chart-pie"></i>
+                <span>Dashboard</span>
+            </a>
+
+            <a href="#" class="nav-item">
+                <i class="fa-solid fa-cash-register"></i>
+                <span>Sales / POS</span>
+            </a>
+
+            <a href="#" class="nav-item active">
+                <i class="fa-solid fa-pills"></i>
+                <span>Medicines</span>
+                <i class="fa-solid fa-chevron-right nav-arrow"></i>
+            </a>
+
+            <a href="#" class="nav-item">
+                <i class="fa-solid fa-boxes-stacked"></i>
+                <span>Inventory</span>
+                <i class="fa-solid fa-chevron-right nav-arrow"></i>
+            </a>
+
+            <a href="#" class="nav-item">
+                <i class="fa-solid fa-cart-shopping"></i>
+                <span>Purchases</span>
+            </a>
+
+            <a href="#" class="nav-item">
+                <i class="fa-solid fa-truck"></i>
+                <span>Suppliers</span>
+            </a>
+
+            <a href="#" class="nav-item">
+                <i class="fa-solid fa-users"></i>
+                <span>Customers</span>
+            </a>
+
+            <div class="menu-title">Analytics</div>
+
+            <a href="#" class="nav-item">
+                <i class="fa-solid fa-chart-column"></i>
+                <span>Reports</span>
+                <i class="fa-solid fa-chevron-right nav-arrow"></i>
+            </a>
+
+            <div class="menu-title">Administration</div>
+
+            <a href="#" class="nav-item">
+                <i class="fa-solid fa-user-shield"></i>
+                <span>Users & Roles</span>
+            </a>
+
+            <a href="#" class="nav-item">
+                <i class="fa-solid fa-gear"></i>
+                <span>Settings</span>
+            </a>
+
+        </div>
+
+        <div class="sidebar-footer">
+            <a href="#" class="nav-item">
+                <i class="fa-solid fa-right-from-bracket"></i>
+                <span>Logout</span>
+            </a>
+        </div>
+
+    </aside>
+
+
+    <!-- =========================
+         MAIN
+    ========================== -->
+
+    <main class="main">
+
+        <!-- TOPBAR -->
+
+        <header class="topbar">
+
+            <div class="topbar-left">
+
+                <button class="mobile-menu" onclick="toggleSidebar()">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+
+                <div class="global-search">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+
+                    <input
+                        type="text"
+                        placeholder="Search medicines, invoices, customers..."
+                    >
+                </div>
+
+            </div>
+
+            <div class="topbar-right">
+
+                <div class="notification">
+                    <i class="fa-regular fa-bell"></i>
+                    <span class="notification-badge"></span>
+                </div>
+
+                <div class="profile">
+
+                    <div class="avatar">
+                        AH
+                    </div>
+
+                    <div class="profile-info">
+                        <strong>Abdul Hayee</strong>
+                        <span>Administrator</span>
+                    </div>
+
+                    <i class="fa-solid fa-chevron-down"></i>
+
+                </div>
+
+            </div>
+
+        </header>
+
+
+        <!-- =========================
+             CONTENT
+        ========================== -->
+
+        <section class="content">
+
+            <!-- PAGE HEADER -->
+
+            <div class="page-header">
+
+                <div class="page-title">
+                    <h1>Medicine Management</h1>
+                    <p>Manage medicines, pricing, batches and expiry information.</p>
+                </div>
+
+                <button class="btn btn-primary" onclick="openModal()">
+                    <i class="fa-solid fa-plus"></i>
+                    Add Medicine
+                </button>
+
+            </div>
+
+
+            <!-- =========================
+                 SUMMARY
+            ========================== -->
+
+            <div class="summary-grid">
+
+                <div class="summary-card">
+
+                    <div class="summary-icon blue">
+                        <i class="fa-solid fa-pills"></i>
+                    </div>
+
+                    <div class="summary-info">
+                        <span>Total Medicines</span>
+                        <strong>1,248</strong>
+                    </div>
+
+                </div>
+
+
+                <div class="summary-card">
+
+                    <div class="summary-icon green">
+                        <i class="fa-solid fa-circle-check"></i>
+                    </div>
+
+                    <div class="summary-info">
+                        <span>In Stock</span>
+                        <strong>1,184</strong>
+                    </div>
+
+                </div>
+
+
+                <div class="summary-card">
+
+                    <div class="summary-icon orange">
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                    </div>
+
+                    <div class="summary-info">
+                        <span>Low Stock</span>
+                        <strong>42</strong>
+                    </div>
+
+                </div>
+
+
+                <div class="summary-card">
+
+                    <div class="summary-icon red">
+                        <i class="fa-solid fa-clock"></i>
+                    </div>
+
+                    <div class="summary-info">
+                        <span>Expiring Soon</span>
+                        <strong>22</strong>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =========================
+                 MEDICINE TABLE CARD
+            ========================== -->
+
+            <div class="card">
+
+                <!-- FILTERS -->
+
+                <div class="filter-section">
+
+                    <div class="filter-row">
+
+                        <div class="search-box">
+
+                            <i class="fa-solid fa-magnifying-glass"></i>
+
+                            <input
+                                type="text"
+                                id="medicineSearch"
+                                placeholder="Search medicine by name, generic or batch..."
+                                onkeyup="filterMedicines()"
+                            >
+
+                        </div>
+
+                        <select class="filter-select" id="categoryFilter" onchange="filterMedicines()">
+                            <option value="">All Categories</option>
+                            <option value="Analgesic">Analgesic</option>
+                            <option value="Antibiotic">Antibiotic</option>
+                            <option value="Antihistamine">Antihistamine</option>
+                            <option value="Vitamin">Vitamin</option>
+                        </select>
+
+                        <select class="filter-select" id="statusFilter" onchange="filterMedicines()">
+                            <option value="">All Status</option>
+                            <option value="In Stock">In Stock</option>
+                            <option value="Low Stock">Low Stock</option>
+                            <option value="Expiring Soon">Expiring Soon</option>
+                            <option value="Out of Stock">Out of Stock</option>
+                        </select>
+
+                        <div class="filter-spacer"></div>
+
+                        <button class="export-btn">
+                            <i class="fa-solid fa-download"></i>
+                            Export
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <!-- TABLE HEADER -->
+
+                <div class="table-header">
+
+                    <div>
+                        <h3>All Medicines</h3>
+                        <span>Showing registered medicines in your pharmacy</span>
+                    </div>
+
+                </div>
+
+
+                <!-- TABLE -->
+
+                <div class="table-wrapper">
+
+                    <table>
+
+                        <thead>
+
+                            <tr>
+                                <th>Medicine</th>
+                                <th>Category</th>
+                                <th>Batch No.</th>
+                                <th>Expiry Date</th>
+                                <th>Stock</th>
+                                <th>Purchase Price</th>
+                                <th>Sale Price</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody id="medicineTable">
+
+                            <!-- ROW 1 -->
+
+                            <tr data-category="Analgesic" data-status="In Stock">
+
+                                <td>
+
+                                    <div class="medicine-cell">
+
+                                        <div class="medicine-icon">
+                                            <i class="fa-solid fa-pills"></i>
+                                        </div>
+
+                                        <div>
+                                            <span class="medicine-name">
+                                                Panadol 500mg
+                                            </span>
+
+                                            <span class="medicine-generic">
+                                                Paracetamol
+                                            </span>
+                                        </div>
+
+                                    </div>
+
+                                </td>
+
+                                <td>Analgesic</td>
+
+                                <td>B-10245</td>
+
+                                <td>Dec 2027</td>
+
+                                <td>
+                                    <span class="stock-number">148</span>
+                                </td>
+
+                                <td>
+                                    <span class="price">Rs. 80</span>
+                                </td>
+
+                                <td>
+                                    <span class="price">Rs. 100</span>
+                                </td>
+
+                                <td>
+                                    <span class="status status-in-stock">
+                                        In Stock
+                                    </span>
+                                </td>
+
+                                <td>
+
+                                    <div class="actions">
+
+                                        <button class="action-btn" title="View">
+                                            <i class="fa-regular fa-eye"></i>
+                                        </button>
+
+                                        <button class="action-btn" title="Edit">
+                                            <i class="fa-solid fa-pen"></i>
+                                        </button>
+
+                                        <button class="action-btn" title="Delete">
+                                            <i class="fa-regular fa-trash-can"></i>
+                                        </button>
+
+                                    </div>
+
+                                </td>
+
+                            </tr>
+
+
+                            <!-- ROW 2 -->
+
+                            <tr data-category="Analgesic" data-status="Low Stock">
+
+                                <td>
+
+                                    <div class="medicine-cell">
+
+                                        <div class="medicine-icon">
+                                            <i class="fa-solid fa-pills"></i>
+                                        </div>
+
+                                        <div>
+                                            <span class="medicine-name">
+                                                Brufen 400mg
+                                            </span>
+
+                                            <span class="medicine-generic">
+                                                Ibuprofen
+                                            </span>
+                                        </div>
+
+                                    </div>
+
+                                </td>
+
+                                <td>Analgesic</td>
+
+                                <td>B-20581</td>
+
+                                <td>Jan 2027</td>
+
+                                <td>
+                                    <span class="stock-number">5</span>
+                                </td>
+
+                                <td>
+                                    <span class="price">Rs. 120</span>
+                                </td>
+
+                                <td>
+                                    <span class="price">Rs. 150</span>
+                                </td>
+
+                                <td>
+                                    <span class="status status-low">
+                                        Low Stock
+                                    </span>
+                                </td>
+
+                                <td>
+
+                                    <div class="actions">
+
+                                        <button class="action-btn">
+                                            <i class="fa-regular fa-eye"></i>
+                                        </button>
+
+                                        <button class="action-btn">
+                                            <i class="fa-solid fa-pen"></i>
+                                        </button>
+
+                                        <button class="action-btn">
+                                            <i class="fa-regular fa-trash-can"></i>
+                                        </button>
+
+                                    </div>
+
+                                </td>
+
+                            </tr>
+
+
+                            <!-- ROW 3 -->
+
+                            <tr data-category="Antibiotic" data-status="Expiring Soon">
+
+                                <td>
+
+                                    <div class="medicine-cell">
+
+                                        <div class="medicine-icon">
+                                            <i class="fa-solid fa-capsules"></i>
+                                        </div>
+
+                                        <div>
+                                            <span class="medicine-name">
+                                                Augmentin 625mg
+                                            </span>
+
+                                            <span class="medicine-generic">
+                                                Amoxicillin + Clavulanate
+                                            </span>
+                                        </div>
+
+                                    </div>
+
+                                </td>
+
+                                <td>Antibiotic</td>
+
+                                <td>B-33107</td>
+
+                                <td>Oct 2026</td>
+
+                                <td>
+                                    <span class="stock-number">12</span>
+                                </td>
+
+                                <td>
+                                    <span class="price">Rs. 390</span>
+                                </td>
+
+                                <td>
+                                    <span class="price">Rs. 450</span>
+                                </td>
+
+                                <td>
+                                    <span class="status status-expiring">
+                                        Expiring Soon
+                                    </span>
+                                </td>
+
+                                <td>
+
+                                    <div class="actions">
+
+                                        <button class="action-btn">
+                                            <i class="fa-regular fa-eye"></i>
+                                        </button>
+
+                                        <button class="action-btn">
+                                            <i class="fa-solid fa-pen"></i>
+                                        </button>
+
+                                        <button class="action-btn">
+                                            <i class="fa-regular fa-trash-can"></i>
+                                        </button>
+
+                                    </div>
+
+                                </td>
+
+                            </tr>
+
+
+                            <!-- ROW 4 -->
+
+                            <tr data-category="Antihistamine" data-status="In Stock">
+
+                                <td>
+
+                                    <div class="medicine-cell">
+
+                                        <div class="medicine-icon">
+                                            <i class="fa-solid fa-capsules"></i>
+                                        </div>
+
+                                        <div>
+                                            <span class="medicine-name">
+                                                Cetirizine 10mg
+                                            </span>
+
+                                            <span class="medicine-generic">
+                                                Cetirizine
+                                            </span>
+                                        </div>
+
+                                    </div>
+
+                                </td>
+
+                                <td>Antihistamine</td>
+
+                                <td>B-20871</td>
+
+                                <td>Nov 2027</td>
+
+                                <td>
+                                    <span class="stock-number">96</span>
+                                </td>
+
+                                <td>
+                                    <span class="price">Rs. 45</span>
+                                </td>
+
+                                <td>
+                                    <span class="price">Rs. 60</span>
+                                </td>
+
+                                <td>
+                                    <span class="status status-in-stock">
+                                        In Stock
+                                    </span>
+                                </td>
+
+                                <td>
+
+                                    <div class="actions">
+
+                                        <button class="action-btn">
+                                            <i class="fa-regular fa-eye"></i>
+                                        </button>
+
+                                        <button class="action-btn">
+                                            <i class="fa-solid fa-pen"></i>
+                                        </button>
+
+                                        <button class="action-btn">
+                                            <i class="fa-regular fa-trash-can"></i>
+                                        </button>
+
+                                    </div>
+
+                                </td>
+
+                            </tr>
+
+
+                            <!-- ROW 5 -->
+
+                            <tr data-category="Vitamin" data-status="Out of Stock">
+
+                                <td>
+
+                                    <div class="medicine-cell">
+
+                                        <div class="medicine-icon">
+                                            <i class="fa-solid fa-tablets"></i>
+                                        </div>
+
+                                        <div>
+                                            <span class="medicine-name">
+                                                Vitamin C 500mg
+                                            </span>
+
+                                            <span class="medicine-generic">
+                                                Ascorbic Acid
+                                            </span>
+                                        </div>
+
+                                    </div>
+
+                                </td>
+
+                                <td>Vitamin</td>
+
+                                <td>B-41202</td>
+
+                                <td>Mar 2028</td>
+
+                                <td>
+                                    <span class="stock-number">0</span>
+                                </td>
+
+                                <td>
+                                    <span class="price">Rs. 55</span>
+                                </td>
+
+                                <td>
+                                    <span class="price">Rs. 75</span>
+                                </td>
+
+                                <td>
+                                    <span class="status status-out">
+                                        Out of Stock
+                                    </span>
+                                </td>
+
+                                <td>
+
+                                    <div class="actions">
+
+                                        <button class="action-btn">
+                                            <i class="fa-regular fa-eye"></i>
+                                        </button>
+
+                                        <button class="action-btn">
+                                            <i class="fa-solid fa-pen"></i>
+                                        </button>
+
+                                        <button class="action-btn">
+                                            <i class="fa-regular fa-trash-can"></i>
+                                        </button>
+
+                                    </div>
+
+                                </td>
+
+                            </tr>
+
+
+                            <!-- ROW 6 -->
+
+                            <tr data-category="Antibiotic" data-status="In Stock">
+
+                                <td>
+
+                                    <div class="medicine-cell">
+
+                                        <div class="medicine-icon">
+                                            <i class="fa-solid fa-capsules"></i>
+                                        </div>
+
+                                        <div>
+                                            <span class="medicine-name">
+                                                Azithromycin 500mg
+                                            </span>
+
+                                            <span class="medicine-generic">
+                                                Azithromycin
+                                            </span>
+                                        </div>
+
+                                    </div>
+
+                                </td>
+
+                                <td>Antibiotic</td>
+
+                                <td>B-51743</td>
+
+                                <td>Aug 2027</td>
+
+                                <td>
+                                    <span class="stock-number">64</span>
+                                </td>
+
+                                <td>
+                                    <span class="price">Rs. 180</span>
+                                </td>
+
+                                <td>
+                                    <span class="price">Rs. 220</span>
+                                </td>
+
+                                <td>
+                                    <span class="status status-in-stock">
+                                        In Stock
+                                    </span>
+                                </td>
+
+                                <td>
+
+                                    <div class="actions">
+
+                                        <button class="action-btn">
+                                            <i class="fa-regular fa-eye"></i>
+                                        </button>
+
+                                        <button class="action-btn">
+                                            <i class="fa-solid fa-pen"></i>
+                                        </button>
+
+                                        <button class="action-btn">
+                                            <i class="fa-regular fa-trash-can"></i>
+                                        </button>
+
+                                    </div>
+
+                                </td>
+
+                            </tr>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+
+                <!-- PAGINATION -->
+
+                <div class="pagination">
+
+                    <div class="pagination-info">
+                        Showing 1–6 of 1,248 medicines
+                    </div>
+
+                    <div class="pages">
+
+                        <button class="page-btn">
+                            <i class="fa-solid fa-chevron-left"></i>
+                        </button>
+
+                        <button class="page-btn active">1</button>
+                        <button class="page-btn">2</button>
+                        <button class="page-btn">3</button>
+                        <button class="page-btn">...</button>
+                        <button class="page-btn">208</button>
+
+                        <button class="page-btn">
+                            <i class="fa-solid fa-chevron-right"></i>
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <!-- =========================
+         ADD MEDICINE MODAL
+    ========================== -->
+
+    <div class="modal-overlay" id="medicineModal">
+
+        <div class="modal">
+
+            <div class="modal-header">
+
+                <div>
+                    <h2>Add New Medicine</h2>
+                    <p>Add medicine information to your pharmacy inventory.</p>
+                </div>
+
+                <button class="close-btn" onclick="closeModal()">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+
+            </div>
+
+
+            <div class="modal-body">
+
+                <div class="form-section-title">
+                    Basic Information
+                </div>
+
+                <div class="form-grid">
+
+                    <div class="form-group">
+                        <label>
+                            Medicine Name <span class="required">*</span>
+                        </label>
+
+                        <input
+                            type="text"
+                            class="form-control"
+                            placeholder="e.g. Panadol 500mg"
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            Generic Name <span class="required">*</span>
+                        </label>
+
+                        <input
+                            type="text"
+                            class="form-control"
+                            placeholder="e.g. Paracetamol"
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            Category <span class="required">*</span>
+                        </label>
+
+                        <select class="form-control">
+                            <option>Select Category</option>
+                            <option>Analgesic</option>
+                            <option>Antibiotic</option>
+                            <option>Antihistamine</option>
+                            <option>Vitamin</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            Manufacturer
+                        </label>
+
+                        <input
+                            type="text"
+                            class="form-control"
+                            placeholder="Manufacturer name"
+                        >
+                    </div>
+
+                </div>
+
+
+                <div class="form-section-title">
+                    Batch & Inventory
+                </div>
+
+                <div class="form-grid">
+
+                    <div class="form-group">
+                        <label>
+                            Batch Number <span class="required">*</span>
+                        </label>
+
+                        <input
+                            type="text"
+                            class="form-control"
+                            placeholder="e.g. B-10245"
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            Expiry Date <span class="required">*</span>
+                        </label>
+
+                        <input
+                            type="date"
+                            class="form-control"
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            Initial Quantity <span class="required">*</span>
+                        </label>
+
+                        <input
+                            type="number"
+                            class="form-control"
+                            placeholder="0"
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            Reorder Level
+                        </label>
+
+                        <input
+                            type="number"
+                            class="form-control"
+                            placeholder="e.g. 20"
+                        >
+                    </div>
+
+                </div>
+
+
+                <div class="form-section-title">
+                    Pricing
+                </div>
+
+                <div class="form-grid">
+
+                    <div class="form-group">
+                        <label>
+                            Purchase Price <span class="required">*</span>
+                        </label>
+
+                        <input
+                            type="number"
+                            class="form-control"
+                            placeholder="Rs. 0.00"
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            Sale Price <span class="required">*</span>
+                        </label>
+
+                        <input
+                            type="number"
+                            class="form-control"
+                            placeholder="Rs. 0.00"
+                        >
+                    </div>
+
+                    <div class="form-group full">
+                        <label>
+                            Description
+                        </label>
+
+                        <input
+                            type="text"
+                            class="form-control"
+                            placeholder="Optional medicine description"
+                        >
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="modal-footer">
+
+                <button
+                    class="btn btn-secondary"
+                    onclick="closeModal()"
+                >
+                    Cancel
+                </button>
+
+                <button class="btn btn-primary">
+                    <i class="fa-solid fa-check"></i>
+                    Save Medicine
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================
+         JAVASCRIPT
+    ========================== -->
+
+    <script>
+
+        function toggleSidebar() {
+            document
+                .getElementById("sidebar")
+                .classList.toggle("open");
+        }
+
+
+        function openModal() {
+            document
+                .getElementById("medicineModal")
+                .classList.add("show");
+        }
+
+
+        function closeModal() {
+            document
+                .getElementById("medicineModal")
+                .classList.remove("show");
+        }
+
+
+        /* Close modal when clicking outside */
+
+        document
+            .getElementById("medicineModal")
+            .addEventListener("click", function(event) {
+
+                if (event.target === this) {
+                    closeModal();
+                }
+
+            });
+
+
+        /* Medicine Search + Filters */
+
+        function filterMedicines() {
+
+            const search =
+                document
+                    .getElementById("medicineSearch")
+                    .value
+                    .toLowerCase();
+
+            const category =
+                document
+                    .getElementById("categoryFilter")
+                    .value;
+
+            const status =
+                document
+                    .getElementById("statusFilter")
+                    .value;
+
+            const rows =
+                document
+                    .querySelectorAll("#medicineTable tr");
+
+            rows.forEach(function(row) {
+
+                const text =
+                    row.textContent.toLowerCase();
+
+                const rowCategory =
+                    row.getAttribute("data-category");
+
+                const rowStatus =
+                    row.getAttribute("data-status");
+
+                const matchesSearch =
+                    text.includes(search);
+
+                const matchesCategory =
+                    category === "" ||
+                    rowCategory === category;
+
+                const matchesStatus =
+                    status === "" ||
+                    rowStatus === status;
+
+                if (
+                    matchesSearch &&
+                    matchesCategory &&
+                    matchesStatus
+                ) {
+
+                    row.style.display = "";
+
+                } else {
+
+                    row.style.display = "none";
+
+                }
+
+            });
+
+        }
+
+    </script>
+
+</body>
+</html>
+```

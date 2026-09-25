@@ -1,0 +1,1681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PharmaCare — Dashboard</title>
+
+    <!-- Google Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    >
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #0f766e;
+            --primary-dark: #115e59;
+            --primary-light: #ccfbf1;
+
+            --bg: #f5f7f9;
+            --white: #ffffff;
+            --text: #172033;
+            --muted: #667085;
+            --border: #e7eaee;
+
+            --success: #16a34a;
+            --success-bg: #dcfce7;
+
+            --warning: #d97706;
+            --warning-bg: #fef3c7;
+
+            --danger: #dc2626;
+            --danger-bg: #fee2e2;
+
+            --blue: #2563eb;
+            --blue-bg: #dbeafe;
+
+            --sidebar-width: 250px;
+        }
+
+        body {
+            font-family: "Inter", sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        /* =========================
+           SIDEBAR
+        ========================== */
+
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: var(--white);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            z-index: 1000;
+        }
+
+        .brand {
+            height: 76px;
+            display: flex;
+            align-items: center;
+            padding: 0 24px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .brand-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            margin-right: 11px;
+        }
+
+        .brand-text h2 {
+            font-size: 17px;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .brand-text span {
+            display: block;
+            font-size: 10px;
+            color: var(--muted);
+            margin-top: 2px;
+            letter-spacing: 0.5px;
+        }
+
+        .sidebar-content {
+            padding: 20px 14px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .menu-title {
+            font-size: 10px;
+            font-weight: 600;
+            color: #98a2b3;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            padding: 0 12px;
+            margin: 12px 0 8px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 11px 12px;
+            margin-bottom: 3px;
+            border-radius: 8px;
+            text-decoration: none;
+            color: #667085;
+            font-size: 13px;
+            font-weight: 500;
+            transition: 0.2s ease;
+        }
+
+        .nav-item i {
+            width: 18px;
+            text-align: center;
+            font-size: 15px;
+        }
+
+        .nav-item:hover {
+            background: #f2f8f7;
+            color: var(--primary);
+        }
+
+        .nav-item.active {
+            background: var(--primary-light);
+            color: var(--primary-dark);
+            font-weight: 600;
+        }
+
+        .nav-arrow {
+            margin-left: auto;
+            font-size: 10px !important;
+        }
+
+        .sidebar-footer {
+            border-top: 1px solid var(--border);
+            padding: 14px;
+        }
+
+        /* =========================
+           MAIN AREA
+        ========================== */
+
+        .main {
+            margin-left: var(--sidebar-width);
+            min-height: 100vh;
+        }
+
+        /* =========================
+           TOPBAR
+        ========================== */
+
+        .topbar {
+            height: 76px;
+            background: var(--white);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 30px;
+        }
+
+        .topbar-left {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+        }
+
+        .mobile-menu {
+            display: none;
+            border: none;
+            background: none;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .global-search {
+            width: 320px;
+            height: 40px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            padding: 0 13px;
+            gap: 9px;
+            color: #98a2b3;
+            background: #fafbfc;
+        }
+
+        .global-search input {
+            border: none;
+            outline: none;
+            background: transparent;
+            width: 100%;
+            font-size: 12px;
+            color: var(--text);
+            font-family: inherit;
+        }
+
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+        }
+
+        .notification {
+            position: relative;
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #667085;
+            cursor: pointer;
+        }
+
+        .notification:hover {
+            background: #f5f7f9;
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: 3px;
+            right: 3px;
+            width: 7px;
+            height: 7px;
+            background: var(--danger);
+            border-radius: 50%;
+            border: 1px solid white;
+        }
+
+        .profile {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+        }
+
+        .avatar {
+            width: 36px;
+            height: 36px;
+            background: var(--primary);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .profile-info strong {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .profile-info span {
+            display: block;
+            font-size: 10px;
+            color: var(--muted);
+            margin-top: 2px;
+        }
+
+        .profile i {
+            font-size: 10px;
+            color: #98a2b3;
+            margin-left: 4px;
+        }
+
+        /* =========================
+           PAGE CONTENT
+        ========================== */
+
+        .content {
+            padding: 28px 30px 40px;
+        }
+
+        .page-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 25px;
+        }
+
+        .page-header h1 {
+            font-size: 23px;
+            font-weight: 700;
+            letter-spacing: -0.4px;
+        }
+
+        .page-header p {
+            color: var(--muted);
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        .date-selector {
+            height: 38px;
+            padding: 0 13px;
+            border: 1px solid var(--border);
+            background: white;
+            border-radius: 7px;
+            color: #475467;
+            font-size: 11px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* =========================
+           STAT CARDS
+        ========================== */
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 18px;
+            min-height: 125px;
+        }
+
+        .stat-top {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: var(--muted);
+            font-weight: 500;
+        }
+
+        .stat-icon {
+            width: 34px;
+            height: 34px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+
+        .icon-green {
+            background: var(--success-bg);
+            color: var(--success);
+        }
+
+        .icon-blue {
+            background: var(--blue-bg);
+            color: var(--blue);
+        }
+
+        .icon-orange {
+            background: var(--warning-bg);
+            color: var(--warning);
+        }
+
+        .icon-red {
+            background: var(--danger-bg);
+            color: var(--danger);
+        }
+
+        .stat-value {
+            font-size: 22px;
+            font-weight: 700;
+            margin-top: 12px;
+            letter-spacing: -0.5px;
+        }
+
+        .stat-bottom {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-top: 6px;
+            font-size: 10px;
+        }
+
+        .positive {
+            color: var(--success);
+            font-weight: 600;
+        }
+
+        .negative {
+            color: var(--danger);
+            font-weight: 600;
+        }
+
+        .neutral {
+            color: var(--muted);
+        }
+
+        /* =========================
+           CHART SECTION
+        ========================== */
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 18px;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 17px 18px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .card-title {
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .card-subtitle {
+            font-size: 10px;
+            color: var(--muted);
+            margin-top: 3px;
+        }
+
+        .chart-filter {
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 6px 9px;
+            font-size: 10px;
+            color: #475467;
+            background: white;
+        }
+
+        .chart-container {
+            height: 275px;
+            padding: 18px;
+        }
+
+        /* =========================
+           QUICK ACTIONS
+        ========================== */
+
+        .quick-actions {
+            padding: 17px 18px;
+        }
+
+        .quick-action {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            padding: 11px 0;
+            border-bottom: 1px solid #f0f2f4;
+            cursor: pointer;
+        }
+
+        .quick-action:last-child {
+            border-bottom: none;
+        }
+
+        .quick-action-icon {
+            width: 34px;
+            height: 34px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f2f8f7;
+            color: var(--primary);
+            font-size: 13px;
+        }
+
+        .quick-action-text strong {
+            display: block;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .quick-action-text span {
+            display: block;
+            font-size: 9px;
+            color: var(--muted);
+            margin-top: 2px;
+        }
+
+        .quick-action > i {
+            margin-left: auto;
+            color: #98a2b3;
+            font-size: 9px;
+        }
+
+        /* =========================
+           LOWER GRID
+        ========================== */
+
+        .lower-grid {
+            display: grid;
+            grid-template-columns: 1.35fr 1fr;
+            gap: 18px;
+        }
+
+        /* =========================
+           TABLE
+        ========================== */
+
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: #fafbfc;
+            color: #667085;
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+            padding: 11px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #f0f2f4;
+            font-size: 10px;
+            color: #344054;
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        tbody tr:hover {
+            background: #fafcfc;
+        }
+
+        .medicine-name {
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .invoice-number {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .status {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 7px;
+            border-radius: 5px;
+            font-size: 8px;
+            font-weight: 600;
+        }
+
+        .status-paid {
+            background: var(--success-bg);
+            color: #15803d;
+        }
+
+        .status-low {
+            background: var(--warning-bg);
+            color: #b45309;
+        }
+
+        .status-expiring {
+            background: #ffedd5;
+            color: #c2410c;
+        }
+
+        .status-expired {
+            background: var(--danger-bg);
+            color: #b91c1c;
+        }
+
+        .view-all {
+            color: var(--primary);
+            font-size: 10px;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .view-all:hover {
+            text-decoration: underline;
+        }
+
+        /* =========================
+           ALERT LIST
+        ========================== */
+
+        .alert-list {
+            padding: 7px 18px 12px;
+        }
+
+        .alert-item {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            padding: 12px 0;
+            border-bottom: 1px solid #f0f2f4;
+        }
+
+        .alert-item:last-child {
+            border-bottom: none;
+        }
+
+        .alert-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 12px;
+        }
+
+        .alert-warning {
+            background: var(--warning-bg);
+            color: var(--warning);
+        }
+
+        .alert-danger {
+            background: var(--danger-bg);
+            color: var(--danger);
+        }
+
+        .alert-content {
+            flex: 1;
+        }
+
+        .alert-content strong {
+            display: block;
+            font-size: 10px;
+            font-weight: 600;
+        }
+
+        .alert-content span {
+            display: block;
+            color: var(--muted);
+            font-size: 9px;
+            margin-top: 3px;
+        }
+
+        .alert-count {
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        /* =========================
+           RESPONSIVE
+        ========================== */
+
+        @media (max-width: 1200px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .main-grid,
+            .lower-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 850px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: 0.25s ease;
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .main {
+                margin-left: 0;
+            }
+
+            .mobile-menu {
+                display: block;
+            }
+
+            .global-search {
+                width: 230px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .content {
+                padding: 20px 15px;
+            }
+
+            .topbar {
+                padding: 0 15px;
+            }
+
+            .global-search {
+                display: none;
+            }
+
+            .profile-info {
+                display: none;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .page-header {
+                align-items: flex-start;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- =========================
+         SIDEBAR
+    ========================== -->
+
+    <aside class="sidebar" id="sidebar">
+
+        <div class="brand">
+            <div class="brand-icon">
+                <i class="fa-solid fa-prescription-bottle-medical"></i>
+            </div>
+
+            <div class="brand-text">
+                <h2>PharmaCare</h2>
+                <span>PHARMACY MANAGEMENT</span>
+            </div>
+        </div>
+
+        <div class="sidebar-content">
+
+            <div class="menu-title">Main Menu</div>
+
+            <a href="#" class="nav-item active">
+                <i class="fa-solid fa-chart-pie"></i>
+                <span>Dashboard</span>
+            </a>
+
+            <a href="#" class="nav-item">
+                <i class="fa-solid fa-cash-register"></i>
+                <span>Sales / POS</span>
+            </a>
+
+            <a href="#" class="nav-item">
+                <i class="fa-solid fa-pills"></i>
+                <span>Medicines</span>
+                <i class="fa-solid fa-chevron-right nav-arrow"></i>
+            </a>
+
+            <a href="#" class="nav-item">
+                <i class="fa-solid fa-boxes-stacked"></i>
+                <span>Inventory</span>
+                <i class="fa-solid fa-chevron-right nav-arrow"></i>
+            </a>
+
+            <a href="#" class="nav-item">
+                <i class="fa-solid fa-cart-shopping"></i>
+                <span>Purchases</span>
+            </a>
+
+            <a href="#" class="nav-item">
+                <i class="fa-solid fa-truck"></i>
+                <span>Suppliers</span>
+            </a>
+
+            <a href="#" class="nav-item">
+                <i class="fa-solid fa-users"></i>
+                <span>Customers</span>
+            </a>
+
+            <div class="menu-title">Analytics</div>
+
+            <a href="#" class="nav-item">
+                <i class="fa-solid fa-chart-column"></i>
+                <span>Reports</span>
+                <i class="fa-solid fa-chevron-right nav-arrow"></i>
+            </a>
+
+            <div class="menu-title">Administration</div>
+
+            <a href="#" class="nav-item">
+                <i class="fa-solid fa-user-shield"></i>
+                <span>Users & Roles</span>
+            </a>
+
+            <a href="#" class="nav-item">
+                <i class="fa-solid fa-gear"></i>
+                <span>Settings</span>
+            </a>
+
+        </div>
+
+        <div class="sidebar-footer">
+            <a href="#" class="nav-item">
+                <i class="fa-solid fa-right-from-bracket"></i>
+                <span>Logout</span>
+            </a>
+        </div>
+
+    </aside>
+
+
+    <!-- =========================
+         MAIN
+    ========================== -->
+
+    <main class="main">
+
+        <!-- TOPBAR -->
+
+        <header class="topbar">
+
+            <div class="topbar-left">
+
+                <button class="mobile-menu" onclick="toggleSidebar()">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+
+                <div class="global-search">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+
+                    <input
+                        type="text"
+                        placeholder="Search medicines, invoices, customers..."
+                    >
+                </div>
+
+            </div>
+
+
+            <div class="topbar-right">
+
+                <div class="notification">
+                    <i class="fa-regular fa-bell"></i>
+                    <span class="notification-badge"></span>
+                </div>
+
+                <div class="profile">
+
+                    <div class="avatar">
+                        AH
+                    </div>
+
+                    <div class="profile-info">
+                        <strong>Abdul Hayee</strong>
+                        <span>Administrator</span>
+                    </div>
+
+                    <i class="fa-solid fa-chevron-down"></i>
+
+                </div>
+
+            </div>
+
+        </header>
+
+
+        <!-- PAGE CONTENT -->
+
+        <section class="content">
+
+            <!-- PAGE HEADER -->
+
+            <div class="page-header">
+
+                <div>
+                    <h1>Dashboard</h1>
+                    <p>Here's what's happening in your pharmacy today.</p>
+                </div>
+
+                <button class="date-selector">
+                    <i class="fa-regular fa-calendar"></i>
+                    Today, 25 Sep 2026
+                    <i class="fa-solid fa-chevron-down"></i>
+                </button>
+
+            </div>
+
+
+            <!-- =========================
+                 STAT CARDS
+            ========================== -->
+
+            <div class="stats-grid">
+
+                <!-- SALES -->
+
+                <div class="stat-card">
+
+                    <div class="stat-top">
+
+                        <div class="stat-label">
+                            Today's Sales
+                        </div>
+
+                        <div class="stat-icon icon-green">
+                            <i class="fa-solid fa-chart-line"></i>
+                        </div>
+
+                    </div>
+
+                    <div class="stat-value">
+                        Rs. 48,520
+                    </div>
+
+                    <div class="stat-bottom">
+                        <span class="positive">
+                            <i class="fa-solid fa-arrow-up"></i> 12.5%
+                        </span>
+                        <span class="neutral">
+                            vs yesterday
+                        </span>
+                    </div>
+
+                </div>
+
+
+                <!-- PROFIT -->
+
+                <div class="stat-card">
+
+                    <div class="stat-top">
+
+                        <div class="stat-label">
+                            Today's Profit
+                        </div>
+
+                        <div class="stat-icon icon-blue">
+                            <i class="fa-solid fa-money-bill-trend-up"></i>
+                        </div>
+
+                    </div>
+
+                    <div class="stat-value">
+                        Rs. 12,840
+                    </div>
+
+                    <div class="stat-bottom">
+                        <span class="positive">
+                            <i class="fa-solid fa-arrow-up"></i> 8.2%
+                        </span>
+                        <span class="neutral">
+                            vs yesterday
+                        </span>
+                    </div>
+
+                </div>
+
+
+                <!-- STOCK -->
+
+                <div class="stat-card">
+
+                    <div class="stat-top">
+
+                        <div class="stat-label">
+                            Total Stock
+                        </div>
+
+                        <div class="stat-icon icon-orange">
+                            <i class="fa-solid fa-boxes-stacked"></i>
+                        </div>
+
+                    </div>
+
+                    <div class="stat-value">
+                        8,426
+                    </div>
+
+                    <div class="stat-bottom">
+                        <span class="neutral">
+                            Medicine units in stock
+                        </span>
+                    </div>
+
+                </div>
+
+
+                <!-- LOW STOCK -->
+
+                <div class="stat-card">
+
+                    <div class="stat-top">
+
+                        <div class="stat-label">
+                            Low Stock Items
+                        </div>
+
+                        <div class="stat-icon icon-red">
+                            <i class="fa-solid fa-triangle-exclamation"></i>
+                        </div>
+
+                    </div>
+
+                    <div class="stat-value">
+                        17
+                    </div>
+
+                    <div class="stat-bottom">
+                        <span class="negative">
+                            Requires attention
+                        </span>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =========================
+                 CHART + QUICK ACTIONS
+            ========================== -->
+
+            <div class="main-grid">
+
+                <!-- SALES CHART -->
+
+                <div class="card">
+
+                    <div class="card-header">
+
+                        <div>
+                            <div class="card-title">
+                                Sales Overview
+                            </div>
+
+                            <div class="card-subtitle">
+                                Revenue generated over the last 7 days
+                            </div>
+                        </div>
+
+                        <select class="chart-filter">
+                            <option>Last 7 Days</option>
+                            <option>Last 30 Days</option>
+                            <option>Last 3 Months</option>
+                        </select>
+
+                    </div>
+
+                    <div class="chart-container">
+                        <canvas id="salesChart"></canvas>
+                    </div>
+
+                </div>
+
+
+                <!-- QUICK ACTIONS -->
+
+                <div class="card">
+
+                    <div class="card-header">
+                        <div>
+                            <div class="card-title">
+                                Quick Actions
+                            </div>
+
+                            <div class="card-subtitle">
+                                Frequently used actions
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="quick-actions">
+
+                        <div class="quick-action">
+
+                            <div class="quick-action-icon">
+                                <i class="fa-solid fa-cart-plus"></i>
+                            </div>
+
+                            <div class="quick-action-text">
+                                <strong>New Sale</strong>
+                                <span>Create a new pharmacy sale</span>
+                            </div>
+
+                            <i class="fa-solid fa-chevron-right"></i>
+
+                        </div>
+
+
+                        <div class="quick-action">
+
+                            <div class="quick-action-icon">
+                                <i class="fa-solid fa-pills"></i>
+                            </div>
+
+                            <div class="quick-action-text">
+                                <strong>Add Medicine</strong>
+                                <span>Add a new medicine to inventory</span>
+                            </div>
+
+                            <i class="fa-solid fa-chevron-right"></i>
+
+                        </div>
+
+
+                        <div class="quick-action">
+
+                            <div class="quick-action-icon">
+                                <i class="fa-solid fa-truck"></i>
+                            </div>
+
+                            <div class="quick-action-text">
+                                <strong>New Purchase</strong>
+                                <span>Record a supplier purchase</span>
+                            </div>
+
+                            <i class="fa-solid fa-chevron-right"></i>
+
+                        </div>
+
+
+                        <div class="quick-action">
+
+                            <div class="quick-action-icon">
+                                <i class="fa-solid fa-file-invoice"></i>
+                            </div>
+
+                            <div class="quick-action-text">
+                                <strong>View Reports</strong>
+                                <span>Analyze pharmacy performance</span>
+                            </div>
+
+                            <i class="fa-solid fa-chevron-right"></i>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =========================
+                 LOWER SECTION
+            ========================== -->
+
+            <div class="lower-grid">
+
+                <!-- RECENT SALES -->
+
+                <div class="card">
+
+                    <div class="card-header">
+
+                        <div>
+                            <div class="card-title">
+                                Recent Sales
+                            </div>
+
+                            <div class="card-subtitle">
+                                Latest transactions
+                            </div>
+                        </div>
+
+                        <a href="#" class="view-all">
+                            View All
+                        </a>
+
+                    </div>
+
+
+                    <div class="table-wrapper">
+
+                        <table>
+
+                            <thead>
+
+                                <tr>
+                                    <th>Invoice</th>
+                                    <th>Customer</th>
+                                    <th>Total</th>
+                                    <th>Payment</th>
+                                    <th>Status</th>
+                                </tr>
+
+                            </thead>
+
+
+                            <tbody>
+
+                                <tr>
+
+                                    <td>
+                                        <span class="invoice-number">
+                                            INV-10245
+                                        </span>
+                                    </td>
+
+                                    <td>
+                                        Walk-in Customer
+                                    </td>
+
+                                    <td>
+                                        Rs. 850
+                                    </td>
+
+                                    <td>
+                                        Cash
+                                    </td>
+
+                                    <td>
+                                        <span class="status status-paid">
+                                            Paid
+                                        </span>
+                                    </td>
+
+                                </tr>
+
+
+                                <tr>
+
+                                    <td>
+                                        <span class="invoice-number">
+                                            INV-10244
+                                        </span>
+                                    </td>
+
+                                    <td>
+                                        Ali Ahmed
+                                    </td>
+
+                                    <td>
+                                        Rs. 2,450
+                                    </td>
+
+                                    <td>
+                                        Card
+                                    </td>
+
+                                    <td>
+                                        <span class="status status-paid">
+                                            Paid
+                                        </span>
+                                    </td>
+
+                                </tr>
+
+
+                                <tr>
+
+                                    <td>
+                                        <span class="invoice-number">
+                                            INV-10243
+                                        </span>
+                                    </td>
+
+                                    <td>
+                                        Walk-in Customer
+                                    </td>
+
+                                    <td>
+                                        Rs. 620
+                                    </td>
+
+                                    <td>
+                                        Cash
+                                    </td>
+
+                                    <td>
+                                        <span class="status status-paid">
+                                            Paid
+                                        </span>
+                                    </td>
+
+                                </tr>
+
+
+                                <tr>
+
+                                    <td>
+                                        <span class="invoice-number">
+                                            INV-10242
+                                        </span>
+                                    </td>
+
+                                    <td>
+                                        Ahmed Khan
+                                    </td>
+
+                                    <td>
+                                        Rs. 4,200
+                                    </td>
+
+                                    <td>
+                                        Cash
+                                    </td>
+
+                                    <td>
+                                        <span class="status status-paid">
+                                            Paid
+                                        </span>
+                                    </td>
+
+                                </tr>
+
+
+                                <tr>
+
+                                    <td>
+                                        <span class="invoice-number">
+                                            INV-10241
+                                        </span>
+                                    </td>
+
+                                    <td>
+                                        Hassan Ali
+                                    </td>
+
+                                    <td>
+                                        Rs. 1,850
+                                    </td>
+
+                                    <td>
+                                        Card
+                                    </td>
+
+                                    <td>
+                                        <span class="status status-paid">
+                                            Paid
+                                        </span>
+                                    </td>
+
+                                </tr>
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+
+                <!-- ALERTS -->
+
+                <div class="card">
+
+                    <div class="card-header">
+
+                        <div>
+                            <div class="card-title">
+                                Inventory Alerts
+                            </div>
+
+                            <div class="card-subtitle">
+                                Items requiring attention
+                            </div>
+                        </div>
+
+                        <a href="#" class="view-all">
+                            View All
+                        </a>
+
+                    </div>
+
+
+                    <div class="alert-list">
+
+                        <!-- LOW STOCK -->
+
+                        <div class="alert-item">
+
+                            <div class="alert-icon alert-warning">
+                                <i class="fa-solid fa-box-open"></i>
+                            </div>
+
+                            <div class="alert-content">
+                                <strong>Low Stock</strong>
+                                <span>
+                                    Brufen 400mg is below reorder level
+                                </span>
+                            </div>
+
+                            <div class="alert-count">
+                                5 left
+                            </div>
+
+                        </div>
+
+
+                        <!-- LOW STOCK -->
+
+                        <div class="alert-item">
+
+                            <div class="alert-icon alert-warning">
+                                <i class="fa-solid fa-box-open"></i>
+                            </div>
+
+                            <div class="alert-content">
+                                <strong>Low Stock</strong>
+                                <span>
+                                    Vitamin C 500mg is running low
+                                </span>
+                            </div>
+
+                            <div class="alert-count">
+                                3 left
+                            </div>
+
+                        </div>
+
+
+                        <!-- EXPIRING -->
+
+                        <div class="alert-item">
+
+                            <div class="alert-icon alert-danger">
+                                <i class="fa-solid fa-clock"></i>
+                            </div>
+
+                            <div class="alert-content">
+                                <strong>Expiring Soon</strong>
+                                <span>
+                                    Augmentin 625mg — Batch B331
+                                </span>
+                            </div>
+
+                            <div class="alert-count">
+                                17d
+                            </div>
+
+                        </div>
+
+
+                        <!-- EXPIRING -->
+
+                        <div class="alert-item">
+
+                            <div class="alert-icon alert-danger">
+                                <i class="fa-solid fa-clock"></i>
+                            </div>
+
+                            <div class="alert-content">
+                                <strong>Expiring Soon</strong>
+                                <span>
+                                    Cetirizine 10mg — Batch B208
+                                </span>
+                            </div>
+
+                            <div class="alert-count">
+                                24d
+                            </div>
+
+                        </div>
+
+
+                        <!-- OUT OF STOCK -->
+
+                        <div class="alert-item">
+
+                            <div class="alert-icon alert-danger">
+                                <i class="fa-solid fa-circle-xmark"></i>
+                            </div>
+
+                            <div class="alert-content">
+                                <strong>Out of Stock</strong>
+                                <span>
+                                    Azithromycin 500mg
+                                </span>
+                            </div>
+
+                            <div class="alert-count">
+                                0
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <!-- =========================
+         JAVASCRIPT
+    ========================== -->
+
+    <script>
+
+        /* Sidebar Toggle */
+
+        function toggleSidebar() {
+            document
+                .getElementById("sidebar")
+                .classList.toggle("open");
+        }
+
+
+        /* Sales Chart */
+
+        const ctx = document
+            .getElementById("salesChart")
+            .getContext("2d");
+
+
+        new Chart(ctx, {
+
+            type: "line",
+
+            data: {
+
+                labels: [
+                    "Mon",
+                    "Tue",
+                    "Wed",
+                    "Thu",
+                    "Fri",
+                    "Sat",
+                    "Sun"
+                ],
+
+                datasets: [
+
+                    {
+                        label: "Sales",
+
+                        data: [
+                            32000,
+                            41000,
+                            36500,
+                            47000,
+                            39000,
+                            52000,
+                            48520
+                        ],
+
+                        borderColor: "#0f766e",
+
+                        backgroundColor: "rgba(15, 118, 110, 0.08)",
+
+                        borderWidth: 2,
+
+                        pointRadius: 3,
+
+                        pointHoverRadius: 5,
+
+                        tension: 0.4,
+
+                        fill: true
+                    }
+
+                ]
+
+            },
+
+            options: {
+
+                responsive: true,
+
+                maintainAspectRatio: false,
+
+                plugins: {
+
+                    legend: {
+                        display: false
+                    }
+
+                },
+
+                scales: {
+
+                    x: {
+
+                        grid: {
+                            display: false
+                        },
+
+                        ticks: {
+                            color: "#98a2b3",
+                            font: {
+                                size: 9
+                            }
+                        }
+
+                    },
+
+                    y: {
+
+                        beginAtZero: true,
+
+                        border: {
+                            display: false
+                        },
+
+                        grid: {
+                            color: "#f0f2f4"
+                        },
+
+                        ticks: {
+
+                            color: "#98a2b3",
+
+                            font: {
+                                size: 9
+                            },
+
+                            callback: function(value) {
+
+                                return "Rs. " +
+                                    (value / 1000) +
+                                    "k";
+
+                            }
+
+                        }
+
+                    }
+
+                }
+
+            }
+
+        });
+
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,2465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Purchases - PharmaCare</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+    <style>
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Inter", sans-serif;
+            background: #f5f7f9;
+            color: #172033;
+        }
+
+        button,
+        input,
+        select {
+            font-family: inherit;
+        }
+
+        /* ================= SIDEBAR ================= */
+
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 250px;
+            height: 100vh;
+            background: #fff;
+            border-right: 1px solid #e7eaee;
+            padding: 24px 15px;
+            z-index: 1000;
+            transition: .3s;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 0 10px 28px;
+        }
+
+        .brand-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+            background: #0f766e;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 19px;
+        }
+
+        .brand h2 {
+            font-size: 19px;
+            font-weight: 700;
+        }
+
+        .brand span {
+            display: block;
+            color: #7b8494;
+            font-size: 9px;
+            letter-spacing: 1.3px;
+            margin-top: 3px;
+        }
+
+        .menu-title {
+            font-size: 10px;
+            font-weight: 600;
+            color: #98a1af;
+            text-transform: uppercase;
+            letter-spacing: .8px;
+            padding: 0 12px;
+            margin: 17px 0 8px;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 13px;
+            padding: 11px 13px;
+            border-radius: 8px;
+            color: #667085;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 500;
+            margin-bottom: 3px;
+        }
+
+        .menu-item i {
+            width: 18px;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .menu-item:hover {
+            background: #f0fdfa;
+            color: #0f766e;
+        }
+
+        .menu-item.active {
+            background: #ccfbf1;
+            color: #0f766e;
+            font-weight: 600;
+        }
+
+        .logout {
+            position: absolute;
+            bottom: 20px;
+            left: 15px;
+            right: 15px;
+        }
+
+
+        /* ================= MAIN ================= */
+
+        .main {
+            margin-left: 250px;
+            min-height: 100vh;
+        }
+
+
+        /* ================= TOPBAR ================= */
+
+        .topbar {
+            height: 72px;
+            background: #fff;
+            border-bottom: 1px solid #e7eaee;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 30px;
+        }
+
+        .search-box {
+            width: 320px;
+            position: relative;
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 13px;
+            top: 12px;
+            color: #98a1af;
+            font-size: 14px;
+        }
+
+        .search-box input {
+            width: 100%;
+            height: 38px;
+            border: 1px solid #e1e5ea;
+            border-radius: 7px;
+            outline: none;
+            padding: 0 14px 0 38px;
+            font-size: 12px;
+        }
+
+        .top-right {
+            display: flex;
+            align-items: center;
+            gap: 22px;
+        }
+
+        .notification {
+            width: 34px;
+            height: 34px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #667085;
+            position: relative;
+        }
+
+        .notification::after {
+            content: "";
+            width: 6px;
+            height: 6px;
+            background: #ef4444;
+            border-radius: 50%;
+            position: absolute;
+            top: 6px;
+            right: 6px;
+        }
+
+        .profile {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #ccfbf1;
+            color: #0f766e;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 13px;
+        }
+
+        .profile-info strong {
+            display: block;
+            font-size: 12px;
+        }
+
+        .profile-info span {
+            display: block;
+            color: #98a1af;
+            font-size: 10px;
+            margin-top: 2px;
+        }
+
+
+        /* ================= CONTENT ================= */
+
+        .content {
+            padding: 28px 30px;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 24px;
+        }
+
+        .page-header h1 {
+            font-size: 22px;
+            margin-bottom: 6px;
+        }
+
+        .page-header p {
+            color: #7b8494;
+            font-size: 12px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 9px;
+        }
+
+        .btn {
+            border: none;
+            border-radius: 7px;
+            padding: 10px 15px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: #0f766e;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #115e59;
+        }
+
+        .btn-outline {
+            background: white;
+            border: 1px solid #dfe3e8;
+            color: #475467;
+        }
+
+
+        /* ================= STATS ================= */
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 18px;
+            margin-bottom: 22px;
+        }
+
+        .stat-card {
+            background: white;
+            border: 1px solid #e7eaee;
+            border-radius: 10px;
+            padding: 19px;
+        }
+
+        .stat-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .stat-label {
+            color: #667085;
+            font-size: 11px;
+            margin-bottom: 4px;
+        }
+
+        .stat-value {
+            font-size: 21px;
+            font-weight: 700;
+        }
+
+        .stat-bottom {
+            color: #98a1af;
+            font-size: 9px;
+            margin-top: 5px;
+        }
+
+        .stat-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 15px;
+        }
+
+        .teal {
+            background: #ccfbf1;
+            color: #0f766e;
+        }
+
+        .blue {
+            background: #dbeafe;
+            color: #2563eb;
+        }
+
+        .orange {
+            background: #ffedd5;
+            color: #ea580c;
+        }
+
+        .purple {
+            background: #ede9fe;
+            color: #7c3aed;
+        }
+
+
+        /* ================= TABLE CARD ================= */
+
+        .table-card {
+            background: white;
+            border: 1px solid #e7eaee;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .table-header {
+            padding: 17px 19px;
+            border-bottom: 1px solid #edf0f2;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .table-header h3 {
+            font-size: 13px;
+        }
+
+        .table-header span {
+            color: #98a1af;
+            font-size: 10px;
+        }
+
+
+        /* ================= FILTERS ================= */
+
+        .filters {
+            padding: 15px 19px;
+            border-bottom: 1px solid #edf0f2;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .filter-search {
+            position: relative;
+            width: 260px;
+        }
+
+        .filter-search i {
+            position: absolute;
+            left: 12px;
+            top: 11px;
+            color: #98a1af;
+            font-size: 12px;
+        }
+
+        .filter-search input {
+            width: 100%;
+            height: 36px;
+            border: 1px solid #dfe3e8;
+            border-radius: 6px;
+            padding-left: 33px;
+            outline: none;
+            font-size: 11px;
+        }
+
+        .filter-select {
+            height: 36px;
+            border: 1px solid #dfe3e8;
+            border-radius: 6px;
+            padding: 0 10px;
+            background: white;
+            color: #475467;
+            font-size: 11px;
+            outline: none;
+        }
+
+
+        /* ================= TABLE ================= */
+
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 950px;
+        }
+
+        th {
+            background: #fafbfc;
+            color: #667085;
+            font-size: 10px;
+            font-weight: 600;
+            text-align: left;
+            padding: 12px 18px;
+            border-bottom: 1px solid #edf0f2;
+        }
+
+        td {
+            padding: 13px 18px;
+            border-bottom: 1px solid #f0f2f4;
+            font-size: 10px;
+            color: #475467;
+        }
+
+        .invoice {
+            color: #0f766e;
+            font-weight: 700;
+        }
+
+        .supplier strong {
+            display: block;
+            color: #172033;
+            font-size: 10px;
+        }
+
+        .supplier span {
+            display: block;
+            color: #98a1af;
+            font-size: 8px;
+            margin-top: 3px;
+        }
+
+        .status {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            border-radius: 20px;
+            padding: 5px 9px;
+            font-size: 9px;
+            font-weight: 600;
+        }
+
+        .status::before {
+            content: "";
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+        }
+
+        .status-paid {
+            background: #dcfce7;
+            color: #15803d;
+        }
+
+        .status-paid::before {
+            background: #16a34a;
+        }
+
+        .status-pending {
+            background: #ffedd5;
+            color: #c2410c;
+        }
+
+        .status-pending::before {
+            background: #f97316;
+        }
+
+        .status-partial {
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+
+        .status-partial::before {
+            background: #3b82f6;
+        }
+
+        .actions {
+            display: flex;
+            gap: 6px;
+        }
+
+        .action-btn {
+            width: 28px;
+            height: 28px;
+            border: 1px solid #e4e7eb;
+            background: white;
+            border-radius: 5px;
+            color: #667085;
+            cursor: pointer;
+            font-size: 11px;
+        }
+
+        .action-btn:hover {
+            color: #0f766e;
+            background: #f0fdfa;
+            border-color: #99f6e4;
+        }
+
+
+        /* ================= PAGINATION ================= */
+
+        .pagination {
+            padding: 14px 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .pagination-text {
+            color: #98a1af;
+            font-size: 10px;
+        }
+
+        .pages {
+            display: flex;
+            gap: 5px;
+        }
+
+        .page {
+            width: 29px;
+            height: 29px;
+            border: 1px solid #e4e7eb;
+            border-radius: 5px;
+            background: white;
+            color: #667085;
+            cursor: pointer;
+            font-size: 10px;
+        }
+
+        .page.active {
+            background: #0f766e;
+            border-color: #0f766e;
+            color: white;
+        }
+
+
+        /* ================= MODAL ================= */
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, .45);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal {
+            width: 650px;
+            max-width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            background: white;
+            border-radius: 11px;
+            box-shadow: 0 20px 50px rgba(0,0,0,.15);
+        }
+
+        .modal-header {
+            padding: 18px 20px;
+            border-bottom: 1px solid #edf0f2;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            font-size: 15px;
+        }
+
+        .close-btn {
+            width: 30px;
+            height: 30px;
+            border: none;
+            background: #f4f5f6;
+            border-radius: 6px;
+            color: #667085;
+            cursor: pointer;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .form-section {
+            margin-bottom: 22px;
+        }
+
+        .form-section h4 {
+            font-size: 11px;
+            color: #0f766e;
+            text-transform: uppercase;
+            letter-spacing: .6px;
+            margin-bottom: 13px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 13px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 10px;
+            font-weight: 600;
+            color: #475467;
+            margin-bottom: 6px;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            height: 36px;
+            border: 1px solid #dfe3e8;
+            border-radius: 6px;
+            padding: 0 10px;
+            font-size: 11px;
+            outline: none;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            border-color: #0f766e;
+        }
+
+        /* Purchase Items */
+
+        .purchase-items {
+            border: 1px solid #e3e7eb;
+            border-radius: 7px;
+            overflow: hidden;
+        }
+
+        .purchase-items table {
+            min-width: 0;
+        }
+
+        .purchase-items th {
+            font-size: 9px;
+            padding: 10px;
+        }
+
+        .purchase-items td {
+            padding: 8px;
+        }
+
+        .purchase-items input {
+            width: 100%;
+            height: 31px;
+            border: 1px solid #dfe3e8;
+            border-radius: 5px;
+            padding: 0 7px;
+            font-size: 9px;
+            outline: none;
+        }
+
+        .remove-row {
+            width: 26px;
+            height: 26px;
+            border: none;
+            background: #fff1f2;
+            color: #e11d48;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .add-row {
+            margin-top: 10px;
+            border: none;
+            background: transparent;
+            color: #0f766e;
+            font-size: 10px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .purchase-total {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 15px;
+        }
+
+        .total-box {
+            width: 240px;
+            background: #f0fdfa;
+            border: 1px solid #ccfbf1;
+            border-radius: 7px;
+            padding: 12px;
+        }
+
+        .total-box div {
+            display: flex;
+            justify-content: space-between;
+            font-size: 10px;
+            color: #667085;
+            margin-bottom: 7px;
+        }
+
+        .total-box div:last-child {
+            margin-bottom: 0;
+            padding-top: 8px;
+            border-top: 1px solid #ccfbf1;
+            color: #172033;
+            font-weight: 700;
+            font-size: 12px;
+        }
+
+        .modal-footer {
+            padding: 14px 20px;
+            background: #fafbfc;
+            border-top: 1px solid #edf0f2;
+            display: flex;
+            justify-content: flex-end;
+            gap: 9px;
+        }
+
+
+        /* ================= MOBILE ================= */
+
+        .mobile-menu {
+            display: none;
+            border: none;
+            background: transparent;
+            font-size: 19px;
+            color: #475467;
+            cursor: pointer;
+        }
+
+        @media (max-width: 1100px) {
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+        }
+
+        @media (max-width: 768px) {
+
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.show {
+                transform: translateX(0);
+            }
+
+            .main {
+                margin-left: 0;
+            }
+
+            .mobile-menu {
+                display: block;
+                margin-right: 15px;
+            }
+
+            .topbar {
+                padding: 0 18px;
+            }
+
+            .search-box {
+                display: none;
+            }
+
+            .profile-info {
+                display: none;
+            }
+
+            .content {
+                padding: 22px 16px;
+            }
+
+            .page-header {
+                flex-direction: column;
+                gap: 14px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<!-- ================= SIDEBAR ================= -->
+
+<aside class="sidebar" id="sidebar">
+
+    <div class="brand">
+
+        <div class="brand-icon">
+            <i class="fa-solid fa-pills"></i>
+        </div>
+
+        <div>
+            <h2>PharmaCare</h2>
+            <span>PHARMACY MANAGEMENT</span>
+        </div>
+
+    </div>
+
+
+    <div class="menu-title">
+        Main Menu
+    </div>
+
+
+    <a href="#" class="menu-item">
+        <i class="fa-solid fa-chart-pie"></i>
+        Dashboard
+    </a>
+
+
+    <a href="#" class="menu-item">
+        <i class="fa-solid fa-cash-register"></i>
+        Sales / POS
+    </a>
+
+
+    <a href="#" class="menu-item">
+        <i class="fa-solid fa-pills"></i>
+        Medicines
+    </a>
+
+
+    <a href="#" class="menu-item">
+        <i class="fa-solid fa-boxes-stacked"></i>
+        Inventory
+    </a>
+
+
+    <a href="#" class="menu-item active">
+        <i class="fa-solid fa-cart-shopping"></i>
+        Purchases
+    </a>
+
+
+    <a href="#" class="menu-item">
+        <i class="fa-solid fa-truck"></i>
+        Suppliers
+    </a>
+
+
+    <a href="#" class="menu-item">
+        <i class="fa-solid fa-users"></i>
+        Customers
+    </a>
+
+
+    <div class="menu-title">
+        Analytics
+    </div>
+
+
+    <a href="#" class="menu-item">
+        <i class="fa-solid fa-chart-column"></i>
+        Reports
+    </a>
+
+
+    <div class="menu-title">
+        Administration
+    </div>
+
+
+    <a href="#" class="menu-item">
+        <i class="fa-solid fa-user-shield"></i>
+        Users & Roles
+    </a>
+
+
+    <a href="#" class="menu-item">
+        <i class="fa-solid fa-gear"></i>
+        Settings
+    </a>
+
+
+    <a href="#" class="menu-item logout">
+        <i class="fa-solid fa-right-from-bracket"></i>
+        Logout
+    </a>
+
+</aside>
+
+
+
+<!-- ================= MAIN ================= -->
+
+<main class="main">
+
+
+    <!-- TOPBAR -->
+
+    <header class="topbar">
+
+        <div style="display:flex;align-items:center;">
+
+            <button class="mobile-menu"
+                    onclick="toggleSidebar()">
+
+                <i class="fa-solid fa-bars"></i>
+
+            </button>
+
+
+            <div class="search-box">
+
+                <i class="fa-solid fa-magnifying-glass"></i>
+
+                <input type="text"
+                       placeholder="Search purchases, invoices...">
+
+            </div>
+
+        </div>
+
+
+        <div class="top-right">
+
+            <div class="notification">
+
+                <i class="fa-regular fa-bell"></i>
+
+            </div>
+
+
+            <div class="profile">
+
+                <div class="avatar">
+                    AH
+                </div>
+
+                <div class="profile-info">
+
+                    <strong>Abdul Hayee</strong>
+
+                    <span>Administrator</span>
+
+                </div>
+
+                <i class="fa-solid fa-chevron-down"
+                   style="font-size:9px;color:#98a1af;">
+                </i>
+
+            </div>
+
+        </div>
+
+    </header>
+
+
+
+    <!-- CONTENT -->
+
+    <section class="content">
+
+
+        <!-- PAGE HEADER -->
+
+        <div class="page-header">
+
+            <div>
+
+                <h1>Purchase Management</h1>
+
+                <p>
+                    Manage medicine purchases, suppliers, invoices and incoming stock.
+                </p>
+
+            </div>
+
+
+            <div class="header-actions">
+
+                <button class="btn btn-outline">
+
+                    <i class="fa-solid fa-file-export"></i>
+
+                    Export
+
+                </button>
+
+
+                <button class="btn btn-primary"
+                        onclick="openPurchaseModal()">
+
+                    <i class="fa-solid fa-plus"></i>
+
+                    New Purchase
+
+                </button>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- ================= STATS ================= -->
+
+        <div class="stats-grid">
+
+
+            <div class="stat-card">
+
+                <div class="stat-top">
+
+                    <div>
+
+                        <div class="stat-label">
+                            Total Purchases
+                        </div>
+
+                        <div class="stat-value">
+                            486
+                        </div>
+
+                        <div class="stat-bottom">
+                            This month
+                        </div>
+
+                    </div>
+
+                    <div class="stat-icon teal">
+
+                        <i class="fa-solid fa-cart-shopping"></i>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <div class="stat-top">
+
+                    <div>
+
+                        <div class="stat-label">
+                            Purchase Amount
+                        </div>
+
+                        <div class="stat-value">
+                            Rs. 1.84M
+                        </div>
+
+                        <div class="stat-bottom">
+                            This month
+                        </div>
+
+                    </div>
+
+                    <div class="stat-icon blue">
+
+                        <i class="fa-solid fa-money-bill-wave"></i>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <div class="stat-top">
+
+                    <div>
+
+                        <div class="stat-label">
+                            Pending Payments
+                        </div>
+
+                        <div class="stat-value">
+                            Rs. 324K
+                        </div>
+
+                        <div class="stat-bottom">
+                            Supplier dues
+                        </div>
+
+                    </div>
+
+                    <div class="stat-icon orange">
+
+                        <i class="fa-solid fa-clock"></i>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <div class="stat-top">
+
+                    <div>
+
+                        <div class="stat-label">
+                            Suppliers
+                        </div>
+
+                        <div class="stat-value">
+                            38
+                        </div>
+
+                        <div class="stat-bottom">
+                            Active suppliers
+                        </div>
+
+                    </div>
+
+                    <div class="stat-icon purple">
+
+                        <i class="fa-solid fa-truck"></i>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- ================= PURCHASE TABLE ================= -->
+
+        <div class="table-card">
+
+
+            <div class="table-header">
+
+                <h3>
+                    Purchase Records
+                </h3>
+
+                <span>
+                    Showing recent purchase transactions
+                </span>
+
+            </div>
+
+
+
+            <!-- FILTERS -->
+
+            <div class="filters">
+
+
+                <div class="filter-search">
+
+                    <i class="fa-solid fa-magnifying-glass"></i>
+
+                    <input
+                        id="purchaseSearch"
+                        type="text"
+                        placeholder="Search invoice or supplier..."
+                        onkeyup="filterPurchases()">
+
+                </div>
+
+
+                <select class="filter-select"
+                        id="paymentFilter"
+                        onchange="filterPurchases()">
+
+                    <option value="">
+                        All Payment Status
+                    </option>
+
+                    <option value="Paid">
+                        Paid
+                    </option>
+
+                    <option value="Pending">
+                        Pending
+                    </option>
+
+                    <option value="Partial">
+                        Partial
+                    </option>
+
+                </select>
+
+
+                <select class="filter-select">
+
+                    <option>
+                        All Suppliers
+                    </option>
+
+                    <option>
+                        Medico Distributors
+                    </option>
+
+                    <option>
+                        HealthCare Pharma
+                    </option>
+
+                    <option>
+                        Prime Medicals
+                    </option>
+
+                </select>
+
+
+                <select class="filter-select">
+
+                    <option>
+                        This Month
+                    </option>
+
+                    <option>
+                        Last Month
+                    </option>
+
+                    <option>
+                        This Year
+                    </option>
+
+                </select>
+
+
+            </div>
+
+
+
+            <!-- TABLE -->
+
+            <div class="table-wrapper">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+
+                            <th>
+                                Purchase Invoice
+                            </th>
+
+                            <th>
+                                Supplier
+                            </th>
+
+                            <th>
+                                Purchase Date
+                            </th>
+
+                            <th>
+                                Items
+                            </th>
+
+                            <th>
+                                Total Amount
+                            </th>
+
+                            <th>
+                                Paid
+                            </th>
+
+                            <th>
+                                Due
+                            </th>
+
+                            <th>
+                                Status
+                            </th>
+
+                            <th>
+                                Actions
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody id="purchaseTable">
+
+
+                        <tr data-status="Paid">
+
+                            <td>
+                                <span class="invoice">
+                                    PUR-2026-00482
+                                </span>
+                            </td>
+
+
+                            <td>
+
+                                <div class="supplier">
+
+                                    <strong>
+                                        Medico Distributors
+                                    </strong>
+
+                                    <span>
+                                        SUP-00124
+                                    </span>
+
+                                </div>
+
+                            </td>
+
+
+                            <td>
+                                24 Sep 2026
+                            </td>
+
+
+                            <td>
+                                18
+                            </td>
+
+
+                            <td>
+                                <strong>
+                                    Rs. 184,500
+                                </strong>
+                            </td>
+
+
+                            <td>
+                                Rs. 184,500
+                            </td>
+
+
+                            <td>
+                                Rs. 0
+                            </td>
+
+
+                            <td>
+
+                                <span class="status status-paid">
+                                    Paid
+                                </span>
+
+                            </td>
+
+
+                            <td>
+
+                                <div class="actions">
+
+                                    <button class="action-btn"
+                                            title="View">
+
+                                        <i class="fa-regular fa-eye"></i>
+
+                                    </button>
+
+
+                                    <button class="action-btn"
+                                            title="Print">
+
+                                        <i class="fa-solid fa-print"></i>
+
+                                    </button>
+
+
+                                    <button class="action-btn"
+                                            title="More">
+
+                                        <i class="fa-solid fa-ellipsis"></i>
+
+                                    </button>
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+
+
+
+                        <tr data-status="Pending">
+
+                            <td>
+                                <span class="invoice">
+                                    PUR-2026-00481
+                                </span>
+                            </td>
+
+
+                            <td>
+
+                                <div class="supplier">
+
+                                    <strong>
+                                        HealthCare Pharma
+                                    </strong>
+
+                                    <span>
+                                        SUP-00087
+                                    </span>
+
+                                </div>
+
+                            </td>
+
+
+                            <td>
+                                23 Sep 2026
+                            </td>
+
+
+                            <td>
+                                12
+                            </td>
+
+
+                            <td>
+                                <strong>
+                                    Rs. 92,800
+                                </strong>
+                            </td>
+
+
+                            <td>
+                                Rs. 0
+                            </td>
+
+
+                            <td>
+                                Rs. 92,800
+                            </td>
+
+
+                            <td>
+
+                                <span class="status status-pending">
+                                    Pending
+                                </span>
+
+                            </td>
+
+
+                            <td>
+
+                                <div class="actions">
+
+                                    <button class="action-btn">
+
+                                        <i class="fa-regular fa-eye"></i>
+
+                                    </button>
+
+
+                                    <button class="action-btn">
+
+                                        <i class="fa-solid fa-print"></i>
+
+                                    </button>
+
+
+                                    <button class="action-btn">
+
+                                        <i class="fa-solid fa-ellipsis"></i>
+
+                                    </button>
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+
+
+
+                        <tr data-status="Partial">
+
+                            <td>
+                                <span class="invoice">
+                                    PUR-2026-00480
+                                </span>
+                            </td>
+
+
+                            <td>
+
+                                <div class="supplier">
+
+                                    <strong>
+                                        Prime Medicals
+                                    </strong>
+
+                                    <span>
+                                        SUP-00108
+                                    </span>
+
+                                </div>
+
+                            </td>
+
+
+                            <td>
+                                22 Sep 2026
+                            </td>
+
+
+                            <td>
+                                25
+                            </td>
+
+
+                            <td>
+                                <strong>
+                                    Rs. 316,250
+                                </strong>
+                            </td>
+
+
+                            <td>
+                                Rs. 200,000
+                            </td>
+
+
+                            <td>
+                                Rs. 116,250
+                            </td>
+
+
+                            <td>
+
+                                <span class="status status-partial">
+                                    Partial
+                                </span>
+
+                            </td>
+
+
+                            <td>
+
+                                <div class="actions">
+
+                                    <button class="action-btn">
+
+                                        <i class="fa-regular fa-eye"></i>
+
+                                    </button>
+
+
+                                    <button class="action-btn">
+
+                                        <i class="fa-solid fa-print"></i>
+
+                                    </button>
+
+
+                                    <button class="action-btn">
+
+                                        <i class="fa-solid fa-ellipsis"></i>
+
+                                    </button>
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+
+
+
+                        <tr data-status="Paid">
+
+                            <td>
+                                <span class="invoice">
+                                    PUR-2026-00479
+                                </span>
+                            </td>
+
+
+                            <td>
+
+                                <div class="supplier">
+
+                                    <strong>
+                                        Medico Distributors
+                                    </strong>
+
+                                    <span>
+                                        SUP-00124
+                                    </span>
+
+                                </div>
+
+                            </td>
+
+
+                            <td>
+                                21 Sep 2026
+                            </td>
+
+
+                            <td>
+                                9
+                            </td>
+
+
+                            <td>
+                                <strong>
+                                    Rs. 78,450
+                                </strong>
+                            </td>
+
+
+                            <td>
+                                Rs. 78,450
+                            </td>
+
+
+                            <td>
+                                Rs. 0
+                            </td>
+
+
+                            <td>
+
+                                <span class="status status-paid">
+                                    Paid
+                                </span>
+
+                            </td>
+
+
+                            <td>
+
+                                <div class="actions">
+
+                                    <button class="action-btn">
+
+                                        <i class="fa-regular fa-eye"></i>
+
+                                    </button>
+
+
+                                    <button class="action-btn">
+
+                                        <i class="fa-solid fa-print"></i>
+
+                                    </button>
+
+
+                                    <button class="action-btn">
+
+                                        <i class="fa-solid fa-ellipsis"></i>
+
+                                    </button>
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+
+
+
+                        <tr data-status="Pending">
+
+                            <td>
+                                <span class="invoice">
+                                    PUR-2026-00478
+                                </span>
+                            </td>
+
+
+                            <td>
+
+                                <div class="supplier">
+
+                                    <strong>
+                                        National Pharma
+                                    </strong>
+
+                                    <span>
+                                        SUP-00135
+                                    </span>
+
+                                </div>
+
+                            </td>
+
+
+                            <td>
+                                19 Sep 2026
+                            </td>
+
+
+                            <td>
+                                16
+                            </td>
+
+
+                            <td>
+                                <strong>
+                                    Rs. 145,600
+                                </strong>
+                            </td>
+
+
+                            <td>
+                                Rs. 50,000
+                            </td>
+
+
+                            <td>
+                                Rs. 95,600
+                            </td>
+
+
+                            <td>
+
+                                <span class="status status-pending">
+                                    Pending
+                                </span>
+
+                            </td>
+
+
+                            <td>
+
+                                <div class="actions">
+
+                                    <button class="action-btn">
+
+                                        <i class="fa-regular fa-eye"></i>
+
+                                    </button>
+
+
+                                    <button class="action-btn">
+
+                                        <i class="fa-solid fa-print"></i>
+
+                                    </button>
+
+
+                                    <button class="action-btn">
+
+                                        <i class="fa-solid fa-ellipsis"></i>
+
+                                    </button>
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+
+
+            <!-- PAGINATION -->
+
+            <div class="pagination">
+
+                <div class="pagination-text">
+                    Showing 1 to 5 of 486 purchases
+                </div>
+
+
+                <div class="pages">
+
+                    <button class="page">
+                        <i class="fa-solid fa-chevron-left"></i>
+                    </button>
+
+                    <button class="page active">
+                        1
+                    </button>
+
+                    <button class="page">
+                        2
+                    </button>
+
+                    <button class="page">
+                        3
+                    </button>
+
+                    <button class="page">
+                        ...
+                    </button>
+
+                    <button class="page">
+                        98
+                    </button>
+
+                    <button class="page">
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+</main>
+
+
+
+<!-- ================= NEW PURCHASE MODAL ================= -->
+
+<div class="modal-overlay"
+     id="purchaseModal">
+
+
+    <div class="modal">
+
+
+        <div class="modal-header">
+
+            <h3>
+                Create New Purchase
+            </h3>
+
+
+            <button class="close-btn"
+                    onclick="closePurchaseModal()">
+
+                <i class="fa-solid fa-xmark"></i>
+
+            </button>
+
+        </div>
+
+
+
+        <div class="modal-body">
+
+
+            <!-- SUPPLIER -->
+
+            <div class="form-section">
+
+                <h4>
+                    Supplier Information
+                </h4>
+
+
+                <div class="form-grid">
+
+
+                    <div class="form-group">
+
+                        <label>
+                            Supplier
+                        </label>
+
+                        <select>
+
+                            <option>
+                                Select Supplier
+                            </option>
+
+                            <option>
+                                Medico Distributors
+                            </option>
+
+                            <option>
+                                HealthCare Pharma
+                            </option>
+
+                            <option>
+                                Prime Medicals
+                            </option>
+
+                            <option>
+                                National Pharma
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label>
+                            Supplier Invoice No.
+                        </label>
+
+                        <input
+                            type="text"
+                            placeholder="Enter invoice number">
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label>
+                            Purchase Date
+                        </label>
+
+                        <input
+                            type="date"
+                            value="2026-09-25">
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label>
+                            Payment Status
+                        </label>
+
+                        <select>
+
+                            <option>
+                                Paid
+                            </option>
+
+                            <option>
+                                Pending
+                            </option>
+
+                            <option>
+                                Partial
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- PURCHASE ITEMS -->
+
+            <div class="form-section">
+
+                <h4>
+                    Purchase Items
+                </h4>
+
+
+                <div class="purchase-items">
+
+                    <table>
+
+                        <thead>
+
+                            <tr>
+
+                                <th>
+                                    Medicine
+                                </th>
+
+                                <th>
+                                    Batch
+                                </th>
+
+                                <th>
+                                    Expiry
+                                </th>
+
+                                <th>
+                                    Qty
+                                </th>
+
+                                <th>
+                                    Unit Cost
+                                </th>
+
+                                <th>
+                                    Total
+                                </th>
+
+                                <th></th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody id="purchaseItems">
+
+
+                            <tr>
+
+                                <td>
+
+                                    <input
+                                        value="Panadol 500mg">
+
+                                </td>
+
+                                <td>
+
+                                    <input
+                                        value="PAN-24091">
+
+                                </td>
+
+                                <td>
+
+                                    <input
+                                        type="date"
+                                        value="2027-12-15">
+
+                                </td>
+
+                                <td>
+
+                                    <input
+                                        type="number"
+                                        value="500">
+
+                                </td>
+
+                                <td>
+
+                                    <input
+                                        type="number"
+                                        value="2.40">
+
+                                </td>
+
+                                <td>
+                                    Rs. 1,200
+                                </td>
+
+                                <td>
+
+                                    <button
+                                        class="remove-row"
+                                        onclick="removePurchaseRow(this)">
+
+                                        <i class="fa-solid fa-xmark"></i>
+
+                                    </button>
+
+                                </td>
+
+                            </tr>
+
+
+                            <tr>
+
+                                <td>
+
+                                    <input
+                                        value="Brufen 400mg">
+
+                                </td>
+
+                                <td>
+
+                                    <input
+                                        value="BRU-24112">
+
+                                </td>
+
+                                <td>
+
+                                    <input
+                                        type="date"
+                                        value="2027-08-08">
+
+                                </td>
+
+                                <td>
+
+                                    <input
+                                        type="number"
+                                        value="300">
+
+                                </td>
+
+                                <td>
+
+                                    <input
+                                        type="number"
+                                        value="4.80">
+
+                                </td>
+
+                                <td>
+                                    Rs. 1,440
+                                </td>
+
+                                <td>
+
+                                    <button
+                                        class="remove-row"
+                                        onclick="removePurchaseRow(this)">
+
+                                        <i class="fa-solid fa-xmark"></i>
+
+                                    </button>
+
+                                </td>
+
+                            </tr>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+
+                <button class="add-row"
+                        onclick="addPurchaseRow()">
+
+                    <i class="fa-solid fa-plus"></i>
+
+                    Add Another Medicine
+
+                </button>
+
+
+                <div class="purchase-total">
+
+                    <div class="total-box">
+
+                        <div>
+
+                            <span>
+                                Subtotal
+                            </span>
+
+                            <strong>
+                                Rs. 2,640
+                            </strong>
+
+                        </div>
+
+
+                        <div>
+
+                            <span>
+                                Discount
+                            </span>
+
+                            <strong>
+                                Rs. 0
+                            </strong>
+
+                        </div>
+
+
+                        <div>
+
+                            <span>
+                                Total Purchase
+                            </span>
+
+                            <strong>
+                                Rs. 2,640
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- NOTES -->
+
+            <div class="form-group">
+
+                <label>
+                    Notes
+                </label>
+
+                <input
+                    type="text"
+                    placeholder="Optional purchase notes">
+
+            </div>
+
+        </div>
+
+
+
+        <div class="modal-footer">
+
+            <button class="btn btn-outline"
+                    onclick="closePurchaseModal()">
+
+                Cancel
+
+            </button>
+
+
+            <button class="btn btn-primary"
+                    onclick="savePurchase()">
+
+                <i class="fa-solid fa-check"></i>
+
+                Save Purchase
+
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<script>
+
+    /* ================= SIDEBAR ================= */
+
+    function toggleSidebar() {
+
+        document
+            .getElementById("sidebar")
+            .classList
+            .toggle("show");
+
+    }
+
+
+    /* ================= MODAL ================= */
+
+    function openPurchaseModal() {
+
+        document
+            .getElementById("purchaseModal")
+            .style.display = "flex";
+
+    }
+
+
+    function closePurchaseModal() {
+
+        document
+            .getElementById("purchaseModal")
+            .style.display = "none";
+
+    }
+
+
+    document
+        .getElementById("purchaseModal")
+        .addEventListener("click", function(e) {
+
+            if (e.target === this) {
+                closePurchaseModal();
+            }
+
+        });
+
+
+    /* ================= FILTER ================= */
+
+    function filterPurchases() {
+
+        const search =
+            document
+                .getElementById("purchaseSearch")
+                .value
+                .toLowerCase();
+
+        const status =
+            document
+                .getElementById("paymentFilter")
+                .value;
+
+        const rows =
+            document
+                .querySelectorAll("#purchaseTable tr");
+
+
+        rows.forEach(row => {
+
+            const text =
+                row.innerText.toLowerCase();
+
+            const rowStatus =
+                row.dataset.status;
+
+
+            const searchMatch =
+                text.includes(search);
+
+            const statusMatch =
+                status === "" ||
+                rowStatus === status;
+
+
+            if (
+                searchMatch &&
+                statusMatch
+            ) {
+
+                row.style.display = "";
+
+            } else {
+
+                row.style.display = "none";
+
+            }
+
+        });
+
+    }
+
+
+    /* ================= PURCHASE ROW ================= */
+
+    function removePurchaseRow(button) {
+
+        button
+            .closest("tr")
+            .remove();
+
+    }
+
+
+    function addPurchaseRow() {
+
+        const tbody =
+            document.getElementById("purchaseItems");
+
+        const row =
+            document.createElement("tr");
+
+        row.innerHTML = `
+
+            <td>
+                <input placeholder="Medicine name">
+            </td>
+
+            <td>
+                <input placeholder="Batch No.">
+            </td>
+
+            <td>
+                <input type="date">
+            </td>
+
+            <td>
+                <input type="number"
+                       placeholder="0">
+            </td>
+
+            <td>
+                <input type="number"
+                       placeholder="0.00">
+            </td>
+
+            <td>
+                Rs. 0
+            </td>
+
+            <td>
+
+                <button
+                    class="remove-row"
+                    onclick="removePurchaseRow(this)">
+
+                    <i class="fa-solid fa-xmark"></i>
+
+                </button>
+
+            </td>
+
+        `;
+
+        tbody.appendChild(row);
+
+    }
+
+
+    /* ================= SAVE ================= */
+
+    function savePurchase() {
+
+        alert(
+            "Purchase saved successfully!\n\nStock will be added to inventory."
+        );
+
+        closePurchaseModal();
+
+    }
+
+</script>
+
+</body>
+</html>
