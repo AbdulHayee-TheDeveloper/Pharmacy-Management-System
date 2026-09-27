@@ -1,0 +1,429 @@
+{% extends "base/base.html" %}
+
+{% block title %}{{ batch.batch_number }} | Inventory | PharmaCare{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+
+    <div>
+        <div class="d-flex align-items-center gap-2 mb-2">
+            <a
+                href="{% url 'inventory:list' %}"
+                class="text-muted text-decoration-none"
+            >
+                Inventory
+            </a>
+
+            <i class="fa-solid fa-chevron-right text-muted small"></i>
+
+            <span class="text-muted">
+                Batch Details
+            </span>
+        </div>
+
+        <h1 class="page-title">
+            {{ batch.medicine.name }}
+        </h1>
+
+        <p class="page-subtitle">
+            Batch {{ batch.batch_number }}
+        </p>
+    </div>
+
+
+    <div class="d-flex gap-2">
+
+        <a
+            href="{% url 'inventory:list' %}"
+            class="btn btn-light border"
+        >
+            <i class="fa-solid fa-arrow-left me-2"></i>
+            Back to Inventory
+        </a>
+
+        {% if perms.inventory.change_inventorybatch %}
+
+            <a
+                href="#"
+                class="btn btn-primary"
+            >
+                <i class="fa-solid fa-pen me-2"></i>
+                Edit Batch
+            </a>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+
+<!-- Status -->
+<div class="card border-0 shadow-sm mb-4">
+
+    <div class="card-body">
+
+        <div class="d-flex flex-wrap align-items-center gap-3">
+
+            {% if not batch.is_active %}
+
+                <span class="badge bg-secondary-subtle text-secondary px-3 py-2">
+                    <i class="fa-solid fa-circle me-1"></i>
+                    Inactive
+                </span>
+
+            {% elif batch.is_expired %}
+
+                <span class="badge bg-danger-subtle text-danger px-3 py-2">
+                    <i class="fa-solid fa-triangle-exclamation me-1"></i>
+                    Expired
+                </span>
+
+            {% elif batch.is_out_of_stock %}
+
+                <span class="badge bg-danger-subtle text-danger px-3 py-2">
+                    <i class="fa-solid fa-box-open me-1"></i>
+                    Out of Stock
+                </span>
+
+            {% elif batch.is_low_stock %}
+
+                <span class="badge bg-warning-subtle text-warning px-3 py-2">
+                    <i class="fa-solid fa-triangle-exclamation me-1"></i>
+                    Low Stock
+                </span>
+
+            {% else %}
+
+                <span class="badge bg-success-subtle text-success px-3 py-2">
+                    <i class="fa-solid fa-circle-check me-1"></i>
+                    In Stock
+                </span>
+
+            {% endif %}
+
+
+            <span class="text-muted">
+                Batch:
+                <strong class="text-dark">
+                    {{ batch.batch_number }}
+                </strong>
+            </span>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<div class="row g-4">
+
+    <!-- Medicine Information -->
+    <div class="col-lg-6">
+
+        <div class="card border-0 shadow-sm h-100">
+
+            <div class="card-header bg-white border-0 py-3">
+
+                <h5 class="mb-0">
+                    <i class="fa-solid fa-pills me-2 text-primary"></i>
+                    Medicine Information
+                </h5>
+
+            </div>
+
+
+            <div class="card-body">
+
+                <div class="mb-4">
+
+                    <div class="text-muted small mb-1">
+                        Medicine
+                    </div>
+
+                    <div class="fw-semibold fs-5">
+                        {{ batch.medicine.name }}
+                    </div>
+
+                </div>
+
+
+                <div class="row g-4">
+
+                    <div class="col-sm-6">
+
+                        <div class="text-muted small mb-1">
+                            Generic Name
+                        </div>
+
+                        <div>
+                            {{ batch.medicine.generic_name|default:"—" }}
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-sm-6">
+
+                        <div class="text-muted small mb-1">
+                            Category
+                        </div>
+
+                        <div>
+                            {{ batch.medicine.category.name }}
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-sm-6">
+
+                        <div class="text-muted small mb-1">
+                            Dosage Form
+                        </div>
+
+                        <div>
+                            {{ batch.medicine.get_dosage_form_display }}
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-sm-6">
+
+                        <div class="text-muted small mb-1">
+                            Strength
+                        </div>
+
+                        <div>
+                            {{ batch.medicine.strength|default:"—" }}
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-sm-6">
+
+                        <div class="text-muted small mb-1">
+                            Manufacturer
+                        </div>
+
+                        <div>
+                            {{ batch.medicine.manufacturer|default:"—" }}
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-sm-6">
+
+                        <div class="text-muted small mb-1">
+                            Unit
+                        </div>
+
+                        <div>
+                            {{ batch.medicine.get_unit_display }}
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Batch Information -->
+    <div class="col-lg-6">
+
+        <div class="card border-0 shadow-sm h-100">
+
+            <div class="card-header bg-white border-0 py-3">
+
+                <h5 class="mb-0">
+                    <i class="fa-solid fa-boxes-stacked me-2 text-primary"></i>
+                    Batch Information
+                </h5>
+
+            </div>
+
+
+            <div class="card-body">
+
+                <div class="row g-4">
+
+                    <div class="col-sm-6">
+
+                        <div class="text-muted small mb-1">
+                            Batch Number
+                        </div>
+
+                        <div class="fw-semibold">
+                            {{ batch.batch_number }}
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-sm-6">
+
+                        <div class="text-muted small mb-1">
+                            Branch
+                        </div>
+
+                        <div class="fw-semibold">
+                            {{ batch.branch.name }}
+                        </div>
+
+                        <div class="text-muted small">
+                            {{ batch.branch.code }}
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-sm-6">
+
+                        <div class="text-muted small mb-1">
+                            Expiry Date
+                        </div>
+
+                        <div class="fw-semibold">
+                            {{ batch.expiry_date|date:"d M Y" }}
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-sm-6">
+
+                        <div class="text-muted small mb-1">
+                            Quantity
+                        </div>
+
+                        <div class="fw-semibold fs-5">
+                            {{ batch.quantity }}
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-sm-6">
+
+                        <div class="text-muted small mb-1">
+                            Purchase Price
+                        </div>
+
+                        <div class="fw-semibold">
+                            Rs. {{ batch.purchase_price|floatformat:2 }}
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-sm-6">
+
+                        <div class="text-muted small mb-1">
+                            Selling Price
+                        </div>
+
+                        <div class="fw-semibold">
+                            Rs. {{ batch.selling_price|floatformat:2 }}
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Stock Summary -->
+    <div class="col-12">
+
+        <div class="card border-0 shadow-sm">
+
+            <div class="card-header bg-white border-0 py-3">
+
+                <h5 class="mb-0">
+                    <i class="fa-solid fa-chart-simple me-2 text-primary"></i>
+                    Stock Summary
+                </h5>
+
+            </div>
+
+
+            <div class="card-body">
+
+                <div class="row g-4">
+
+                    <div class="col-md-4">
+
+                        <div class="p-3 rounded bg-light">
+
+                            <div class="text-muted small mb-1">
+                                Current Quantity
+                            </div>
+
+                            <div class="fs-4 fw-bold">
+                                {{ batch.quantity }}
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-md-4">
+
+                        <div class="p-3 rounded bg-light">
+
+                            <div class="text-muted small mb-1">
+                                Minimum Stock Level
+                            </div>
+
+                            <div class="fs-4 fw-bold">
+                                {{ batch.medicine.minimum_stock_level }}
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-md-4">
+
+                        <div class="p-3 rounded bg-light">
+
+                            <div class="text-muted small mb-1">
+                                Reorder Level
+                            </div>
+
+                            <div class="fs-4 fw-bold">
+                                {{ batch.medicine.reorder_level }}
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

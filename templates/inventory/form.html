@@ -1,0 +1,961 @@
+TEMPLATE TEST: 123456
+{% extends "base/base.html" %}
+
+{% block title %}{{ page_title }} | PharmaCare{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+
+    <div>
+        <h1 class="page-title">{{ page_title }}</h1>
+        <p class="page-subtitle">
+            Add a new medicine with its first stock batch or add stock to an existing medicine.
+        </p>
+    </div>
+
+    <div>
+        <a
+            href="{% url 'inventory:list' %}"
+            class="btn btn-light border"
+        >
+            <i class="fa-solid fa-arrow-left me-2"></i>
+            Back to Inventory
+        </a>
+    </div>
+
+</div>
+
+
+<div class="card border-0 shadow-sm">
+
+    <div class="card-body p-4">
+
+        {% if form.non_field_errors %}
+            <div class="alert alert-danger">
+                {% for error in form.non_field_errors %}
+                    <div>{{ error }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+
+        <form method="post" novalidate>
+
+            {% csrf_token %}
+
+
+            <!-- =========================================================
+                 ENTRY TYPE
+            ========================================================== -->
+
+            <div class="mb-4">
+
+                <h5 class="fw-semibold mb-1">
+                    Inventory Entry
+                </h5>
+
+                <p class="text-muted small mb-3">
+                    Choose whether you are creating a new medicine or adding
+                    stock to an existing medicine.
+                </p>
+
+
+                <div class="row g-3">
+
+                    <div class="col-md-6">
+
+                        <label
+                            class="border rounded-3 p-3 d-flex align-items-start gap-3 h-100"
+                            style="cursor: pointer;"
+                        >
+
+                            <input
+                                type="radio"
+                                name="{{ form.entry_type.name }}"
+                                value="new"
+                                class="form-check-input mt-1"
+                                id="entryTypeNew"
+                                {% if form.entry_type.value == "new" or not form.entry_type.value %}
+                                    checked
+                                {% endif %}
+                            >
+
+                            <span>
+
+                                <span class="fw-semibold d-block">
+                                    <i class="fa-solid fa-plus me-2 text-primary"></i>
+                                    New Medicine
+                                </span>
+
+                                <span class="text-muted small">
+                                    Create a new medicine and add its first stock batch.
+                                </span>
+
+                            </span>
+
+                        </label>
+
+                    </div>
+
+
+                    <div class="col-md-6">
+
+                        <label
+                            class="border rounded-3 p-3 d-flex align-items-start gap-3 h-100"
+                            style="cursor: pointer;"
+                        >
+
+                            <input
+                                type="radio"
+                                name="{{ form.entry_type.name }}"
+                                value="existing"
+                                class="form-check-input mt-1"
+                                id="entryTypeExisting"
+                                {% if form.entry_type.value == "existing" %}
+                                    checked
+                                {% endif %}
+                            >
+
+                            <span>
+
+                                <span class="fw-semibold d-block">
+                                    <i class="fa-solid fa-boxes-stacked me-2 text-success"></i>
+                                    Existing Medicine
+                                </span>
+
+                                <span class="text-muted small">
+                                    Add a new batch or stock to an existing medicine.
+                                </span>
+
+                            </span>
+
+                        </label>
+
+                    </div>
+
+                </div>
+
+
+                {% if form.entry_type.errors %}
+                    <div class="text-danger small mt-2">
+                        {% for error in form.entry_type.errors %}
+                            <div>{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+            </div>
+
+
+            <hr class="my-4">
+
+
+            <!-- =========================================================
+                 EXISTING MEDICINE
+            ========================================================== -->
+
+            <div
+                id="existingMedicineSection"
+                class="mb-4"
+            >
+
+                <div class="mb-3">
+
+                    <h5 class="fw-semibold mb-1">
+                        Select Medicine
+                    </h5>
+
+                    <p class="text-muted small mb-3">
+                        Search for the medicine you want to add stock to.
+                    </p>
+
+                </div>
+
+
+                {{ form.medicine }}
+
+
+                <div class="position-relative">
+
+                    <label
+                        for="medicineSearchInput"
+                        class="form-label"
+                    >
+                        Search Medicine
+                        <span class="text-danger">*</span>
+                    </label>
+
+
+                    <div class="input-group">
+
+                        <span class="input-group-text bg-white">
+                            <i class="fa-solid fa-magnifying-glass text-muted"></i>
+                        </span>
+
+                        <input
+                            type="search"
+                            id="medicineSearchInput"
+                            class="form-control"
+                            placeholder="Search by medicine name, generic name, SKU or barcode..."
+                            autocomplete="off"
+                        >
+
+                        <button
+                            type="button"
+                            id="clearMedicineSearch"
+                            class="btn btn-light border"
+                            style="display: none;"
+                            aria-label="Clear medicine search"
+                        >
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+
+                    </div>
+
+
+                    <div
+                        id="medicineSearchResults"
+                        class="position-absolute bg-white border rounded-3 shadow-sm w-100 mt-1"
+                        style="display: none; z-index: 1050;"
+                    ></div>
+
+                </div>
+
+
+                <!-- Selected Medicine -->
+
+                <div
+                    id="selectedMedicine"
+                    class="border rounded-3 p-3 mt-3"
+                    style="display: none;"
+                >
+
+                    <div class="d-flex justify-content-between align-items-start gap-3">
+
+                        <div class="d-flex align-items-start gap-3">
+
+                            <div
+                                class="rounded-3 d-flex align-items-center justify-content-center"
+                                style="width: 42px; height: 42px; background: #ccfbf1;"
+                            >
+                                <i class="fa-solid fa-pills text-success"></i>
+                            </div>
+
+
+                            <div>
+
+                                <div
+                                    id="selectedMedicineName"
+                                    class="fw-semibold"
+                                ></div>
+
+                                <div
+                                    id="selectedMedicineMeta"
+                                    class="text-muted small mt-1"
+                                ></div>
+
+                                <div
+                                    id="selectedMedicineIdentifiers"
+                                    class="text-muted small mt-1"
+                                ></div>
+
+                            </div>
+
+                        </div>
+
+
+                        <button
+                            type="button"
+                            id="removeSelectedMedicine"
+                            class="btn btn-sm btn-light border"
+                        >
+                            <i class="fa-solid fa-xmark me-1"></i>
+                            Change
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                {% if form.medicine.errors %}
+                    <div class="text-danger small mt-2">
+                        {% for error in form.medicine.errors %}
+                            <div>{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+            </div>
+
+
+            <!-- =========================================================
+                 NEW MEDICINE INFORMATION
+            ========================================================== -->
+
+            <div id="newMedicineSection">
+
+                <div class="mb-4">
+
+                    <h5 class="fw-semibold mb-1">
+                        Medicine Information
+                    </h5>
+
+                    <p class="text-muted small mb-0">
+                        Enter the basic information for the new medicine.
+                    </p>
+
+                </div>
+
+
+                <div class="row g-4">
+
+
+                    <!-- Brand Name -->
+
+                    <div class="col-md-6">
+
+                        <label
+                            for="{{ form.name.id_for_label }}"
+                            class="form-label"
+                        >
+                            Brand Name
+                            <span class="text-danger">*</span>
+                        </label>
+
+                        {{ form.name }}
+
+                        {% if form.name.errors %}
+                            <div class="text-danger small mt-1">
+                                {% for error in form.name.errors %}
+                                    <div>{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                    </div>
+
+
+                    <!-- Generic Name -->
+
+                    <div class="col-md-6">
+
+                        <label
+                            for="{{ form.generic_name.id_for_label }}"
+                            class="form-label"
+                        >
+                            Generic Name
+                        </label>
+
+                        {{ form.generic_name }}
+
+                        {% if form.generic_name.errors %}
+                            <div class="text-danger small mt-1">
+                                {% for error in form.generic_name.errors %}
+                                    <div>{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                    </div>
+
+
+                    <!-- Category -->
+
+                    <div class="col-md-6">
+
+                        <label
+                            for="{{ form.category.id_for_label }}"
+                            class="form-label"
+                        >
+                            Category
+                            <span class="text-danger">*</span>
+                        </label>
+
+                        {{ form.category }}
+
+                        {% if form.category.errors %}
+                            <div class="text-danger small mt-1">
+                                {% for error in form.category.errors %}
+                                    <div>{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                    </div>
+
+
+                    <!-- Manufacturer -->
+
+                    <div class="col-md-6">
+
+                        <label
+                            for="{{ form.manufacturer.id_for_label }}"
+                            class="form-label"
+                        >
+                            Manufacturer
+                        </label>
+
+                        {{ form.manufacturer }}
+
+                        {% if form.manufacturer.errors %}
+                            <div class="text-danger small mt-1">
+                                {% for error in form.manufacturer.errors %}
+                                    <div>{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                    </div>
+
+
+                    <!-- Country -->
+
+                    <div class="col-md-6">
+
+                        <label
+                            for="{{ form.country_of_origin.id_for_label }}"
+                            class="form-label"
+                        >
+                            Country of Origin
+                        </label>
+
+                        {{ form.country_of_origin }}
+
+                        {% if form.country_of_origin.errors %}
+                            <div class="text-danger small mt-1">
+                                {% for error in form.country_of_origin.errors %}
+                                    <div>{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                    </div>
+
+
+                    <!-- Dosage Form -->
+
+                    <div class="col-md-6">
+
+                        <label
+                            for="{{ form.dosage_form.id_for_label }}"
+                            class="form-label"
+                        >
+                            Dosage Form
+                            <span class="text-danger">*</span>
+                        </label>
+
+                        {{ form.dosage_form }}
+
+                        {% if form.dosage_form.errors %}
+                            <div class="text-danger small mt-1">
+                                {% for error in form.dosage_form.errors %}
+                                    <div>{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                    </div>
+
+
+                    <!-- Strength -->
+
+                    <div class="col-md-6">
+
+                        <label
+                            for="{{ form.strength.id_for_label }}"
+                            class="form-label"
+                        >
+                            Strength
+                        </label>
+
+                        {{ form.strength }}
+
+                        {% if form.strength.errors %}
+                            <div class="text-danger small mt-1">
+                                {% for error in form.strength.errors %}
+                                    <div>{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                    </div>
+
+
+                    <!-- Unit -->
+
+                    <div class="col-md-6">
+
+                        <label
+                            for="{{ form.unit.id_for_label }}"
+                            class="form-label"
+                        >
+                            Unit
+                            <span class="text-danger">*</span>
+                        </label>
+
+                        {{ form.unit }}
+
+                        {% if form.unit.errors %}
+                            <div class="text-danger small mt-1">
+                                {% for error in form.unit.errors %}
+                                    <div>{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                    </div>
+
+
+                    <!-- Pack Size -->
+
+                    <div class="col-md-4">
+
+                        <label
+                            for="{{ form.pack_size.id_for_label }}"
+                            class="form-label"
+                        >
+                            Pack Size
+                        </label>
+
+                        {{ form.pack_size }}
+
+                        {% if form.pack_size.errors %}
+                            <div class="text-danger small mt-1">
+                                {% for error in form.pack_size.errors %}
+                                    <div>{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                    </div>
+
+
+                    <!-- Barcode -->
+
+                    <div class="col-md-4">
+
+                        <label
+                            for="{{ form.barcode.id_for_label }}"
+                            class="form-label"
+                        >
+                            Barcode
+                        </label>
+
+                        {{ form.barcode }}
+
+                        {% if form.barcode.errors %}
+                            <div class="text-danger small mt-1">
+                                {% for error in form.barcode.errors %}
+                                    <div>{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                    </div>
+
+
+                    <!-- SKU -->
+
+                    <div class="col-md-4">
+
+                        <label
+                            for="{{ form.sku.id_for_label }}"
+                            class="form-label"
+                        >
+                            SKU
+                        </label>
+
+                        {{ form.sku }}
+
+                        {% if form.sku.errors %}
+                            <div class="text-danger small mt-1">
+                                {% for error in form.sku.errors %}
+                                    <div>{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                    </div>
+
+
+                    <!-- Minimum Stock -->
+
+                    <div class="col-md-6">
+
+                        <label
+                            for="{{ form.minimum_stock_level.id_for_label }}"
+                            class="form-label"
+                        >
+                            Minimum Stock Level
+                        </label>
+
+                        {{ form.minimum_stock_level }}
+
+                        {% if form.minimum_stock_level.errors %}
+                            <div class="text-danger small mt-1">
+                                {% for error in form.minimum_stock_level.errors %}
+                                    <div>{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                    </div>
+
+
+                    <!-- Reorder Level -->
+
+                    <div class="col-md-6">
+
+                        <label
+                            for="{{ form.reorder_level.id_for_label }}"
+                            class="form-label"
+                        >
+                            Reorder Level
+                        </label>
+
+                        {{ form.reorder_level }}
+
+                        {% if form.reorder_level.errors %}
+                            <div class="text-danger small mt-1">
+                                {% for error in form.reorder_level.errors %}
+                                    <div>{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                    </div>
+
+
+                    <!-- Storage -->
+
+                    <div class="col-md-6">
+
+                        <label
+                            for="{{ form.storage_condition.id_for_label }}"
+                            class="form-label"
+                        >
+                            Storage Condition
+                        </label>
+
+                        {{ form.storage_condition }}
+
+                        {% if form.storage_condition.errors %}
+                            <div class="text-danger small mt-1">
+                                {% for error in form.storage_condition.errors %}
+                                    <div>{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                    </div>
+
+
+                    <!-- Description -->
+
+                    <div class="col-md-6">
+
+                        <label
+                            for="{{ form.description.id_for_label }}"
+                            class="form-label"
+                        >
+                            Description
+                        </label>
+
+                        {{ form.description }}
+
+                        {% if form.description.errors %}
+                            <div class="text-danger small mt-1">
+                                {% for error in form.description.errors %}
+                                    <div>{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                    </div>
+
+
+                    <!-- Prescription -->
+
+                    <div class="col-md-6">
+
+                        <div class="form-check">
+
+                            {{ form.prescription_required }}
+
+                            <label
+                                class="form-check-label"
+                                for="{{ form.prescription_required.id_for_label }}"
+                            >
+                                Prescription Required
+                            </label>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- Controlled -->
+
+                    <div class="col-md-6">
+
+                        <div class="form-check">
+
+                            {{ form.controlled_medicine }}
+
+                            <label
+                                class="form-check-label"
+                                for="{{ form.controlled_medicine.id_for_label }}"
+                            >
+                                Controlled Medicine
+                            </label>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <hr class="my-5">
+
+
+            <!-- =========================================================
+                 BATCH / STOCK INFORMATION
+            ========================================================== -->
+
+            <div class="mb-4">
+
+                <h5 class="fw-semibold mb-1">
+                    Batch & Stock Information
+                </h5>
+
+                <p class="text-muted small mb-0">
+                    Enter the stock, branch, expiry and pricing information for this batch.
+                </p>
+
+            </div>
+
+
+            <div class="row g-4">
+
+
+                <!-- Branch -->
+
+                <div class="col-md-6">
+
+                    <label
+                        for="{{ form.branch.id_for_label }}"
+                        class="form-label"
+                    >
+                        Branch
+                        <span class="text-danger">*</span>
+                    </label>
+
+                    {{ form.branch }}
+
+                    {% if form.branch.errors %}
+                        <div class="text-danger small mt-1">
+                            {% for error in form.branch.errors %}
+                                <div>{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
+                </div>
+
+
+                <!-- Batch Number -->
+
+                <div class="col-md-6">
+
+                    <label
+                        for="{{ form.batch_number.id_for_label }}"
+                        class="form-label"
+                    >
+                        Batch Number
+                        <span class="text-danger">*</span>
+                    </label>
+
+                    {{ form.batch_number }}
+
+                    {% if form.batch_number.errors %}
+                        <div class="text-danger small mt-1">
+                            {% for error in form.batch_number.errors %}
+                                <div>{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
+                </div>
+
+
+                <!-- Expiry -->
+
+                <div class="col-md-6">
+
+                    <label
+                        for="{{ form.expiry_date.id_for_label }}"
+                        class="form-label"
+                    >
+                        Expiry Date
+                        <span class="text-danger">*</span>
+                    </label>
+
+                    {{ form.expiry_date }}
+
+                    {% if form.expiry_date.errors %}
+                        <div class="text-danger small mt-1">
+                            {% for error in form.expiry_date.errors %}
+                                <div>{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
+                </div>
+
+
+                <!-- Quantity -->
+
+                <div class="col-md-6">
+
+                    <label
+                        for="{{ form.quantity.id_for_label }}"
+                        class="form-label"
+                    >
+                        Quantity
+                        <span class="text-danger">*</span>
+                    </label>
+
+                    {{ form.quantity }}
+
+                    {% if form.quantity.errors %}
+                        <div class="text-danger small mt-1">
+                            {% for error in form.quantity.errors %}
+                                <div>{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
+                </div>
+
+
+                <!-- Purchase Price -->
+
+                <div class="col-md-6">
+
+                    <label
+                        for="{{ form.purchase_price.id_for_label }}"
+                        class="form-label"
+                    >
+                        Purchase Price
+                        <span class="text-danger">*</span>
+                    </label>
+
+                    {{ form.purchase_price }}
+
+                    {% if form.purchase_price.errors %}
+                        <div class="text-danger small mt-1">
+                            {% for error in form.purchase_price.errors %}
+                                <div>{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
+                </div>
+
+
+                <!-- Selling Price -->
+
+                <div class="col-md-6">
+
+                    <label
+                        for="{{ form.selling_price.id_for_label }}"
+                        class="form-label"
+                    >
+                        Selling Price
+                        <span class="text-danger">*</span>
+                    </label>
+
+                    {{ form.selling_price }}
+
+                    {% if form.selling_price.errors %}
+                        <div class="text-danger small mt-1">
+                            {% for error in form.selling_price.errors %}
+                                <div>{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
+                </div>
+
+
+                <!-- Active -->
+
+                <div class="col-12">
+
+                    <div class="form-check">
+
+                        {{ form.is_active }}
+
+                        <label
+                            class="form-check-label"
+                            for="{{ form.is_active.id_for_label }}"
+                        >
+                            Active Batch
+                        </label>
+
+                    </div>
+
+                    {% if form.is_active.errors %}
+                        <div class="text-danger small mt-1">
+                            {% for error in form.is_active.errors %}
+                                <div>{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+
+            <hr class="my-4">
+
+
+            <!-- =========================================================
+                 ACTIONS
+            ========================================================== -->
+
+            <div class="d-flex justify-content-end gap-2">
+
+                <a
+                    href="{% url 'inventory:list' %}"
+                    class="btn btn-light border"
+                >
+                    Cancel
+                </a>
+
+                <button
+                    type="submit"
+                    class="btn btn-primary"
+                >
+                    <i class="fa-solid fa-boxes-stacked me-2"></i>
+                    {{ submit_text }}
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+
+
+{% endblock %}

@@ -1,54 +1,74 @@
 <header class="topbar">
 
-    <div class="topbar-left">
 
-        <button
-            type="button"
-            class="mobile-menu-btn"
-            id="sidebarToggle"
-            aria-label="Toggle sidebar"
+<div class="topbar-left">
+
+    <button
+        type="button"
+        class="mobile-menu-btn"
+        id="sidebarToggle"
+        aria-label="Toggle sidebar"
+    >
+        <i class="fa-solid fa-bars"></i>
+    </button>
+
+    <div class="global-search">
+        <i class="fa-solid fa-magnifying-glass"></i>
+
+        <input
+            type="search"
+            placeholder="Search anything..."
+            aria-label="Global search"
         >
-            <i class="fa-solid fa-bars"></i>
-        </button>
+    </div>
 
-        <div class="global-search">
-            <i class="fa-solid fa-magnifying-glass"></i>
+</div>
 
-            <input
-                type="search"
-                placeholder="Search anything..."
-                aria-label="Global search"
-            >
+
+<div class="topbar-right">
+
+    <!-- Notifications -->
+    <button
+        type="button"
+        class="topbar-icon-btn"
+        title="Notifications"
+        aria-label="Notifications"
+    >
+        <i class="fa-regular fa-bell"></i>
+        <span class="notification-dot"></span>
+    </button>
+
+
+    <!-- User Profile -->
+    <div class="profile">
+
+        <div class="profile-avatar">
+            {% if request.user.first_name and request.user.last_name %}
+                {{ request.user.first_name|first|upper }}{{ request.user.last_name|first|upper }}
+            {% elif request.user.first_name %}
+                {{ request.user.first_name|first|upper }}
+            {% else %}
+                {{ request.user.username|first|upper }}
+            {% endif %}
         </div>
+
+        <div class="profile-info">
+
+            <div class="fw-semibold">
+                {{ request.user.get_full_name|default:request.user.username }}
+            </div>
+
+            <div class="small text-muted">
+                {{ request.user.role.name|default:"User" }}
+            </div>
+
+        </div>
+
+        <i class="fa-solid fa-chevron-down profile-arrow"></i>
 
     </div>
 
-    <div class="topbar-right">
+</div>
 
-        <button
-            type="button"
-            class="topbar-icon-btn"
-            title="Notifications"
-        >
-            <i class="fa-regular fa-bell"></i>
-            <span class="notification-dot"></span>
-        </button>
-
-        <div class="profile">
-
-            <div class="profile-avatar">
-                AH
-            </div>
-
-            <div class="profile-info">
-                <div class="profile-name">Abdul Hayee</div>
-                <div class="profile-role">Administrator</div>
-            </div>
-
-            <i class="fa-solid fa-chevron-down profile-arrow"></i>
-
-        </div>
-
-    </div>
 
 </header>

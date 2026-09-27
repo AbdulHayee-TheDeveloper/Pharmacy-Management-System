@@ -5,30 +5,14 @@
 {% block content %}
 <div class="container-fluid py-4">
 
-    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
-        <div>
-            <h1 class="h3 fw-bold mb-1">Medicine Management</h1>
-            <p class="text-muted mb-0">
-                Manage medicines, categories and medicine information.
-            </p>
-        </div>
-
-        <a href="{% url 'medicines:create' %}" class="btn btn-primary">
-            <i class="fa-solid fa-plus me-2"></i>
-            Add Medicine
-        </a>
+    <!-- Page Header -->
+    <div class="mb-4">
+        <h1 class="h3 fw-bold mb-1">Medicines</h1>
+        <p class="text-muted mb-0">
+            View medicine information and available stock.
+        </p>
     </div>
 
-    {% if messages %}
-        {% for message in messages %}
-            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                {{ message }}
-                <button type="button"
-                        class="btn-close"
-                        data-bs-dismiss="alert"></button>
-            </div>
-        {% endfor %}
-    {% endif %}
 
     <!-- Summary Cards -->
     <div class="row g-3 mb-4">
@@ -36,161 +20,231 @@
         <div class="col-md-6 col-xl-4">
             <div class="dashboard-card h-100">
                 <div class="d-flex justify-content-between align-items-center">
+
                     <div>
-                        <p class="text-muted mb-1">Total Medicines</p>
-                        <h3 class="fw-bold mb-0">{{ total_medicines }}</h3>
+                        <p class="text-muted mb-1">
+                            Total Medicines
+                        </p>
+
+                        <h3 class="fw-bold mb-0">
+                            {{ total_medicines }}
+                        </h3>
                     </div>
+
                     <div class="stat-icon">
                         <i class="fa-solid fa-pills"></i>
                     </div>
+
                 </div>
             </div>
         </div>
+
 
         <div class="col-md-6 col-xl-4">
             <div class="dashboard-card h-100">
                 <div class="d-flex justify-content-between align-items-center">
+
                     <div>
-                        <p class="text-muted mb-1">Active Medicines</p>
-                        <h3 class="fw-bold mb-0">{{ active_medicines }}</h3>
+                        <p class="text-muted mb-1">
+                            Active Medicines
+                        </p>
+
+                        <h3 class="fw-bold mb-0">
+                            {{ active_medicines }}
+                        </h3>
                     </div>
+
                     <div class="stat-icon">
                         <i class="fa-solid fa-circle-check"></i>
                     </div>
+
                 </div>
             </div>
         </div>
+
 
         <div class="col-md-12 col-xl-4">
             <div class="dashboard-card h-100">
                 <div class="d-flex justify-content-between align-items-center">
+
                     <div>
-                        <p class="text-muted mb-1">Inactive Medicines</p>
+                        <p class="text-muted mb-1">
+                            Inactive Medicines
+                        </p>
+
                         <h3 class="fw-bold mb-0">
                             {{ inactive_medicines }}
                         </h3>
                     </div>
+
                     <div class="stat-icon">
                         <i class="fa-solid fa-circle-pause"></i>
                     </div>
+
                 </div>
             </div>
         </div>
 
     </div>
 
+
     <!-- Filters -->
     <div class="dashboard-card mb-4">
-        <div class="dashboard-card mb-4">
-    <form
-        method="get"
-        id="medicineFilterForm"
-        class="row g-3 align-items-end"
-    >
 
-        <!-- Search -->
-        <div class="col-lg-5">
-            <label class="form-label fw-semibold">Search</label>
+        <form
+            method="get"
+            id="medicineFilterForm"
+            class="row g-3 align-items-end"
+        >
 
-            <div class="input-group">
-                <span class="input-group-text bg-white">
-                    <i class="fa-solid fa-magnifying-glass"></i>
-                </span>
+            <!-- Search -->
+            <div class="col-lg-5">
 
-                <input
-                    type="search"
-                    name="q"
-                    id="medicineSearch"
-                    value="{{ query }}"
-                    class="form-control"
-                    placeholder="Search medicine, generic name, barcode..."
-                    autocomplete="off"
-                >
+                <label class="form-label fw-semibold">
+                    Search
+                </label>
+
+                <div class="input-group">
+
+                    <span class="input-group-text bg-white">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </span>
+
+                    <input
+                        type="search"
+                        name="q"
+                        id="medicineSearch"
+                        value="{{ query }}"
+                        class="form-control"
+                        placeholder="Search medicine, generic name, barcode..."
+                        autocomplete="off"
+                    >
+
+                </div>
+
             </div>
-        </div>
 
-        <!-- Category -->
-        <div class="col-lg-3">
-            <label class="form-label fw-semibold">Category</label>
 
-            <select
-                name="category"
-                id="medicineCategory"
-                class="form-select"
-            >
-                <option value="">All Categories</option>
+            <!-- Category -->
+            <div class="col-lg-3">
 
-                {% for category in categories %}
+                <label class="form-label fw-semibold">
+                    Category
+                </label>
+
+                <select
+                    name="category"
+                    id="medicineCategory"
+                    class="form-select"
+                >
+
+                    <option value="">
+                        All Categories
+                    </option>
+
+                    {% for category in categories %}
+
+                        <option
+                            value="{{ category.id }}"
+                            {% if selected_category == category.id|stringformat:"s" %}
+                                selected
+                            {% endif %}
+                        >
+                            {{ category.name }}
+                        </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+
+            <!-- Status -->
+            <div class="col-lg-2">
+
+                <label class="form-label fw-semibold">
+                    Status
+                </label>
+
+                <select
+                    name="status"
+                    id="medicineStatus"
+                    class="form-select"
+                >
+
+                    <option value="">
+                        All
+                    </option>
+
                     <option
-                        value="{{ category.id }}"
-                        {% if selected_category == category.id|stringformat:"s" %}
+                        value="active"
+                        {% if selected_status == "active" %}
                             selected
                         {% endif %}
                     >
-                        {{ category.name }}
+                        Active
                     </option>
-                {% endfor %}
-            </select>
-        </div>
 
-        <!-- Status -->
-        <div class="col-lg-2">
-            <label class="form-label fw-semibold">Status</label>
+                    <option
+                        value="inactive"
+                        {% if selected_status == "inactive" %}
+                            selected
+                        {% endif %}
+                    >
+                        Inactive
+                    </option>
 
-            <select
-                name="status"
-                id="medicineStatus"
-                class="form-select"
-            >
-                <option value="">All</option>
+                </select>
 
-                <option
-                    value="active"
-                    {% if selected_status == "active" %}selected{% endif %}
+            </div>
+
+
+            <!-- Clear Filters -->
+            <div class="col-lg-2">
+
+                <a
+                    href="{% url 'medicines:list' %}"
+                    class="btn btn-light border w-100"
                 >
-                    Active
-                </option>
+                    <i class="fa-solid fa-rotate-left me-1"></i>
+                    Clear Filters
+                </a>
 
-                <option
-                    value="inactive"
-                    {% if selected_status == "inactive" %}selected{% endif %}
-                >
-                    Inactive
-                </option>
-            </select>
-        </div>
+            </div>
 
-        <!-- Clear -->
-        <div class="col-lg-2">
-            <a
-                href="{% url 'medicines:list' %}"
-                class="btn btn-light border w-100"
-            >
-                <i class="fa-solid fa-rotate-left me-1"></i>
-                Clear Filters
-            </a>
-        </div>
+        </form>
 
-    </form>
-</div>
     </div>
+
 
     <!-- Medicine Table -->
     <div class="dashboard-card">
 
         <div class="d-flex justify-content-between align-items-center mb-3">
+
             <div>
-                <h5 class="fw-bold mb-1">Medicines</h5>
+
+                <h5 class="fw-bold mb-1">
+                    Medicines
+                </h5>
+
                 <p class="text-muted small mb-0">
-                    {{ medicines|length }} result{{ medicines|length|pluralize }}
+                    {{ medicines|length }}
+                    result{{ medicines|length|pluralize }}
                 </p>
+
             </div>
+
         </div>
 
+
         <div class="table-responsive">
+
             <table class="table align-middle mb-0">
 
                 <thead>
+
                     <tr>
                         <th>Medicine</th>
                         <th>Category</th>
@@ -199,130 +253,135 @@
                         <th>Strength</th>
                         <th>Barcode</th>
                         <th>Status</th>
-                        <th class="text-end">Actions</th>
+                        <th class="text-end">Details</th>
                     </tr>
+
                 </thead>
+
 
                 <tbody>
 
                     {% for medicine in medicines %}
+
                         <tr>
 
+                            <!-- Medicine -->
                             <td>
+
                                 <div class="fw-semibold">
+
                                     <a
-    href="{% url 'medicines:detail' medicine.pk %}"
-    class="fw-semibold text-decoration-none"
->
-    <a
-    href="{% url 'medicines:detail' medicine.pk %}"
-    class="fw-semibold text-decoration-none"
->
-    <a
-    href="{% url 'medicines:detail' medicine.pk %}"
-    class="fw-semibold text-decoration-none"
->
-    {{ medicine.name }}
-</a>
-</a>
-</a>
+                                        href="{% url 'medicines:detail' medicine.pk %}"
+                                        class="fw-semibold text-decoration-none"
+                                    >
+                                        {{ medicine.name }}
+                                    </a>
+
                                 </div>
 
                                 {% if medicine.generic_name %}
+
                                     <small class="text-muted">
                                         {{ medicine.generic_name }}
                                     </small>
+
                                 {% endif %}
+
                             </td>
 
+
+                            <!-- Category -->
                             <td>
                                 {{ medicine.category.name }}
                             </td>
 
+
+                            <!-- Manufacturer -->
                             <td>
                                 {{ medicine.manufacturer|default:"—" }}
                             </td>
 
+
+                            <!-- Form -->
                             <td>
                                 {{ medicine.get_dosage_form_display }}
                             </td>
 
+
+                            <!-- Strength -->
                             <td>
                                 {{ medicine.strength|default:"—" }}
                             </td>
 
+
+                            <!-- Barcode -->
                             <td>
                                 {{ medicine.barcode|default:"—" }}
                             </td>
 
+
+                            <!-- Status -->
                             <td>
+
                                 {% if medicine.is_active %}
+
                                     <span class="badge bg-success-subtle text-success">
                                         Active
                                     </span>
+
                                 {% else %}
+
                                     <span class="badge bg-secondary-subtle text-secondary">
                                         Inactive
                                     </span>
+
                                 {% endif %}
+
                             </td>
 
+
+                            <!-- Details -->
                             <td class="text-end">
-                                <div class="d-flex justify-content-end gap-1">
 
-                                    <a
-                                        href="{% url 'medicines:update' medicine.pk %}"
-                                        class="btn btn-sm btn-light border"
-                                        title="Edit"
-                                    >
-                                        <i class="fa-solid fa-pen"></i>
-                                    </a>
+                                <a
+                                    href="{% url 'medicines:detail' medicine.pk %}"
+                                    class="btn btn-sm btn-light border"
+                                    title="View Medicine Details"
+                                >
+                                    <i class="fa-solid fa-eye me-1"></i>
+                                    View
+                                </a>
 
-                                    <form
-                                        method="post"
-                                        action="{% url 'medicines:toggle_status' medicine.pk %}"
-                                        class="d-inline"
-                                    >
-                                        {% csrf_token %}
-
-                                        <button
-                                            type="submit"
-                                            class="btn btn-sm btn-light border"
-                                            title="{% if medicine.is_active %}Deactivate{% else %}Activate{% endif %}"
-                                        >
-                                            {% if medicine.is_active %}
-                                                <i class="fa-solid fa-ban text-danger"></i>
-                                            {% else %}
-                                                <i class="fa-solid fa-check text-success"></i>
-                                            {% endif %}
-                                        </button>
-                                    </form>
-
-                                </div>
                             </td>
 
                         </tr>
 
+
                     {% empty %}
 
                         <tr>
-                            <td colspan="8" class="text-center py-5">
+
+                            <td
+                                colspan="8"
+                                class="text-center py-5"
+                            >
+
                                 <div class="text-muted">
+
                                     <i class="fa-solid fa-pills fa-2x mb-3"></i>
-                                    <h6 class="fw-semibold">No medicines found</h6>
-                                    <p class="small mb-3">
-                                        Try changing your filters or add a new medicine.
+
+                                    <h6 class="fw-semibold">
+                                        No medicines found
+                                    </h6>
+
+                                    <p class="small mb-0">
+                                        Try changing your search or filters.
                                     </p>
 
-                                    <a
-                                        href="{% url 'medicines:create' %}"
-                                        class="btn btn-primary btn-sm"
-                                    >
-                                        <i class="fa-solid fa-plus me-1"></i>
-                                        Add Medicine
-                                    </a>
                                 </div>
+
                             </td>
+
                         </tr>
 
                     {% endfor %}
@@ -330,6 +389,7 @@
                 </tbody>
 
             </table>
+
         </div>
 
     </div>

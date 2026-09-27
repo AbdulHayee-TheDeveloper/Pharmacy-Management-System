@@ -1,81 +1,137 @@
 <aside class="sidebar" id="sidebar">
 
+
+    <!-- Brand -->
     <div class="sidebar-brand">
+
         <div class="brand-icon">
             <i class="fa-solid fa-prescription-bottle-medical"></i>
         </div>
 
         <div>
-            <div class="brand-name">PharmaCare</div>
-            <div class="brand-subtitle">PHARMACY MANAGEMENT</div>
+            <div class="brand-name">
+                PharmaCare
+            </div>
+
+            <div class="brand-subtitle">
+                PHARMACY MANAGEMENT
+            </div>
         </div>
+
     </div>
 
+
+    <!-- Navigation -->
     <nav class="sidebar-nav">
 
-        <div class="nav-section-title">MAIN MENU</div>
 
-        <a href="#" class="nav-link active">
+        <!-- Main Menu -->
+        <div class="nav-section-title">
+            MAIN MENU
+        </div>
+
+
+        <!-- Dashboard -->
+        <a
+            href="{% url 'dashboard:index' %}"
+            class="nav-link {% if request.resolver_match.app_name == 'dashboard' %}active{% endif %}"
+        >
             <i class="fa-solid fa-chart-line"></i>
             <span>Dashboard</span>
         </a>
 
-        <a href="#" class="nav-link">
-            <i class="fa-solid fa-cash-register"></i>
-            <span>Sales / POS</span>
-        </a>
 
-        <a href="#" class="nav-link">
-            <i class="fa-solid fa-pills"></i>
-            <span>Medicines</span>
-        </a>
+        <!-- Medicines -->
+        {% if perms.medicines.view_medicine %}
+            <a
+                href="{% url 'medicines:list' %}"
+                class="nav-link {% if request.resolver_match.app_name == 'medicines' %}active{% endif %}"
+            >
+                <i class="fa-solid fa-pills"></i>
+                <span>Medicines</span>
+            </a>
+        {% endif %}
 
-        <a href="#" class="nav-link">
-            <i class="fa-solid fa-boxes-stacked"></i>
-            <span>Inventory</span>
-        </a>
 
-        <a href="#" class="nav-link">
-            <i class="fa-solid fa-cart-shopping"></i>
-            <span>Purchases</span>
-        </a>
+        <!-- Inventory -->
+        {% if perms.inventory.view_inventorybatch %}
+            <a
+                href="{% url 'inventory:list' %}"
+                class="nav-link {% if request.resolver_match.app_name == 'inventory' %}active{% endif %}"
+            >
+                <i class="fa-solid fa-boxes-stacked"></i>
+                <span>Inventory</span>
+            </a>
+        {% endif %}
 
-        <a href="#" class="nav-link">
-            <i class="fa-solid fa-truck-field"></i>
-            <span>Suppliers</span>
-        </a>
 
-        <a href="#" class="nav-link">
-            <i class="fa-solid fa-users"></i>
-            <span>Customers</span>
-        </a>
+        <!-- Sales / POS -->
+        {% if perms.sales.view_sale %}
+            <!-- Sales module will be connected here -->
+        {% endif %}
 
-        <div class="nav-section-title mt-4">ANALYTICS</div>
 
-        <a href="#" class="nav-link">
-            <i class="fa-solid fa-chart-pie"></i>
-            <span>Reports</span>
-        </a>
+        <!-- Purchases -->
+        {% if perms.purchases.view_purchase %}
+            <!-- Purchases module will be connected here -->
+        {% endif %}
 
-        <div class="nav-section-title mt-4">ADMINISTRATION</div>
 
-        <a href="#" class="nav-link">
-            <i class="fa-solid fa-user-shield"></i>
-            <span>Users, Roles &amp; Branches</span>
-        </a>
+        <!-- Suppliers -->
+        {% if perms.suppliers.view_supplier %}
+            <!-- Suppliers module will be connected here -->
+        {% endif %}
 
-        <a href="#" class="nav-link">
-            <i class="fa-solid fa-gear"></i>
-            <span>Settings</span>
-        </a>
+
+        <!-- Customers -->
+        {% if perms.customers.view_customer %}
+            <!-- Customers module will be connected here -->
+        {% endif %}
+
+
+
+        <!-- Analytics -->
+        <div class="nav-section-title mt-4">
+            ANALYTICS
+        </div>
+
+
+        <!-- Reports -->
+        {% if perms.reports.view_report %}
+            <!-- Reports module will be connected here -->
+        {% endif %}
+
+
+
+        <!-- Administration -->
+        <div class="nav-section-title mt-4">
+            ADMINISTRATION
+        </div>
+
+
+        <!-- Users, Roles & Branches -->
+        {% if perms.accounts.view_user or perms.branches.view_branch %}
+            <!-- Users, Roles & Branches module will be connected here -->
+        {% endif %}
+
+
+        <!-- Settings -->
+        {% if perms.accounts.view_user %}
+            <!-- Settings module will be connected here -->
+        {% endif %}
 
     </nav>
 
+
+    <!-- Logout -->
     <div class="sidebar-footer">
-        <a href="#" class="logout-link">
+
+        <a href="{% url 'accounts:logout' %}">
             <i class="fa-solid fa-right-from-bracket"></i>
             <span>Logout</span>
         </a>
+
     </div>
+
 
 </aside>
