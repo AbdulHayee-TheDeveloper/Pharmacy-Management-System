@@ -1,7 +1,9 @@
 <aside class="sidebar" id="sidebar">
 
+    <!-- ====================================================== -->
+    <!-- BRAND -->
+    <!-- ====================================================== -->
 
-    <!-- Brand -->
     <div class="sidebar-brand">
 
         <div class="brand-icon">
@@ -21,101 +23,176 @@
     </div>
 
 
-    <!-- Navigation -->
+    <!-- ====================================================== -->
+    <!-- NAVIGATION -->
+    <!-- ====================================================== -->
+
     <nav class="sidebar-nav">
 
+        <!-- ================================================== -->
+        <!-- MAIN MENU -->
+        <!-- ================================================== -->
 
-        <!-- Main Menu -->
         <div class="nav-section-title">
             MAIN MENU
         </div>
 
 
         <!-- Dashboard -->
+
         <a
             href="{% url 'dashboard:index' %}"
-            class="nav-link {% if request.resolver_match.app_name == 'dashboard' %}active{% endif %}"
+            class="
+                nav-link
+                {% if request.resolver_match.app_name == 'dashboard' %}
+                    active
+                {% endif %}
+            "
         >
             <i class="fa-solid fa-chart-line"></i>
             <span>Dashboard</span>
         </a>
 
 
+        <!-- Sales / POS -->
+
+        {% if perms.sales.add_sale %}
+
+            <a
+                href="{% url 'sales:pos' %}"
+                class="
+                    nav-link
+                    {% if request.resolver_match.app_name == 'sales' %}
+                        {% if request.resolver_match.url_name == 'pos' %}
+                            active
+                        {% endif %}
+                    {% endif %}
+                "
+            >
+                <i class="fa-solid fa-cash-register"></i>
+                <span>Sales / POS</span>
+            </a>
+
+        {% endif %}
+
+
+        <!-- Sale History -->
+
+        {% if perms.sales.view_sale %}
+
+            <a
+                href="{% url 'sales:history' %}"
+                class="
+                    nav-link
+                    {% if request.resolver_match.app_name == 'sales' %}
+                        {% if request.resolver_match.url_name == 'history' or request.resolver_match.url_name == 'detail' %}
+                            active
+                        {% endif %}
+                    {% endif %}
+                "
+            >
+                <i class="fa-solid fa-clock-rotate-left"></i>
+                <span>Sale History</span>
+            </a>
+
+        {% endif %}
+
+
         <!-- Medicines -->
+
         {% if perms.medicines.view_medicine %}
+
             <a
                 href="{% url 'medicines:list' %}"
-                class="nav-link {% if request.resolver_match.app_name == 'medicines' %}active{% endif %}"
+                class="
+                    nav-link
+                    {% if request.resolver_match.app_name == 'medicines' %}
+                        active
+                    {% endif %}
+                "
             >
                 <i class="fa-solid fa-pills"></i>
                 <span>Medicines</span>
             </a>
+
         {% endif %}
 
 
         <!-- Inventory -->
+
         {% if perms.inventory.view_inventorybatch %}
+
             <a
                 href="{% url 'inventory:list' %}"
-                class="nav-link {% if request.resolver_match.app_name == 'inventory' %}active{% endif %}"
+                class="
+                    nav-link
+                    {% if request.resolver_match.app_name == 'inventory' %}
+                        active
+                    {% endif %}
+                "
             >
                 <i class="fa-solid fa-boxes-stacked"></i>
                 <span>Inventory</span>
             </a>
-        {% endif %}
 
-
-        <!-- Sales / POS -->
-        {% if perms.sales.view_sale %}
-            <!-- Sales module will be connected here -->
         {% endif %}
 
 
         <!-- Purchases -->
+
         {% if perms.purchases.view_purchase %}
             <!-- Purchases module will be connected here -->
         {% endif %}
 
 
         <!-- Suppliers -->
+
         {% if perms.suppliers.view_supplier %}
             <!-- Suppliers module will be connected here -->
         {% endif %}
 
 
         <!-- Customers -->
+
         {% if perms.customers.view_customer %}
             <!-- Customers module will be connected here -->
         {% endif %}
 
 
+        <!-- ================================================== -->
+        <!-- ANALYTICS -->
+        <!-- ================================================== -->
 
-        <!-- Analytics -->
         <div class="nav-section-title mt-4">
             ANALYTICS
         </div>
 
 
         <!-- Reports -->
+
         {% if perms.reports.view_report %}
             <!-- Reports module will be connected here -->
         {% endif %}
 
 
+        <!-- ================================================== -->
+        <!-- ADMINISTRATION -->
+        <!-- ================================================== -->
 
-        <!-- Administration -->
         <div class="nav-section-title mt-4">
             ADMINISTRATION
         </div>
 
 
         <!-- Users, Roles & Branches -->
+
         {% if perms.accounts.view_user or perms.branches.view_branch %}
             <!-- Users, Roles & Branches module will be connected here -->
         {% endif %}
 
 
         <!-- Settings -->
+
         {% if perms.accounts.view_user %}
             <!-- Settings module will be connected here -->
         {% endif %}
@@ -123,7 +200,10 @@
     </nav>
 
 
-    <!-- Logout -->
+    <!-- ====================================================== -->
+    <!-- LOGOUT -->
+    <!-- ====================================================== -->
+
     <div class="sidebar-footer">
 
         <a href="{% url 'accounts:logout' %}">
@@ -132,6 +212,5 @@
         </a>
 
     </div>
-
 
 </aside>

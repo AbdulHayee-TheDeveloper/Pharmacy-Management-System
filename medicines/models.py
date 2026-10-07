@@ -1,14 +1,29 @@
+from django.core.exceptions import ValidationError
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
-from django.core.validators import MinValueValidator, MaxValueValidator
 
 
 class Category(models.Model):
-    name = models.CharField(max_length=100, unique=True)
-    description = models.TextField(blank=True)
-    is_active = models.BooleanField(default=True)
+    name = models.CharField(
+        max_length=100,
+        unique=True,
+    )
 
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    description = models.TextField(
+        blank=True,
+    )
+
+    is_active = models.BooleanField(
+        default=True,
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+    )
+
+    updated_at = models.DateTimeField(
+        auto_now=True,
+    )
 
     class Meta:
         ordering = ["name"]
@@ -84,15 +99,32 @@ class Medicine(models.Model):
         help_text="Example: 500mg or 10mg/5ml",
     )
 
+    # Smallest sellable stock unit.
+    # Example:
+    # Tablet medicine -> Tablet
+    # Capsule medicine -> Capsule
+    # Syrup -> Bottle
     unit = models.CharField(
         max_length=20,
         choices=Unit.choices,
         default=Unit.TABLET,
+        help_text="Smallest sellable unit of this medicine.",
     )
 
+    # Number of smallest units inside one full pack.
+    # Example: 1 strip/pack = 10 tablets -> pack_size = 10
     pack_size = models.PositiveIntegerField(
         default=1,
         validators=[MinValueValidator(1)],
+        help_text="Number of smallest units in one full pack.",
+    )
+
+    allow_loose_sale = models.BooleanField(
+        default=False,
+        help_text=(
+            "Allow this medicine to be sold in individual units "
+            "instead of full packs only."
+        ),
     )
 
     barcode = models.CharField(
@@ -179,6 +211,7 @@ class Medicine(models.Model):
 
     class Meta:
         ordering = ["name"]
+
         indexes = [
             models.Index(fields=["name"]),
             models.Index(fields=["generic_name"]),
@@ -186,6 +219,43 @@ class Medicine(models.Model):
             models.Index(fields=["sku"]),
             models.Index(fields=["category", "is_active"]),
         ]
+
+    def clean(self):
+        super().clean()
+
+        if self.allow_loose_sale and self.pack_size <= 1:
+            raise ValidationError(
+                {
+                    "pack_size": (
+                        "Pack size must be greater than 1 "
+                        "when loose sale is enabled."
+                    ),
+                }
+            )
+
+        if self.reorder_level < self.minimum_stock_level:
+            raise ValidationError(
+                {
+                    "reorder_level": (
+                        "Reorder level cannot be lower than "
+                        "the minimum stock level."
+                    ),
+                }
+            )
+
+    @property
+    def unit_label(self):
+        return self.get_unit_display()
+
+    @property
+    def pack_label(self):
+        if self.pack_size <= 1:
+            return self.unit_label
+
+        return (
+            f"Pack of {self.pack_size} "
+            f"{self.unit_label.lower()}(s)"
+        )
 
     def __str__(self):
         return f"{self.name} {self.strength}".strip()

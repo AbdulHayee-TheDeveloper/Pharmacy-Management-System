@@ -1,20 +1,33 @@
-TEMPLATE TEST: 123456
 {% extends "base/base.html" %}
 
-{% block title %}{{ page_title }} | PharmaCare{% endblock %}
+{% block title %}
+{{ page_title }} | PharmaCare
+{% endblock %}
 
 {% block content %}
+
+<!-- ========================================================= -->
+<!-- PAGE HEADER -->
+<!-- ========================================================= -->
 
 <div class="page-header">
 
     <div>
-        <h1 class="page-title">{{ page_title }}</h1>
+
+        <h1 class="page-title">
+            {{ page_title }}
+        </h1>
+
         <p class="page-subtitle">
-            Add a new medicine with its first stock batch or add stock to an existing medicine.
+            Search for an existing medicine first. If it is not available,
+            create a new medicine and add its first stock batch.
         </p>
+
     </div>
 
+
     <div>
+
         <a
             href="{% url 'inventory:list' %}"
             class="btn btn-light border"
@@ -22,21 +35,39 @@ TEMPLATE TEST: 123456
             <i class="fa-solid fa-arrow-left me-2"></i>
             Back to Inventory
         </a>
+
     </div>
 
 </div>
 
 
+<!-- ========================================================= -->
+<!-- INVENTORY FORM CARD -->
+<!-- ========================================================= -->
+
 <div class="card border-0 shadow-sm">
 
     <div class="card-body p-4">
 
+
+        <!-- ================================================= -->
+        <!-- NON-FIELD ERRORS -->
+        <!-- ================================================= -->
+
         {% if form.non_field_errors %}
+
             <div class="alert alert-danger">
+
                 {% for error in form.non_field_errors %}
-                    <div>{{ error }}</div>
+
+                    <div>
+                        {{ error }}
+                    </div>
+
                 {% endfor %}
+
             </div>
+
         {% endif %}
 
 
@@ -45,153 +76,106 @@ TEMPLATE TEST: 123456
             {% csrf_token %}
 
 
-            <!-- =========================================================
-                 ENTRY TYPE
-            ========================================================== -->
+            <!-- ================================================= -->
+            <!-- HIDDEN WORKFLOW FIELDS -->
+            <!-- ================================================= -->
 
-            <div class="mb-4">
-
-                <h5 class="fw-semibold mb-1">
-                    Inventory Entry
-                </h5>
-
-                <p class="text-muted small mb-3">
-                    Choose whether you are creating a new medicine or adding
-                    stock to an existing medicine.
-                </p>
+            <input
+                type="hidden"
+                name="entry_type"
+                id="id_entry_type"
+                value="{{ form.entry_type.value|default:'' }}"
+            >
 
 
-                <div class="row g-3">
-
-                    <div class="col-md-6">
-
-                        <label
-                            class="border rounded-3 p-3 d-flex align-items-start gap-3 h-100"
-                            style="cursor: pointer;"
-                        >
-
-                            <input
-                                type="radio"
-                                name="{{ form.entry_type.name }}"
-                                value="new"
-                                class="form-check-input mt-1"
-                                id="entryTypeNew"
-                                {% if form.entry_type.value == "new" or not form.entry_type.value %}
-                                    checked
-                                {% endif %}
-                            >
-
-                            <span>
-
-                                <span class="fw-semibold d-block">
-                                    <i class="fa-solid fa-plus me-2 text-primary"></i>
-                                    New Medicine
-                                </span>
-
-                                <span class="text-muted small">
-                                    Create a new medicine and add its first stock batch.
-                                </span>
-
-                            </span>
-
-                        </label>
-
-                    </div>
-
-
-                    <div class="col-md-6">
-
-                        <label
-                            class="border rounded-3 p-3 d-flex align-items-start gap-3 h-100"
-                            style="cursor: pointer;"
-                        >
-
-                            <input
-                                type="radio"
-                                name="{{ form.entry_type.name }}"
-                                value="existing"
-                                class="form-check-input mt-1"
-                                id="entryTypeExisting"
-                                {% if form.entry_type.value == "existing" %}
-                                    checked
-                                {% endif %}
-                            >
-
-                            <span>
-
-                                <span class="fw-semibold d-block">
-                                    <i class="fa-solid fa-boxes-stacked me-2 text-success"></i>
-                                    Existing Medicine
-                                </span>
-
-                                <span class="text-muted small">
-                                    Add a new batch or stock to an existing medicine.
-                                </span>
-
-                            </span>
-
-                        </label>
-
-                    </div>
-
-                </div>
-
-
-                {% if form.entry_type.errors %}
-                    <div class="text-danger small mt-2">
-                        {% for error in form.entry_type.errors %}
-                            <div>{{ error }}</div>
-                        {% endfor %}
-                    </div>
-                {% endif %}
-
+            <div class="d-none">
+                {{ form.medicine }}
             </div>
 
 
-            <hr class="my-4">
-
-
-            <!-- =========================================================
-                 EXISTING MEDICINE
-            ========================================================== -->
+            <!-- ========================================================= -->
+            <!-- FIND MEDICINE -->
+            <!-- ========================================================= -->
 
             <div
-                id="existingMedicineSection"
+                id="medicineFinderSection"
                 class="mb-4"
             >
 
                 <div class="mb-3">
 
                     <h5 class="fw-semibold mb-1">
-                        Select Medicine
+                        Find Medicine
                     </h5>
 
-                    <p class="text-muted small mb-3">
-                        Search for the medicine you want to add stock to.
+                    <p class="text-muted small mb-0">
+                        Search by medicine name, generic name, SKU or barcode.
+                        If the medicine already exists, select it and add a new batch.
                     </p>
 
                 </div>
 
 
-                {{ form.medicine }}
+                {% if form.entry_type.errors %}
+
+                    <div class="alert alert-danger py-2">
+
+                        {% for error in form.entry_type.errors %}
+
+                            <div>
+                                {{ error }}
+                            </div>
+
+                        {% endfor %}
+
+                    </div>
+
+                {% endif %}
+
+
+                {% if form.medicine.errors %}
+
+                    <div class="alert alert-danger py-2">
+
+                        {% for error in form.medicine.errors %}
+
+                            <div>
+                                {{ error }}
+                            </div>
+
+                        {% endfor %}
+
+                    </div>
+
+                {% endif %}
 
 
                 <div class="position-relative">
+
 
                     <label
                         for="medicineSearchInput"
                         class="form-label"
                     >
                         Search Medicine
-                        <span class="text-danger">*</span>
                     </label>
 
 
                     <div class="input-group">
 
+
                         <span class="input-group-text bg-white">
-                            <i class="fa-solid fa-magnifying-glass text-muted"></i>
+
+                            <i
+                                class="
+                                    fa-solid
+                                    fa-magnifying-glass
+                                    text-muted
+                                "
+                            ></i>
+
                         </span>
+
 
                         <input
                             type="search"
@@ -201,6 +185,7 @@ TEMPLATE TEST: 123456
                             autocomplete="off"
                         >
 
+
                         <button
                             type="button"
                             id="clearMedicineSearch"
@@ -208,59 +193,207 @@ TEMPLATE TEST: 123456
                             style="display: none;"
                             aria-label="Clear medicine search"
                         >
+
                             <i class="fa-solid fa-xmark"></i>
+
                         </button>
+
 
                     </div>
 
 
                     <div
                         id="medicineSearchResults"
-                        class="position-absolute bg-white border rounded-3 shadow-sm w-100 mt-1"
-                        style="display: none; z-index: 1050;"
+                        class="
+                            position-absolute
+                            bg-white
+                            border
+                            rounded-3
+                            shadow-sm
+                            w-100
+                            mt-1
+                        "
+                        style="
+                            display: none;
+                            z-index: 1050;
+                            max-height: 360px;
+                            overflow-y: auto;
+                        "
                     ></div>
+
 
                 </div>
 
 
-                <!-- Selected Medicine -->
+                <!-- ================================================= -->
+                <!-- NO MEDICINE FOUND -->
+                <!-- ================================================= -->
 
                 <div
-                    id="selectedMedicine"
-                    class="border rounded-3 p-3 mt-3"
+                    id="medicineNotFound"
+                    class="
+                        border
+                        rounded-3
+                        p-4
+                        mt-3
+                        text-center
+                    "
                     style="display: none;"
                 >
 
-                    <div class="d-flex justify-content-between align-items-start gap-3">
+                    <div class="mb-2">
 
-                        <div class="d-flex align-items-start gap-3">
+                        <i
+                            class="
+                                fa-solid
+                                fa-circle-plus
+                                fa-2x
+                                text-primary
+                            "
+                        ></i>
+
+                    </div>
+
+
+                    <div class="fw-semibold">
+                        Medicine not found
+                    </div>
+
+
+                    <div class="small text-muted mt-1 mb-3">
+                        Create this medicine and add its first stock batch.
+                    </div>
+
+
+                    <button
+                        type="button"
+                        id="createNewMedicineButton"
+                        class="btn btn-primary"
+                    >
+
+                        <i class="fa-solid fa-plus me-2"></i>
+
+                        Create New Medicine
+
+                    </button>
+
+
+                </div>
+
+
+                <!-- ================================================= -->
+                <!-- SELECTED MEDICINE -->
+                <!-- ================================================= -->
+
+                <div
+                    id="selectedMedicine"
+                    class="
+                        border
+                        rounded-3
+                        p-3
+                        mt-3
+                    "
+                    style="display: none;"
+                >
+
+                    <div
+                        class="
+                            d-flex
+                            justify-content-between
+                            align-items-start
+                            gap-3
+                        "
+                    >
+
+
+                        <div
+                            class="
+                                d-flex
+                                align-items-start
+                                gap-3
+                            "
+                        >
+
 
                             <div
-                                class="rounded-3 d-flex align-items-center justify-content-center"
-                                style="width: 42px; height: 42px; background: #ccfbf1;"
+                                class="
+                                    rounded-3
+                                    d-flex
+                                    align-items-center
+                                    justify-content-center
+                                "
+                                style="
+                                    width: 44px;
+                                    height: 44px;
+                                    min-width: 44px;
+                                    background: #ccfbf1;
+                                "
                             >
-                                <i class="fa-solid fa-pills text-success"></i>
+
+                                <i
+                                    class="
+                                        fa-solid
+                                        fa-pills
+                                        text-success
+                                    "
+                                ></i>
+
                             </div>
 
 
                             <div>
+
 
                                 <div
                                     id="selectedMedicineName"
                                     class="fw-semibold"
                                 ></div>
 
+
                                 <div
                                     id="selectedMedicineMeta"
-                                    class="text-muted small mt-1"
+                                    class="
+                                        text-muted
+                                        small
+                                        mt-1
+                                    "
                                 ></div>
+
 
                                 <div
                                     id="selectedMedicineIdentifiers"
-                                    class="text-muted small mt-1"
+                                    class="
+                                        text-muted
+                                        small
+                                        mt-1
+                                    "
                                 ></div>
 
+
+                                <div
+                                    id="selectedMedicinePackInfo"
+                                    class="small mt-2"
+                                ></div>
+
+
+                                <div class="small text-success mt-2">
+
+                                    <i
+                                        class="
+                                            fa-solid
+                                            fa-circle-check
+                                            me-1
+                                        "
+                                    ></i>
+
+                                    Existing medicine selected.
+                                    Enter the new batch information below.
+
+                                </div>
+
+
                             </div>
+
 
                         </div>
 
@@ -270,41 +403,85 @@ TEMPLATE TEST: 123456
                             id="removeSelectedMedicine"
                             class="btn btn-sm btn-light border"
                         >
-                            <i class="fa-solid fa-xmark me-1"></i>
+
+                            <i
+                                class="
+                                    fa-solid
+                                    fa-arrows-rotate
+                                    me-1
+                                "
+                            ></i>
+
                             Change
+
                         </button>
 
+
                     </div>
+
 
                 </div>
 
 
-                {% if form.medicine.errors %}
-                    <div class="text-danger small mt-2">
-                        {% for error in form.medicine.errors %}
-                            <div>{{ error }}</div>
-                        {% endfor %}
-                    </div>
-                {% endif %}
-
             </div>
 
 
-            <!-- =========================================================
-                 NEW MEDICINE INFORMATION
-            ========================================================== -->
+            <hr class="my-4">
 
-            <div id="newMedicineSection">
 
-                <div class="mb-4">
+            <!-- ================================================= -->
+            <!-- NEW MEDICINE INFORMATION -->
+            <!-- ================================================= -->
 
-                    <h5 class="fw-semibold mb-1">
-                        Medicine Information
-                    </h5>
+            <div
+                id="newMedicineSection"
+                style="display: none;"
+            >
 
-                    <p class="text-muted small mb-0">
-                        Enter the basic information for the new medicine.
-                    </p>
+
+                <div
+                    class="
+                        d-flex
+                        justify-content-between
+                        align-items-start
+                        gap-3
+                        mb-4
+                    "
+                >
+
+
+                    <div>
+
+                        <h5 class="fw-semibold mb-1">
+                            New Medicine Information
+                        </h5>
+
+                        <p class="text-muted small mb-0">
+                            This medicine is not currently available in the system.
+                            Enter its master information below.
+                        </p>
+
+                    </div>
+
+
+                    <button
+                        type="button"
+                        id="cancelNewMedicineButton"
+                        class="btn btn-sm btn-light border"
+                    >
+
+                        <i
+                            class="
+                                fa-solid
+                                fa-arrow-left
+                                me-1
+                            "
+                        ></i>
+
+                        Back to Search
+
+                    </button>
+
 
                 </div>
 
@@ -312,34 +489,56 @@ TEMPLATE TEST: 123456
                 <div class="row g-4">
 
 
-                    <!-- Brand Name -->
+                    <!-- ================================================= -->
+                    <!-- BRAND NAME -->
+                    <!-- ================================================= -->
 
                     <div class="col-md-6">
+
 
                         <label
                             for="{{ form.name.id_for_label }}"
                             class="form-label"
                         >
+
                             Brand Name
-                            <span class="text-danger">*</span>
+
+                            <span class="text-danger">
+                                *
+                            </span>
+
                         </label>
+
 
                         {{ form.name }}
 
+
                         {% if form.name.errors %}
+
                             <div class="text-danger small mt-1">
+
                                 {% for error in form.name.errors %}
-                                    <div>{{ error }}</div>
+
+                                    <div>
+                                        {{ error }}
+                                    </div>
+
                                 {% endfor %}
+
                             </div>
+
                         {% endif %}
+
 
                     </div>
 
 
-                    <!-- Generic Name -->
+                    <!-- ================================================= -->
+                    <!-- GENERIC NAME -->
+                    <!-- ================================================= -->
 
                     <div class="col-md-6">
+
 
                         <label
                             for="{{ form.generic_name.id_for_label }}"
@@ -348,47 +547,80 @@ TEMPLATE TEST: 123456
                             Generic Name
                         </label>
 
+
                         {{ form.generic_name }}
 
+
                         {% if form.generic_name.errors %}
+
                             <div class="text-danger small mt-1">
+
                                 {% for error in form.generic_name.errors %}
-                                    <div>{{ error }}</div>
+
+                                    <div>
+                                        {{ error }}
+                                    </div>
+
                                 {% endfor %}
+
                             </div>
+
                         {% endif %}
+
 
                     </div>
 
 
-                    <!-- Category -->
+                    <!-- ================================================= -->
+                    <!-- CATEGORY -->
+                    <!-- ================================================= -->
 
                     <div class="col-md-6">
+
 
                         <label
                             for="{{ form.category.id_for_label }}"
                             class="form-label"
                         >
+
                             Category
-                            <span class="text-danger">*</span>
+
+                            <span class="text-danger">
+                                *
+                            </span>
+
                         </label>
+
 
                         {{ form.category }}
 
+
                         {% if form.category.errors %}
+
                             <div class="text-danger small mt-1">
+
                                 {% for error in form.category.errors %}
-                                    <div>{{ error }}</div>
+
+                                    <div>
+                                        {{ error }}
+                                    </div>
+
                                 {% endfor %}
+
                             </div>
+
                         {% endif %}
+
 
                     </div>
 
 
-                    <!-- Manufacturer -->
+                    <!-- ================================================= -->
+                    <!-- MANUFACTURER -->
+                    <!-- ================================================= -->
 
                     <div class="col-md-6">
+
 
                         <label
                             for="{{ form.manufacturer.id_for_label }}"
@@ -397,22 +629,36 @@ TEMPLATE TEST: 123456
                             Manufacturer
                         </label>
 
+
                         {{ form.manufacturer }}
 
+
                         {% if form.manufacturer.errors %}
+
                             <div class="text-danger small mt-1">
+
                                 {% for error in form.manufacturer.errors %}
-                                    <div>{{ error }}</div>
+
+                                    <div>
+                                        {{ error }}
+                                    </div>
+
                                 {% endfor %}
+
                             </div>
+
                         {% endif %}
+
 
                     </div>
 
 
-                    <!-- Country -->
+                    <!-- ================================================= -->
+                    <!-- COUNTRY -->
+                    <!-- ================================================= -->
 
                     <div class="col-md-6">
+
 
                         <label
                             for="{{ form.country_of_origin.id_for_label }}"
@@ -421,47 +667,80 @@ TEMPLATE TEST: 123456
                             Country of Origin
                         </label>
 
+
                         {{ form.country_of_origin }}
 
+
                         {% if form.country_of_origin.errors %}
+
                             <div class="text-danger small mt-1">
+
                                 {% for error in form.country_of_origin.errors %}
-                                    <div>{{ error }}</div>
+
+                                    <div>
+                                        {{ error }}
+                                    </div>
+
                                 {% endfor %}
+
                             </div>
+
                         {% endif %}
+
 
                     </div>
 
 
-                    <!-- Dosage Form -->
+                    <!-- ================================================= -->
+                    <!-- DOSAGE FORM -->
+                    <!-- ================================================= -->
 
                     <div class="col-md-6">
+
 
                         <label
                             for="{{ form.dosage_form.id_for_label }}"
                             class="form-label"
                         >
+
                             Dosage Form
-                            <span class="text-danger">*</span>
+
+                            <span class="text-danger">
+                                *
+                            </span>
+
                         </label>
+
 
                         {{ form.dosage_form }}
 
+
                         {% if form.dosage_form.errors %}
+
                             <div class="text-danger small mt-1">
+
                                 {% for error in form.dosage_form.errors %}
-                                    <div>{{ error }}</div>
+
+                                    <div>
+                                        {{ error }}
+                                    </div>
+
                                 {% endfor %}
+
                             </div>
+
                         {% endif %}
+
 
                     </div>
 
 
-                    <!-- Strength -->
+                    <!-- ================================================= -->
+                    <!-- STRENGTH -->
+                    <!-- ================================================= -->
 
                     <div class="col-md-6">
+
 
                         <label
                             for="{{ form.strength.id_for_label }}"
@@ -470,71 +749,195 @@ TEMPLATE TEST: 123456
                             Strength
                         </label>
 
+
                         {{ form.strength }}
 
+
                         {% if form.strength.errors %}
+
                             <div class="text-danger small mt-1">
+
                                 {% for error in form.strength.errors %}
-                                    <div>{{ error }}</div>
+
+                                    <div>
+                                        {{ error }}
+                                    </div>
+
                                 {% endfor %}
+
                             </div>
+
                         {% endif %}
+
 
                     </div>
 
 
-                    <!-- Unit -->
+                    <!-- ================================================= -->
+                    <!-- UNIT -->
+                    <!-- ================================================= -->
 
                     <div class="col-md-6">
+
 
                         <label
                             for="{{ form.unit.id_for_label }}"
                             class="form-label"
                         >
-                            Unit
-                            <span class="text-danger">*</span>
+
+                            Smallest Sellable Unit
+
+                            <span class="text-danger">
+                                *
+                            </span>
+
                         </label>
+
 
                         {{ form.unit }}
 
+
+                        <div class="form-text">
+                            Example: Tablet, Capsule, Bottle or Tube.
+                        </div>
+
+
                         {% if form.unit.errors %}
+
                             <div class="text-danger small mt-1">
+
                                 {% for error in form.unit.errors %}
-                                    <div>{{ error }}</div>
+
+                                    <div>
+                                        {{ error }}
+                                    </div>
+
                                 {% endfor %}
+
                             </div>
+
                         {% endif %}
+
 
                     </div>
 
 
-                    <!-- Pack Size -->
+                    <!-- ================================================= -->
+                    <!-- PACK SIZE -->
+                    <!-- ================================================= -->
 
-                    <div class="col-md-4">
+                    <div class="col-md-6">
+
 
                         <label
                             for="{{ form.pack_size.id_for_label }}"
                             class="form-label"
                         >
-                            Pack Size
+
+                            Units Per Pack
+
+                            <span class="text-danger">
+                                *
+                            </span>
+
                         </label>
+
 
                         {{ form.pack_size }}
 
+
+                        <div class="form-text">
+                            Example: if one pack contains 10 tablets,
+                            enter 10.
+                        </div>
+
+
                         {% if form.pack_size.errors %}
+
                             <div class="text-danger small mt-1">
+
                                 {% for error in form.pack_size.errors %}
-                                    <div>{{ error }}</div>
+
+                                    <div>
+                                        {{ error }}
+                                    </div>
+
                                 {% endfor %}
+
                             </div>
+
                         {% endif %}
+
 
                     </div>
 
 
-                    <!-- Barcode -->
+                    <!-- ================================================= -->
+                    <!-- LOOSE SALE -->
+                    <!-- ================================================= -->
 
-                    <div class="col-md-4">
+                    <div class="col-md-6">
+
+
+                        <div class="border rounded-3 p-3 h-100">
+
+
+                            <div class="form-check">
+
+
+                                {{ form.allow_loose_sale }}
+
+
+                                <label
+                                    class="
+                                        form-check-label
+                                        fw-semibold
+                                    "
+                                    for="{{ form.allow_loose_sale.id_for_label }}"
+                                >
+                                    Allow Loose Sale
+                                </label>
+
+
+                            </div>
+
+
+                            <div class="text-muted small mt-2">
+                                Enable this when individual tablets,
+                                capsules or other units can be sold
+                                separately from the full pack.
+                            </div>
+
+
+                            {% if form.allow_loose_sale.errors %}
+
+                                <div class="text-danger small mt-1">
+
+                                    {% for error in form.allow_loose_sale.errors %}
+
+                                        <div>
+                                            {{ error }}
+                                        </div>
+
+                                    {% endfor %}
+
+                                </div>
+
+                            {% endif %}
+
+
+                        </div>
+
+
+                    </div>
+
+
+                    <!-- ================================================= -->
+                    <!-- BARCODE -->
+                    <!-- ================================================= -->
+
+                    <div class="col-md-6">
+
 
                         <label
                             for="{{ form.barcode.id_for_label }}"
@@ -543,22 +946,36 @@ TEMPLATE TEST: 123456
                             Barcode
                         </label>
 
+
                         {{ form.barcode }}
 
+
                         {% if form.barcode.errors %}
+
                             <div class="text-danger small mt-1">
+
                                 {% for error in form.barcode.errors %}
-                                    <div>{{ error }}</div>
+
+                                    <div>
+                                        {{ error }}
+                                    </div>
+
                                 {% endfor %}
+
                             </div>
+
                         {% endif %}
+
 
                     </div>
 
 
+                    <!-- ================================================= -->
                     <!-- SKU -->
+                    <!-- ================================================= -->
 
-                    <div class="col-md-4">
+                    <div class="col-md-6">
+
 
                         <label
                             for="{{ form.sku.id_for_label }}"
@@ -567,22 +984,36 @@ TEMPLATE TEST: 123456
                             SKU
                         </label>
 
+
                         {{ form.sku }}
 
+
                         {% if form.sku.errors %}
+
                             <div class="text-danger small mt-1">
+
                                 {% for error in form.sku.errors %}
-                                    <div>{{ error }}</div>
+
+                                    <div>
+                                        {{ error }}
+                                    </div>
+
                                 {% endfor %}
+
                             </div>
+
                         {% endif %}
+
 
                     </div>
 
 
-                    <!-- Minimum Stock -->
+                    <!-- ================================================= -->
+                    <!-- MINIMUM STOCK -->
+                    <!-- ================================================= -->
 
                     <div class="col-md-6">
+
 
                         <label
                             for="{{ form.minimum_stock_level.id_for_label }}"
@@ -591,22 +1022,41 @@ TEMPLATE TEST: 123456
                             Minimum Stock Level
                         </label>
 
+
                         {{ form.minimum_stock_level }}
 
+
+                        <div class="form-text">
+                            Enter the threshold in smallest sellable units.
+                        </div>
+
+
                         {% if form.minimum_stock_level.errors %}
+
                             <div class="text-danger small mt-1">
+
                                 {% for error in form.minimum_stock_level.errors %}
-                                    <div>{{ error }}</div>
+
+                                    <div>
+                                        {{ error }}
+                                    </div>
+
                                 {% endfor %}
+
                             </div>
+
                         {% endif %}
+
 
                     </div>
 
 
-                    <!-- Reorder Level -->
+                    <!-- ================================================= -->
+                    <!-- REORDER LEVEL -->
+                    <!-- ================================================= -->
 
                     <div class="col-md-6">
+
 
                         <label
                             for="{{ form.reorder_level.id_for_label }}"
@@ -615,22 +1065,42 @@ TEMPLATE TEST: 123456
                             Reorder Level
                         </label>
 
+
                         {{ form.reorder_level }}
 
+
+                        <div class="form-text">
+                            Reorder level should not be below
+                            the minimum stock level.
+                        </div>
+
+
                         {% if form.reorder_level.errors %}
+
                             <div class="text-danger small mt-1">
+
                                 {% for error in form.reorder_level.errors %}
-                                    <div>{{ error }}</div>
+
+                                    <div>
+                                        {{ error }}
+                                    </div>
+
                                 {% endfor %}
+
                             </div>
+
                         {% endif %}
+
 
                     </div>
 
 
-                    <!-- Storage -->
+                    <!-- ================================================= -->
+                    <!-- STORAGE -->
+                    <!-- ================================================= -->
 
                     <div class="col-md-6">
+
 
                         <label
                             for="{{ form.storage_condition.id_for_label }}"
@@ -639,22 +1109,36 @@ TEMPLATE TEST: 123456
                             Storage Condition
                         </label>
 
+
                         {{ form.storage_condition }}
 
+
                         {% if form.storage_condition.errors %}
+
                             <div class="text-danger small mt-1">
+
                                 {% for error in form.storage_condition.errors %}
-                                    <div>{{ error }}</div>
+
+                                    <div>
+                                        {{ error }}
+                                    </div>
+
                                 {% endfor %}
+
                             </div>
+
                         {% endif %}
+
 
                     </div>
 
 
-                    <!-- Description -->
+                    <!-- ================================================= -->
+                    <!-- DESCRIPTION -->
+                    <!-- ================================================= -->
 
                     <div class="col-md-6">
+
 
                         <label
                             for="{{ form.description.id_for_label }}"
@@ -663,59 +1147,150 @@ TEMPLATE TEST: 123456
                             Description
                         </label>
 
+
                         {{ form.description }}
 
+
                         {% if form.description.errors %}
+
                             <div class="text-danger small mt-1">
+
                                 {% for error in form.description.errors %}
-                                    <div>{{ error }}</div>
+
+                                    <div>
+                                        {{ error }}
+                                    </div>
+
                                 {% endfor %}
+
                             </div>
+
                         {% endif %}
 
+
                     </div>
 
 
-                    <!-- Prescription -->
+                    <!-- ================================================= -->
+                    <!-- PRESCRIPTION REQUIRED -->
+                    <!-- ================================================= -->
 
                     <div class="col-md-6">
 
-                        <div class="form-check">
 
-                            {{ form.prescription_required }}
+                        <div class="border rounded-3 p-3 h-100">
 
-                            <label
-                                class="form-check-label"
-                                for="{{ form.prescription_required.id_for_label }}"
-                            >
-                                Prescription Required
-                            </label>
+
+                            <div class="form-check">
+
+
+                                {{ form.prescription_required }}
+
+
+                                <label
+                                    class="
+                                        form-check-label
+                                        fw-semibold
+                                    "
+                                    for="{{ form.prescription_required.id_for_label }}"
+                                >
+                                    Prescription Required
+                                </label>
+
+
+                            </div>
+
+
+                            <div class="small text-muted mt-2">
+                                Enable this if the medicine should
+                                normally require a prescription.
+                            </div>
+
+
+                            {% if form.prescription_required.errors %}
+
+                                <div class="text-danger small mt-1">
+
+                                    {% for error in form.prescription_required.errors %}
+
+                                        <div>
+                                            {{ error }}
+                                        </div>
+
+                                    {% endfor %}
+
+                                </div>
+
+                            {% endif %}
+
 
                         </div>
+
 
                     </div>
 
 
-                    <!-- Controlled -->
+                    <!-- ================================================= -->
+                    <!-- CONTROLLED MEDICINE -->
+                    <!-- ================================================= -->
 
                     <div class="col-md-6">
 
-                        <div class="form-check">
 
-                            {{ form.controlled_medicine }}
+                        <div class="border rounded-3 p-3 h-100">
 
-                            <label
-                                class="form-check-label"
-                                for="{{ form.controlled_medicine.id_for_label }}"
-                            >
-                                Controlled Medicine
-                            </label>
+
+                            <div class="form-check">
+
+
+                                {{ form.controlled_medicine }}
+
+
+                                <label
+                                    class="
+                                        form-check-label
+                                        fw-semibold
+                                    "
+                                    for="{{ form.controlled_medicine.id_for_label }}"
+                                >
+                                    Controlled Medicine
+                                </label>
+
+
+                            </div>
+
+
+                            <div class="small text-muted mt-2">
+                                Mark medicines requiring additional
+                                control or monitoring.
+                            </div>
+
+
+                            {% if form.controlled_medicine.errors %}
+
+                                <div class="text-danger small mt-1">
+
+                                    {% for error in form.controlled_medicine.errors %}
+
+                                        <div>
+                                            {{ error }}
+                                        </div>
+
+                                    {% endfor %}
+
+                                </div>
+
+                            {% endif %}
+
 
                         </div>
 
+
                     </div>
+
 
                 </div>
+
 
             </div>
 
@@ -723,19 +1298,23 @@ TEMPLATE TEST: 123456
             <hr class="my-5">
 
 
-            <!-- =========================================================
-                 BATCH / STOCK INFORMATION
-            ========================================================== -->
+            <!-- ================================================= -->
+            <!-- BATCH / STOCK INFORMATION -->
+            <!-- ================================================= -->
 
             <div class="mb-4">
+
 
                 <h5 class="fw-semibold mb-1">
                     Batch & Stock Information
                 </h5>
 
+
                 <p class="text-muted small mb-0">
-                    Enter the stock, branch, expiry and pricing information for this batch.
+                    Enter the number of full packs received,
+                    batch details, expiry date and per-pack pricing.
                 </p>
+
 
             </div>
 
@@ -743,182 +1322,369 @@ TEMPLATE TEST: 123456
             <div class="row g-4">
 
 
-                <!-- Branch -->
+                <!-- ================================================= -->
+                <!-- BRANCH -->
+                <!-- ================================================= -->
 
                 <div class="col-md-6">
+
 
                     <label
                         for="{{ form.branch.id_for_label }}"
                         class="form-label"
                     >
+
                         Branch
-                        <span class="text-danger">*</span>
+
+                        <span class="text-danger">
+                            *
+                        </span>
+
                     </label>
+
 
                     {{ form.branch }}
 
+
                     {% if form.branch.errors %}
+
                         <div class="text-danger small mt-1">
+
                             {% for error in form.branch.errors %}
-                                <div>{{ error }}</div>
+
+                                <div>
+                                    {{ error }}
+                                </div>
+
                             {% endfor %}
+
                         </div>
+
                     {% endif %}
+
 
                 </div>
 
 
-                <!-- Batch Number -->
+                <!-- ================================================= -->
+                <!-- BATCH NUMBER -->
+                <!-- ================================================= -->
 
                 <div class="col-md-6">
+
 
                     <label
                         for="{{ form.batch_number.id_for_label }}"
                         class="form-label"
                     >
+
                         Batch Number
-                        <span class="text-danger">*</span>
+
+                        <span class="text-danger">
+                            *
+                        </span>
+
                     </label>
+
 
                     {{ form.batch_number }}
 
+
                     {% if form.batch_number.errors %}
+
                         <div class="text-danger small mt-1">
+
                             {% for error in form.batch_number.errors %}
-                                <div>{{ error }}</div>
+
+                                <div>
+                                    {{ error }}
+                                </div>
+
                             {% endfor %}
+
                         </div>
+
                     {% endif %}
+
 
                 </div>
 
 
-                <!-- Expiry -->
+                <!-- ================================================= -->
+                <!-- EXPIRY DATE -->
+                <!-- ================================================= -->
 
                 <div class="col-md-6">
+
 
                     <label
                         for="{{ form.expiry_date.id_for_label }}"
                         class="form-label"
                     >
+
                         Expiry Date
-                        <span class="text-danger">*</span>
+
+                        <span class="text-danger">
+                            *
+                        </span>
+
                     </label>
+
 
                     {{ form.expiry_date }}
 
+
                     {% if form.expiry_date.errors %}
+
                         <div class="text-danger small mt-1">
+
                             {% for error in form.expiry_date.errors %}
-                                <div>{{ error }}</div>
+
+                                <div>
+                                    {{ error }}
+                                </div>
+
                             {% endfor %}
+
                         </div>
+
                     {% endif %}
+
 
                 </div>
 
 
-                <!-- Quantity -->
+                <!-- ================================================= -->
+                <!-- NUMBER OF PACKS -->
+                <!-- ================================================= -->
 
                 <div class="col-md-6">
+
 
                     <label
                         for="{{ form.quantity.id_for_label }}"
                         class="form-label"
                     >
-                        Quantity
-                        <span class="text-danger">*</span>
+
+                        Number of Packs Received
+
+                        <span class="text-danger">
+                            *
+                        </span>
+
                     </label>
+
 
                     {{ form.quantity }}
 
+
+                    <div class="form-text">
+                        Enter complete packs received.
+                        Stock will automatically be converted
+                        into individual units.
+                    </div>
+
+
+                    <div
+                        id="stockConversionPreview"
+                        class="
+                            small
+                            text-success
+                            fw-semibold
+                            mt-2
+                        "
+                        style="display: none;"
+                    ></div>
+
+
                     {% if form.quantity.errors %}
+
                         <div class="text-danger small mt-1">
+
                             {% for error in form.quantity.errors %}
-                                <div>{{ error }}</div>
+
+                                <div>
+                                    {{ error }}
+                                </div>
+
                             {% endfor %}
+
                         </div>
+
                     {% endif %}
+
 
                 </div>
 
 
-                <!-- Purchase Price -->
+                <!-- ================================================= -->
+                <!-- PURCHASE PRICE -->
+                <!-- ================================================= -->
 
                 <div class="col-md-6">
+
 
                     <label
                         for="{{ form.purchase_price.id_for_label }}"
                         class="form-label"
                     >
-                        Purchase Price
-                        <span class="text-danger">*</span>
+
+                        Purchase Price Per Pack
+
+                        <span class="text-danger">
+                            *
+                        </span>
+
                     </label>
+
 
                     {{ form.purchase_price }}
 
+
+                    <div class="form-text">
+                        Cost price of one complete pack.
+                    </div>
+
+
                     {% if form.purchase_price.errors %}
+
                         <div class="text-danger small mt-1">
+
                             {% for error in form.purchase_price.errors %}
-                                <div>{{ error }}</div>
+
+                                <div>
+                                    {{ error }}
+                                </div>
+
                             {% endfor %}
+
                         </div>
+
                     {% endif %}
+
 
                 </div>
 
 
-                <!-- Selling Price -->
+                <!-- ================================================= -->
+                <!-- SELLING PRICE -->
+                <!-- ================================================= -->
 
                 <div class="col-md-6">
+
 
                     <label
                         for="{{ form.selling_price.id_for_label }}"
                         class="form-label"
                     >
-                        Selling Price
-                        <span class="text-danger">*</span>
+
+                        Selling Price Per Pack
+
+                        <span class="text-danger">
+                            *
+                        </span>
+
                     </label>
+
 
                     {{ form.selling_price }}
 
+
+                    <div class="form-text">
+                        Retail selling price of one complete pack.
+                    </div>
+
+
+                    <div
+                        id="loosePricePreview"
+                        class="
+                            small
+                            text-success
+                            fw-semibold
+                            mt-2
+                        "
+                        style="display: none;"
+                    ></div>
+
+
                     {% if form.selling_price.errors %}
+
                         <div class="text-danger small mt-1">
+
                             {% for error in form.selling_price.errors %}
-                                <div>{{ error }}</div>
+
+                                <div>
+                                    {{ error }}
+                                </div>
+
                             {% endfor %}
+
                         </div>
+
                     {% endif %}
+
 
                 </div>
 
 
-                <!-- Active -->
+                <!-- ================================================= -->
+                <!-- ACTIVE BATCH -->
+                <!-- ================================================= -->
 
                 <div class="col-12">
 
-                    <div class="form-check">
 
-                        {{ form.is_active }}
+                    <div class="border rounded-3 p-3">
 
-                        <label
-                            class="form-check-label"
-                            for="{{ form.is_active.id_for_label }}"
-                        >
-                            Active Batch
-                        </label>
+
+                        <div class="form-check">
+
+
+                            {{ form.is_active }}
+
+
+                            <label
+                                class="
+                                    form-check-label
+                                    fw-semibold
+                                "
+                                for="{{ form.is_active.id_for_label }}"
+                            >
+                                Active Batch
+                            </label>
+
+
+                        </div>
+
+
+                        <div class="small text-muted mt-2">
+                            Inactive batches will not be available
+                            for POS sales.
+                        </div>
+
+
+                        {% if form.is_active.errors %}
+
+                            <div class="text-danger small mt-1">
+
+                                {% for error in form.is_active.errors %}
+
+                                    <div>
+                                        {{ error }}
+                                    </div>
+
+                                {% endfor %}
+
+                            </div>
+
+                        {% endif %}
+
 
                     </div>
 
-                    {% if form.is_active.errors %}
-                        <div class="text-danger small mt-1">
-                            {% for error in form.is_active.errors %}
-                                <div>{{ error }}</div>
-                            {% endfor %}
-                        </div>
-                    {% endif %}
 
                 </div>
+
 
             </div>
 
@@ -926,11 +1692,18 @@ TEMPLATE TEST: 123456
             <hr class="my-4">
 
 
-            <!-- =========================================================
-                 ACTIONS
-            ========================================================== -->
+            <!-- ================================================= -->
+            <!-- ACTIONS -->
+            <!-- ================================================= -->
 
-            <div class="d-flex justify-content-end gap-2">
+            <div
+                class="
+                    d-flex
+                    justify-content-end
+                    gap-2
+                "
+            >
+
 
                 <a
                     href="{% url 'inventory:list' %}"
@@ -939,23 +1712,34 @@ TEMPLATE TEST: 123456
                     Cancel
                 </a>
 
+
                 <button
                     type="submit"
                     class="btn btn-primary"
                 >
-                    <i class="fa-solid fa-boxes-stacked me-2"></i>
+
+                    <i
+                        class="
+                            fa-solid
+                            fa-boxes-stacked
+                            me-2
+                        "
+                    ></i>
+
                     {{ submit_text }}
+
                 </button>
+
 
             </div>
 
+
         </form>
+
 
     </div>
 
+
 </div>
-
-
-
 
 {% endblock %}

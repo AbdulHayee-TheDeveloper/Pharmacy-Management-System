@@ -1,27 +1,49 @@
 {% extends "base/base.html" %}
 
-{% block title %}Medicines | PharmaCare{% endblock %}
+{% block title %}
+Medicines | PharmaCare
+{% endblock %}
+
 
 {% block content %}
+
 <div class="container-fluid py-4">
 
-    <!-- Page Header -->
+
+    <!-- ========================================================= -->
+    <!-- PAGE HEADER -->
+    <!-- ========================================================= -->
+
     <div class="mb-4">
-        <h1 class="h3 fw-bold mb-1">Medicines</h1>
+
+        <h1 class="h3 fw-bold mb-1">
+            Medicines
+        </h1>
+
         <p class="text-muted mb-0">
-            View medicine information and available stock.
+            View and manage medicine master information.
         </p>
+
     </div>
 
 
-    <!-- Summary Cards -->
+    <!-- ========================================================= -->
+    <!-- SUMMARY CARDS -->
+    <!-- ========================================================= -->
+
     <div class="row g-3 mb-4">
 
+
+        <!-- Total Medicines -->
+
         <div class="col-md-6 col-xl-4">
+
             <div class="dashboard-card h-100">
+
                 <div class="d-flex justify-content-between align-items-center">
 
                     <div>
+
                         <p class="text-muted mb-1">
                             Total Medicines
                         </p>
@@ -29,22 +51,31 @@
                         <h3 class="fw-bold mb-0">
                             {{ total_medicines }}
                         </h3>
+
                     </div>
+
 
                     <div class="stat-icon">
                         <i class="fa-solid fa-pills"></i>
                     </div>
 
                 </div>
+
             </div>
+
         </div>
 
 
+        <!-- Active Medicines -->
+
         <div class="col-md-6 col-xl-4">
+
             <div class="dashboard-card h-100">
+
                 <div class="d-flex justify-content-between align-items-center">
 
                     <div>
+
                         <p class="text-muted mb-1">
                             Active Medicines
                         </p>
@@ -52,22 +83,33 @@
                         <h3 class="fw-bold mb-0">
                             {{ active_medicines }}
                         </h3>
+
                     </div>
 
+
                     <div class="stat-icon">
+
                         <i class="fa-solid fa-circle-check"></i>
+
                     </div>
 
                 </div>
+
             </div>
+
         </div>
 
 
+        <!-- Inactive Medicines -->
+
         <div class="col-md-12 col-xl-4">
+
             <div class="dashboard-card h-100">
+
                 <div class="d-flex justify-content-between align-items-center">
 
                     <div>
+
                         <p class="text-muted mb-1">
                             Inactive Medicines
                         </p>
@@ -75,20 +117,30 @@
                         <h3 class="fw-bold mb-0">
                             {{ inactive_medicines }}
                         </h3>
+
                     </div>
 
+
                     <div class="stat-icon">
+
                         <i class="fa-solid fa-circle-pause"></i>
+
                     </div>
 
                 </div>
+
             </div>
+
         </div>
+
 
     </div>
 
 
-    <!-- Filters -->
+    <!-- ========================================================= -->
+    <!-- FILTERS -->
+    <!-- ========================================================= -->
+
     <div class="dashboard-card mb-4">
 
         <form
@@ -97,18 +149,27 @@
             class="row g-3 align-items-end"
         >
 
+
             <!-- Search -->
+
             <div class="col-lg-5">
 
-                <label class="form-label fw-semibold">
+                <label
+                    for="medicineSearch"
+                    class="form-label fw-semibold"
+                >
                     Search
                 </label>
+
 
                 <div class="input-group">
 
                     <span class="input-group-text bg-white">
+
                         <i class="fa-solid fa-magnifying-glass"></i>
+
                     </span>
+
 
                     <input
                         type="search"
@@ -126,11 +187,16 @@
 
 
             <!-- Category -->
+
             <div class="col-lg-3">
 
-                <label class="form-label fw-semibold">
+                <label
+                    for="medicineCategory"
+                    class="form-label fw-semibold"
+                >
                     Category
                 </label>
+
 
                 <select
                     name="category"
@@ -141,6 +207,7 @@
                     <option value="">
                         All Categories
                     </option>
+
 
                     {% for category in categories %}
 
@@ -161,11 +228,16 @@
 
 
             <!-- Status -->
+
             <div class="col-lg-2">
 
-                <label class="form-label fw-semibold">
+                <label
+                    for="medicineStatus"
+                    class="form-label fw-semibold"
+                >
                     Status
                 </label>
+
 
                 <select
                     name="status"
@@ -177,6 +249,7 @@
                         All
                     </option>
 
+
                     <option
                         value="active"
                         {% if selected_status == "active" %}
@@ -185,6 +258,7 @@
                     >
                         Active
                     </option>
+
 
                     <option
                         value="inactive"
@@ -201,6 +275,7 @@
 
 
             <!-- Clear Filters -->
+
             <div class="col-lg-2">
 
                 <a
@@ -208,20 +283,33 @@
                     class="btn btn-light border w-100"
                 >
                     <i class="fa-solid fa-rotate-left me-1"></i>
+
                     Clear Filters
                 </a>
 
             </div>
+
 
         </form>
 
     </div>
 
 
-    <!-- Medicine Table -->
+    <!-- ========================================================= -->
+    <!-- MEDICINE TABLE -->
+    <!-- ========================================================= -->
+
     <div class="dashboard-card">
 
-        <div class="d-flex justify-content-between align-items-center mb-3">
+
+        <div
+            class="
+                d-flex
+                justify-content-between
+                align-items-center
+                mb-3
+            "
+        >
 
             <div>
 
@@ -241,19 +329,46 @@
 
         <div class="table-responsive">
 
+
             <table class="table align-middle mb-0">
+
 
                 <thead>
 
                     <tr>
-                        <th>Medicine</th>
-                        <th>Category</th>
-                        <th>Manufacturer</th>
-                        <th>Form</th>
-                        <th>Strength</th>
-                        <th>Barcode</th>
-                        <th>Status</th>
-                        <th class="text-end">Details</th>
+
+                        <th>
+                            Medicine
+                        </th>
+
+                        <th>
+                            Category
+                        </th>
+
+                        <th>
+                            Manufacturer
+                        </th>
+
+                        <th>
+                            Form
+                        </th>
+
+                        <th>
+                            Strength
+                        </th>
+
+                        <th>
+                            Barcode
+                        </th>
+
+                        <th>
+                            Status
+                        </th>
+
+                        <th class="text-end">
+                            Actions
+                        </th>
+
                     </tr>
 
                 </thead>
@@ -261,23 +376,32 @@
 
                 <tbody>
 
+
                     {% for medicine in medicines %}
 
                         <tr>
 
-                            <!-- Medicine -->
+
+                            <!-- ================================================= -->
+                            <!-- MEDICINE -->
+                            <!-- ================================================= -->
+
                             <td>
 
                                 <div class="fw-semibold">
 
                                     <a
                                         href="{% url 'medicines:detail' medicine.pk %}"
-                                        class="fw-semibold text-decoration-none"
+                                        class="
+                                            fw-semibold
+                                            text-decoration-none
+                                        "
                                     >
                                         {{ medicine.name }}
                                     </a>
 
                                 </div>
+
 
                                 {% if medicine.generic_name %}
 
@@ -290,74 +414,169 @@
                             </td>
 
 
-                            <!-- Category -->
+                            <!-- ================================================= -->
+                            <!-- CATEGORY -->
+                            <!-- ================================================= -->
+
                             <td>
+
                                 {{ medicine.category.name }}
+
                             </td>
 
 
-                            <!-- Manufacturer -->
+                            <!-- ================================================= -->
+                            <!-- MANUFACTURER -->
+                            <!-- ================================================= -->
+
                             <td>
+
                                 {{ medicine.manufacturer|default:"—" }}
+
                             </td>
 
 
-                            <!-- Form -->
+                            <!-- ================================================= -->
+                            <!-- DOSAGE FORM -->
+                            <!-- ================================================= -->
+
                             <td>
+
                                 {{ medicine.get_dosage_form_display }}
+
                             </td>
 
 
-                            <!-- Strength -->
+                            <!-- ================================================= -->
+                            <!-- STRENGTH -->
+                            <!-- ================================================= -->
+
                             <td>
+
                                 {{ medicine.strength|default:"—" }}
+
                             </td>
 
 
-                            <!-- Barcode -->
+                            <!-- ================================================= -->
+                            <!-- BARCODE -->
+                            <!-- ================================================= -->
+
                             <td>
+
                                 {{ medicine.barcode|default:"—" }}
+
                             </td>
 
 
-                            <!-- Status -->
+                            <!-- ================================================= -->
+                            <!-- STATUS -->
+                            <!-- ================================================= -->
+
                             <td>
+
 
                                 {% if medicine.is_active %}
 
-                                    <span class="badge bg-success-subtle text-success">
+                                    <span
+                                        class="
+                                            badge
+                                            bg-success-subtle
+                                            text-success
+                                        "
+                                    >
                                         Active
                                     </span>
 
                                 {% else %}
 
-                                    <span class="badge bg-secondary-subtle text-secondary">
+                                    <span
+                                        class="
+                                            badge
+                                            bg-secondary-subtle
+                                            text-secondary
+                                        "
+                                    >
                                         Inactive
                                     </span>
 
                                 {% endif %}
 
+
                             </td>
 
 
-                            <!-- Details -->
+                            <!-- ================================================= -->
+                            <!-- ACTIONS -->
+                            <!-- ================================================= -->
+
                             <td class="text-end">
 
-                                <a
-                                    href="{% url 'medicines:detail' medicine.pk %}"
-                                    class="btn btn-sm btn-light border"
-                                    title="View Medicine Details"
+
+                                <div
+                                    class="
+                                        d-inline-flex
+                                        align-items-center
+                                        gap-1
+                                    "
                                 >
-                                    <i class="fa-solid fa-eye me-1"></i>
-                                    View
-                                </a>
+
+
+                                    <!-- View -->
+
+                                    <a
+                                        href="{% url 'medicines:detail' medicine.pk %}"
+                                        class="btn btn-sm btn-light border"
+                                        title="View Medicine Details"
+                                    >
+
+                                        <i class="fa-solid fa-eye me-1"></i>
+
+                                        View
+
+                                    </a>
+
+
+                                    <!-- Edit -->
+
+                                    {% if perms.medicines.change_medicine %}
+
+                                        <a
+                                            href="{% url 'medicines:edit' medicine.pk %}"
+                                            class="
+                                                btn
+                                                btn-sm
+                                                btn-outline-primary
+                                            "
+                                            title="Edit Medicine"
+                                        >
+
+                                            <i
+                                                class="
+                                                    fa-solid
+                                                    fa-pen-to-square
+                                                    me-1
+                                                "
+                                            ></i>
+
+                                            Edit
+
+                                        </a>
+
+                                    {% endif %}
+
+
+                                </div>
+
 
                             </td>
+
 
                         </tr>
 
 
                     {% empty %}
+
 
                         <tr>
 
@@ -368,11 +587,20 @@
 
                                 <div class="text-muted">
 
-                                    <i class="fa-solid fa-pills fa-2x mb-3"></i>
+                                    <i
+                                        class="
+                                            fa-solid
+                                            fa-pills
+                                            fa-2x
+                                            mb-3
+                                        "
+                                    ></i>
+
 
                                     <h6 class="fw-semibold">
                                         No medicines found
                                     </h6>
+
 
                                     <p class="small mb-0">
                                         Try changing your search or filters.
@@ -384,15 +612,22 @@
 
                         </tr>
 
+
                     {% endfor %}
+
 
                 </tbody>
 
+
             </table>
+
 
         </div>
 
+
     </div>
 
+
 </div>
+
 {% endblock %}

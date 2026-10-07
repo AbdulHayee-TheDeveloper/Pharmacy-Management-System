@@ -1,0 +1,310 @@
+{% extends "base/base.html" %}
+
+{% block title %}
+Adjust Stock | PharmaCare
+{% endblock %}
+
+
+{% block content %}
+
+<div class="container-fluid py-4">
+
+
+    <!-- ========================================================= -->
+    <!-- HEADER -->
+    <!-- ========================================================= -->
+
+    <div
+        class="
+            d-flex
+            flex-wrap
+            justify-content-between
+            align-items-center
+            gap-3
+            mb-4
+        "
+    >
+
+        <div>
+
+            <h1 class="h3 fw-bold mb-1">
+                Adjust Stock
+            </h1>
+
+            <p class="text-muted mb-0">
+                Add or remove stock with a traceable reason.
+            </p>
+
+        </div>
+
+
+        <a
+            href="{% url 'inventory:detail' batch.pk %}"
+            class="btn btn-light border"
+        >
+            <i class="fa-solid fa-arrow-left me-2"></i>
+            Back to Batch
+        </a>
+
+    </div>
+
+
+    <!-- ========================================================= -->
+    <!-- BATCH INFORMATION -->
+    <!-- ========================================================= -->
+
+    <div class="dashboard-card mb-4">
+
+        <div class="row g-4">
+
+            <div class="col-md-3">
+
+                <div class="text-muted small mb-1">
+                    Medicine
+                </div>
+
+                <div class="fw-semibold">
+                    {{ batch.medicine.name }}
+                </div>
+
+                {% if batch.medicine.strength %}
+
+                    <div class="small text-muted">
+                        {{ batch.medicine.strength }}
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+
+            <div class="col-md-3">
+
+                <div class="text-muted small mb-1">
+                    Batch
+                </div>
+
+                <div class="fw-semibold">
+                    {{ batch.batch_number }}
+                </div>
+
+            </div>
+
+
+            <div class="col-md-3">
+
+                <div class="text-muted small mb-1">
+                    Branch
+                </div>
+
+                <div class="fw-semibold">
+                    {{ batch.branch.name }}
+                </div>
+
+            </div>
+
+
+            <div class="col-md-3">
+
+                <div class="text-muted small mb-1">
+                    Current Stock
+                </div>
+
+                <div class="fw-semibold">
+                    {{ batch.stock_display }}
+                </div>
+
+                <div class="small text-muted">
+                    {{ batch.quantity }}
+                    {{ batch.medicine.unit_label|lower }}{{ batch.quantity|pluralize }}
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ========================================================= -->
+    <!-- FORM -->
+    <!-- ========================================================= -->
+
+    <div class="card border-0 shadow-sm">
+
+        <div class="card-body p-4">
+
+
+            {% if form.non_field_errors %}
+
+                <div class="alert alert-danger">
+
+                    {% for error in form.non_field_errors %}
+                        <div>{{ error }}</div>
+                    {% endfor %}
+
+                </div>
+
+            {% endif %}
+
+
+            <form method="post" novalidate>
+
+                {% csrf_token %}
+
+
+                <div class="row g-4">
+
+
+                    <!-- Adjustment Type -->
+
+                    <div class="col-md-6">
+
+                        <label
+                            for="{{ form.adjustment_type.id_for_label }}"
+                            class="form-label"
+                        >
+                            Adjustment Type
+                            <span class="text-danger">*</span>
+                        </label>
+
+                        {{ form.adjustment_type }}
+
+                        {% if form.adjustment_type.errors %}
+
+                            <div class="text-danger small mt-1">
+
+                                {% for error in form.adjustment_type.errors %}
+                                    <div>{{ error }}</div>
+                                {% endfor %}
+
+                            </div>
+
+                        {% endif %}
+
+                    </div>
+
+
+                    <!-- Quantity -->
+
+                    <div class="col-md-6">
+
+                        <label
+                            for="{{ form.quantity.id_for_label }}"
+                            class="form-label"
+                        >
+                            Quantity
+                            <span class="text-danger">*</span>
+                        </label>
+
+                        {{ form.quantity }}
+
+
+                        {% if form.quantity.help_text %}
+
+                            <div class="form-text">
+                                {{ form.quantity.help_text }}
+                            </div>
+
+                        {% endif %}
+
+
+                        {% if form.quantity.errors %}
+
+                            <div class="text-danger small mt-1">
+
+                                {% for error in form.quantity.errors %}
+                                    <div>{{ error }}</div>
+                                {% endfor %}
+
+                            </div>
+
+                        {% endif %}
+
+                    </div>
+
+
+                    <!-- Reason -->
+
+                    <div class="col-12">
+
+                        <label
+                            for="{{ form.reason.id_for_label }}"
+                            class="form-label"
+                        >
+                            Reason
+                            <span class="text-danger">*</span>
+                        </label>
+
+                        {{ form.reason }}
+
+                        <div class="form-text">
+                            Example: damaged stock, physical count correction,
+                            expired stock disposal or data correction.
+                        </div>
+
+
+                        {% if form.reason.errors %}
+
+                            <div class="text-danger small mt-1">
+
+                                {% for error in form.reason.errors %}
+                                    <div>{{ error }}</div>
+                                {% endfor %}
+
+                            </div>
+
+                        {% endif %}
+
+                    </div>
+
+
+                </div>
+
+
+                <div class="alert alert-warning border mt-4 mb-0">
+
+                    <i class="fa-solid fa-triangle-exclamation me-2"></i>
+
+                    This action changes live inventory.
+                    Every adjustment will be permanently recorded
+                    in the batch history.
+
+                </div>
+
+
+                <hr class="my-4">
+
+
+                <div class="d-flex justify-content-end gap-2">
+
+                    <a
+                        href="{% url 'inventory:detail' batch.pk %}"
+                        class="btn btn-light border"
+                    >
+                        Cancel
+                    </a>
+
+
+                    <button
+                        type="submit"
+                        class="btn btn-primary"
+                    >
+                        <i class="fa-solid fa-sliders me-2"></i>
+                        Apply Adjustment
+                    </button>
+
+                </div>
+
+
+            </form>
+
+
+        </div>
+
+    </div>
+
+
+</div>
+
+{% endblock %}

@@ -6,6 +6,7 @@ from .models import Category, Medicine
 class CategoryForm(forms.ModelForm):
     class Meta:
         model = Category
+
         fields = [
             "name",
             "description",
@@ -48,6 +49,7 @@ class MedicineForm(forms.ModelForm):
             "strength",
             "unit",
             "pack_size",
+            "allow_loose_sale",
             "barcode",
             "sku",
             "purchase_price",
@@ -114,6 +116,11 @@ class MedicineForm(forms.ModelForm):
                     "class": "form-control",
                     "min": 1,
                     "placeholder": "e.g. 20",
+                }
+            ),
+            "allow_loose_sale": forms.CheckboxInput(
+                attrs={
+                    "class": "form-check-input",
                 }
             ),
             "barcode": forms.TextInput(
@@ -208,7 +215,9 @@ class MedicineForm(forms.ModelForm):
             "generic_name": "Generic Name",
             "country_of_origin": "Country of Origin",
             "dosage_form": "Dosage Form",
-            "pack_size": "Pack Size",
+            "unit": "Smallest Sellable Unit",
+            "pack_size": "Units Per Pack",
+            "allow_loose_sale": "Allow Loose Sale",
             "purchase_price": "Default Purchase Price",
             "selling_price": "Default Selling Price",
             "tax_rate": "Tax Rate (%)",
@@ -219,13 +228,45 @@ class MedicineForm(forms.ModelForm):
             "storage_condition": "Storage Condition",
         }
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.fields["category"].queryset = Category.objects.filter(
+            is_active=True
+        ).order_by("name")
+
+        self.has_inventory_batches = False
+
+        if self.instance and self.instance.pk:
+            self.has_inventory_batches = (
+                self.instance.inventory_batches.exists()
+            )
+
+        if self.has_inventory_batches:
+            self.fields["unit"].disabled = True
+            self.fields["pack_size"].disabled = True
+
+            self.fields["unit"].help_text = (
+                "This field cannot be changed because stock batches "
+                "already exist for this medicine."
+            )
+
+            self.fields["pack_size"].help_text = (
+                "This field cannot be changed because stock batches "
+                "already exist for this medicine."
+            )
+
     def clean(self):
         cleaned_data = super().clean()
 
         purchase_price = cleaned_data.get("purchase_price")
         selling_price = cleaned_data.get("selling_price")
+
         minimum_stock = cleaned_data.get("minimum_stock_level")
         reorder_level = cleaned_data.get("reorder_level")
+
+        pack_size = cleaned_data.get("pack_size")
+        allow_loose_sale = cleaned_data.get("allow_loose_sale")
 
         if (
             purchase_price is not None
@@ -234,7 +275,10 @@ class MedicineForm(forms.ModelForm):
         ):
             self.add_error(
                 "selling_price",
-                "Selling price cannot be lower than the purchase price.",
+                (
+                    "Selling price cannot be lower than "
+                    "the purchase price."
+                ),
             )
 
         if (
@@ -244,7 +288,23 @@ class MedicineForm(forms.ModelForm):
         ):
             self.add_error(
                 "reorder_level",
-                "Reorder level should be equal to or greater than the minimum stock level.",
+                (
+                    "Reorder level should be equal to or greater "
+                    "than the minimum stock level."
+                ),
+            )
+
+        if (
+            allow_loose_sale
+            and pack_size is not None
+            and pack_size <= 1
+        ):
+            self.add_error(
+                "pack_size",
+                (
+                    "Pack size must be greater than 1 "
+                    "when loose sale is enabled."
+                ),
             )
 
         return cleaned_data

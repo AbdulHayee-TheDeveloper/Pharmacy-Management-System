@@ -1,0 +1,757 @@
+{% extends "base/base.html" %}
+
+
+{% block title %}
+Sales / POS | PharmaCare
+{% endblock %}
+
+
+{% block content %}
+
+<div id="posPage" data-search-url="{% url 'sales:product_search' %}" data-checkout-url="{% url 'sales:checkout' %}"
+    data-receipt-url-template="{% url 'sales:receipt' 0 %}" data-detail-url-template="{% url 'sales:detail' 0 %}">
+
+    <!-- ====================================================== -->
+    <!-- PAGE HEADER -->
+    <!-- ====================================================== -->
+
+    <div class="
+            d-flex
+            flex-wrap
+            justify-content-between
+            align-items-center
+            gap-3
+            mb-4
+        ">
+
+        <div>
+            <h1 class="h3 mb-1">
+                Sales / POS
+            </h1>
+
+            <p class="text-muted mb-0">
+                Search medicines, select pack or loose units,
+                build the cart, and complete the sale.
+            </p>
+        </div>
+
+
+        {% if request.user.branch %}
+
+        <div class="badge text-bg-light border px-3 py-2">
+
+            <i class="fa-solid fa-store me-2"></i>
+
+            {{ request.user.branch.name }}
+
+        </div>
+
+        {% endif %}
+
+    </div>
+
+
+    <!-- ====================================================== -->
+    <!-- NO BRANCH WARNING -->
+    <!-- ====================================================== -->
+
+    {% if not request.user.branch %}
+
+    <div class="alert alert-warning">
+
+        <i class="fa-solid fa-triangle-exclamation me-2"></i>
+
+        Your account is not assigned to a branch.
+        Assign a branch before processing sales.
+
+    </div>
+
+    {% endif %}
+
+
+    <div class="row g-4">
+
+        <!-- ================================================== -->
+        <!-- LEFT SIDE: MEDICINE SEARCH -->
+        <!-- ================================================== -->
+
+        <div class="col-xl-7">
+
+            <div class="card border-0 shadow-sm">
+
+                <div class="card-body">
+
+                    <div class="mb-3">
+
+                        <label for="posMedicineSearch" class="form-label fw-semibold">
+                            Search Medicine
+                        </label>
+
+
+                        <div class="input-group">
+
+                            <span class="input-group-text bg-white">
+
+                                <i class="fa-solid fa-magnifying-glass"></i>
+
+                            </span>
+
+
+                            <input type="search" id="posMedicineSearch" class="form-control" placeholder="
+                                    Medicine, generic name,
+                                    barcode, SKU or batch...
+                                " autocomplete="off" {% if not request.user.branch %} disabled {% endif %}>
+
+                        </div>
+
+
+                        <div class="form-text">
+
+                            Only active, available and
+                            non-expired inventory is shown.
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- Search status -->
+
+                    <div id="posSearchStatus" class="small text-muted mb-3"></div>
+
+
+                    <!-- Search results -->
+
+                    <div id="posSearchResults" class="d-grid gap-2">
+
+                        <div class="text-center py-5 text-muted">
+
+                            <i class="
+                                    fa-solid
+                                    fa-pills
+                                    fa-2x
+                                    mb-3
+                                "></i>
+
+                            <div>
+                                Search for a medicine
+                                to start a sale.
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ================================================== -->
+        <!-- RIGHT SIDE: CART -->
+        <!-- ================================================== -->
+
+        <div class="col-xl-5">
+
+            <div class="card border-0 shadow-sm sticky-xl-top" style="top: 1rem;">
+
+                <!-- ========================================== -->
+                <!-- CART HEADER -->
+                <!-- ========================================== -->
+
+                <div class="card-header bg-white border-bottom py-3">
+
+                    <div class="
+                            d-flex
+                            justify-content-between
+                            align-items-center
+                        ">
+
+                        <div>
+
+                            <h2 class="h5 mb-0">
+                                Current Sale
+                            </h2>
+
+                            <small class="text-muted">
+
+                                <span id="posCartCount">
+                                    0
+                                </span>
+
+                                items
+
+                            </small>
+
+                        </div>
+
+
+                        <button type="button" id="posClearCart" class="
+                                btn
+                                btn-sm
+                                btn-outline-danger
+                            " disabled>
+
+                            <i class="
+                                    fa-solid
+                                    fa-trash-can
+                                    me-1
+                                "></i>
+
+                            Clear
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <div class="card-body">
+
+                    <!-- ====================================== -->
+                    <!-- EMPTY CART -->
+                    <!-- ====================================== -->
+
+                    <div id="posCartEmpty" class="
+                            text-center
+                            text-muted
+                            py-4
+                        ">
+
+                        <i class="
+                                fa-solid
+                                fa-cart-shopping
+                                fa-2x
+                                mb-3
+                            "></i>
+
+                        <div>
+                            Your cart is empty.
+                        </div>
+
+                    </div>
+
+
+                    <!-- ====================================== -->
+                    <!-- CART ITEMS -->
+                    <!-- ====================================== -->
+
+                    <div id="posCartItems" class="d-grid gap-3"></div>
+
+
+                    <hr>
+
+
+                    <!-- ====================================== -->
+                    <!-- CART INFORMATION -->
+                    <!-- ====================================== -->
+
+                    <div class="
+                            border
+                            rounded-3
+                            p-3
+                            mb-3
+                            bg-light
+                        ">
+
+                        <div class="
+                                d-flex
+                                align-items-start
+                                gap-2
+                            ">
+
+                            <i class="
+                                    fa-solid
+                                    fa-circle-info
+                                    text-primary
+                                    mt-1
+                                "></i>
+
+
+                            <div class="small text-muted">
+
+                                Medicines that allow loose sale
+                                can be sold either as a complete
+                                pack or as individual units such
+                                as tablets or capsules.
+
+                                Stock is always validated by the
+                                server before checkout.
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- ====================================== -->
+                    <!-- CUSTOMER DETAILS -->
+                    <!-- ====================================== -->
+
+                    <div class="row g-3 mb-3">
+
+                        <div class="col-md-6">
+
+                            <label for="posCustomerName" class="form-label">
+                                Customer Name
+                            </label>
+
+
+                            <input type="text" id="posCustomerName" class="form-control" maxlength="200"
+                                placeholder="Optional">
+
+                        </div>
+
+
+                        <div class="col-md-6">
+
+                            <label for="posCustomerPhone" class="form-label">
+                                Phone
+                            </label>
+
+
+                            <input type="text" id="posCustomerPhone" class="form-control" maxlength="30"
+                                placeholder="Optional">
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- ====================================== -->
+                    <!-- DISCOUNT + PAYMENT METHOD -->
+                    <!-- ====================================== -->
+
+                    <div class="row g-3 mb-3">
+
+                        <div class="col-md-6">
+
+                            <label for="posDiscount" class="form-label">
+                                Discount
+                            </label>
+
+
+                            <div class="input-group">
+
+                                <span class="input-group-text">
+                                    Rs.
+                                </span>
+
+
+                                <input type="number" id="posDiscount" class="form-control" min="0" step="0.01"
+                                    value="0">
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="col-md-6">
+
+                            <label for="posPaymentMethod" class="form-label">
+                                Payment Method
+                            </label>
+
+
+                            <select id="posPaymentMethod" class="form-select">
+
+                                <option value="cash">
+                                    Cash
+                                </option>
+
+                                <option value="card">
+                                    Card
+                                </option>
+
+                                <option value="bank_transfer">
+                                    Bank Transfer
+                                </option>
+
+                                <option value="mobile_wallet">
+                                    Mobile Wallet
+                                </option>
+
+                                <option value="credit">
+                                    Credit
+                                </option>
+
+                            </select>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- ====================================== -->
+                    <!-- PAID AMOUNT -->
+                    <!-- ====================================== -->
+
+                    <div class="mb-3">
+
+                        <label for="posPaidAmount" class="form-label">
+                            Paid Amount
+                        </label>
+
+
+                        <div class="input-group">
+
+                            <span class="input-group-text">
+                                Rs.
+                            </span>
+
+
+                            <input type="number" id="posPaidAmount" class="form-control" min="0" step="0.01" value="0">
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- ====================================== -->
+                    <!-- TOTAL SUMMARY -->
+                    <!-- ====================================== -->
+
+                    <div class="
+                            bg-light
+                            rounded-3
+                            p-3
+                            mb-3
+                        ">
+
+                        <!-- Subtotal -->
+
+                        <div class="
+                                d-flex
+                                justify-content-between
+                                mb-2
+                            ">
+
+                            <span class="text-muted">
+                                Subtotal
+                            </span>
+
+
+                            <span>
+
+                                Rs.
+
+                                <strong id="posSubtotal">
+                                    0.00
+                                </strong>
+
+                            </span>
+
+                        </div>
+
+
+                        <!-- Tax -->
+
+                        <div class="
+                                d-flex
+                                justify-content-between
+                                mb-2
+                            ">
+
+                            <span class="text-muted">
+                                Estimated Tax
+                            </span>
+
+
+                            <span>
+
+                                Rs.
+
+                                <strong id="posTax">
+                                    0.00
+                                </strong>
+
+                            </span>
+
+                        </div>
+
+
+                        <!-- Discount -->
+
+                        <div class="
+                                d-flex
+                                justify-content-between
+                                mb-2
+                            ">
+
+                            <span class="text-muted">
+                                Discount
+                            </span>
+
+
+                            <span>
+
+                                Rs.
+
+                                <strong id="posDiscountDisplay">
+                                    0.00
+                                </strong>
+
+                            </span>
+
+                        </div>
+
+
+                        <hr>
+
+
+                        <!-- Total -->
+
+                        <div class="
+                                d-flex
+                                justify-content-between
+                                fs-5
+                            ">
+
+                            <strong>
+                                Total
+                            </strong>
+
+
+                            <strong>
+
+                                Rs.
+
+                                <span id="posTotal">
+                                    0.00
+                                </span>
+
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- ====================================== -->
+                    <!-- CHECKOUT ERROR -->
+                    <!-- ====================================== -->
+
+                    <div id="posCheckoutError" class="
+                            alert
+                            alert-danger
+                            d-none
+                        " role="alert"></div>
+
+
+                    <!-- ====================================== -->
+                    <!-- CHECKOUT -->
+                    <!-- ====================================== -->
+
+                    <button type="button" id="posCheckoutButton" class="
+                            btn
+                            btn-primary
+                            w-100
+                            py-2
+                        " disabled>
+
+                        <i class="
+                                fa-solid
+                                fa-cash-register
+                                me-2
+                            "></i>
+
+                        Complete Sale
+
+                    </button>
+
+
+                    <div class="small text-muted mt-2">
+
+                        Final prices, available stock,
+                        pack quantities and loose-unit
+                        permissions are validated again
+                        by the server during checkout.
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- ========================================================== -->
+<!-- SALE SUCCESS MODAL -->
+<!-- ========================================================== -->
+
+<div class="modal fade" id="posSuccessModal" tabindex="-1" aria-labelledby="posSuccessModalLabel" aria-hidden="true">
+
+    <div class="modal-dialog modal-dialog-centered">
+
+        <div class="modal-content border-0">
+
+            <div class="modal-body text-center p-4">
+
+                <div class="mb-3">
+
+                    <i class="
+                            fa-solid
+                            fa-circle-check
+                            fa-3x
+                            text-success
+                        "></i>
+
+                </div>
+
+
+                <h3 class="h4" id="posSuccessModalLabel">
+                    Sale Completed
+                </h3>
+
+
+                <p class="text-muted">
+
+                    The sale was saved successfully
+                    and inventory stock was updated.
+
+                </p>
+
+
+                <div class="
+                        bg-light
+                        rounded-3
+                        p-3
+                        text-start
+                        mb-3
+                    ">
+
+                    <!-- Invoice -->
+
+                    <div class="
+                            d-flex
+                            justify-content-between
+                            mb-2
+                        ">
+
+                        <span>
+                            Invoice
+                        </span>
+
+                        <strong id="posSuccessInvoice">
+                            —
+                        </strong>
+
+                    </div>
+
+
+                    <!-- Total -->
+
+                    <div class="
+                            d-flex
+                            justify-content-between
+                            mb-2
+                        ">
+
+                        <span>
+                            Total
+                        </span>
+
+
+                        <strong>
+
+                            Rs.
+
+                            <span id="posSuccessTotal">
+                                0.00
+                            </span>
+
+                        </strong>
+
+                    </div>
+
+
+                    <!-- Paid -->
+
+                    <div class="
+                            d-flex
+                            justify-content-between
+                            mb-2
+                        ">
+
+                        <span>
+                            Paid
+                        </span>
+
+
+                        <strong>
+
+                            Rs.
+
+                            <span id="posSuccessPaid">
+                                0.00
+                            </span>
+
+                        </strong>
+
+                    </div>
+
+
+                    <!-- Change -->
+
+                    <div class="
+                            d-flex
+                            justify-content-between
+                        ">
+
+                        <span>
+                            Change
+                        </span>
+
+
+                        <strong>
+
+                            Rs.
+
+                            <span id="posSuccessChange">
+                                0.00
+                            </span>
+
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <div class="d-grid gap-2">
+
+                    <a href="#" id="posSuccessPrintReceipt" class="btn btn-primary" target="_blank" rel="noopener">
+                        <i class="fa-solid fa-print me-2"></i>
+                        Print Receipt
+                    </a>
+
+                    <a href="#" id="posSuccessViewSale" class="btn btn-outline-primary">
+                        <i class="fa-solid fa-eye me-2"></i>
+                        View Sale
+                    </a>
+
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                        <i class="fa-solid fa-plus me-2"></i>
+                        Start New Sale
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

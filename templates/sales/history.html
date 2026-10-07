@@ -1,0 +1,766 @@
+{% extends "base/base.html" %}
+
+
+{% block title %}
+Sale History | PharmaCare
+{% endblock %}
+
+
+{% block content %}
+
+<div class="container-fluid px-0">
+
+    <!-- ====================================================== -->
+    <!-- HEADER -->
+    <!-- ====================================================== -->
+
+    <div
+        class="
+            d-flex
+            flex-wrap
+            justify-content-between
+            align-items-center
+            gap-3
+            mb-4
+        "
+    >
+        <div>
+            <h1 class="h3 mb-1">
+                Sale History
+            </h1>
+
+            <p class="text-muted mb-0">
+                View and search completed pharmacy sales.
+            </p>
+        </div>
+
+        {% if perms.sales.add_sale %}
+            <a
+                href="{% url 'sales:pos' %}"
+                class="btn btn-primary"
+            >
+                <i class="fa-solid fa-cash-register me-2"></i>
+                New Sale
+            </a>
+        {% endif %}
+    </div>
+
+
+    <!-- ====================================================== -->
+    <!-- FILTERS -->
+    <!-- ====================================================== -->
+
+    <div class="card border-0 shadow-sm mb-4">
+
+        <div class="card-body">
+
+            <form
+                method="get"
+                action="{% url 'sales:history' %}"
+            >
+
+                <div class="row g-3">
+
+                    <!-- Search -->
+
+                    <div class="col-lg-4 col-md-6">
+
+                        <label
+                            for="saleSearch"
+                            class="form-label"
+                        >
+                            Search
+                        </label>
+
+                        <div class="input-group">
+
+                            <span class="input-group-text bg-white">
+                                <i class="fa-solid fa-magnifying-glass"></i>
+                            </span>
+
+                            <input
+                                type="search"
+                                name="q"
+                                id="saleSearch"
+                                class="form-control"
+                                value="{{ query }}"
+                                placeholder="Invoice, customer or cashier..."
+                            >
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- Payment Method -->
+
+                    <div class="col-lg-2 col-md-6">
+
+                        <label
+                            for="paymentMethodFilter"
+                            class="form-label"
+                        >
+                            Payment Method
+                        </label>
+
+                        <select
+                            name="payment_method"
+                            id="paymentMethodFilter"
+                            class="form-select"
+                        >
+                            <option value="">
+                                All Methods
+                            </option>
+
+                            {% for value, label in payment_methods %}
+                                <option
+                                    value="{{ value }}"
+                                    {% if selected_payment_method == value %}
+                                        selected
+                                    {% endif %}
+                                >
+                                    {{ label }}
+                                </option>
+                            {% endfor %}
+                        </select>
+
+                    </div>
+
+
+                    <!-- Payment Status -->
+
+                    <div class="col-lg-2 col-md-6">
+
+                        <label
+                            for="paymentStatusFilter"
+                            class="form-label"
+                        >
+                            Payment Status
+                        </label>
+
+                        <select
+                            name="payment_status"
+                            id="paymentStatusFilter"
+                            class="form-select"
+                        >
+                            <option value="">
+                                All Statuses
+                            </option>
+
+                            {% for value, label in payment_statuses %}
+                                <option
+                                    value="{{ value }}"
+                                    {% if selected_payment_status == value %}
+                                        selected
+                                    {% endif %}
+                                >
+                                    {{ label }}
+                                </option>
+                            {% endfor %}
+                        </select>
+
+                    </div>
+
+
+                    <!-- Sale Status -->
+
+                    <div class="col-lg-2 col-md-6">
+
+                        <label
+                            for="saleStatusFilter"
+                            class="form-label"
+                        >
+                            Sale Status
+                        </label>
+
+                        <select
+                            name="status"
+                            id="saleStatusFilter"
+                            class="form-select"
+                        >
+                            <option value="">
+                                All Statuses
+                            </option>
+
+                            {% for value, label in sale_statuses %}
+                                <option
+                                    value="{{ value }}"
+                                    {% if selected_status == value %}
+                                        selected
+                                    {% endif %}
+                                >
+                                    {{ label }}
+                                </option>
+                            {% endfor %}
+                        </select>
+
+                    </div>
+
+
+                    <!-- Date From -->
+
+                    <div class="col-lg-2 col-md-6">
+
+                        <label
+                            for="dateFromFilter"
+                            class="form-label"
+                        >
+                            From
+                        </label>
+
+                        <input
+                            type="date"
+                            name="date_from"
+                            id="dateFromFilter"
+                            class="form-control"
+                            value="{{ date_from }}"
+                        >
+
+                    </div>
+
+
+                    <!-- Date To -->
+
+                    <div class="col-lg-2 col-md-6">
+
+                        <label
+                            for="dateToFilter"
+                            class="form-label"
+                        >
+                            To
+                        </label>
+
+                        <input
+                            type="date"
+                            name="date_to"
+                            id="dateToFilter"
+                            class="form-control"
+                            value="{{ date_to }}"
+                        >
+
+                    </div>
+
+
+                    <!-- Buttons -->
+
+                    <div
+                        class="
+                            col-lg-4
+                            col-md-6
+                            d-flex
+                            align-items-end
+                            gap-2
+                        "
+                    >
+
+                        <button
+                            type="submit"
+                            class="btn btn-primary"
+                        >
+                            <i class="fa-solid fa-filter me-2"></i>
+                            Apply Filters
+                        </button>
+
+                        <a
+                            href="{% url 'sales:history' %}"
+                            class="btn btn-outline-secondary"
+                        >
+                            Reset
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+    <!-- ====================================================== -->
+    <!-- SALES TABLE -->
+    <!-- ====================================================== -->
+
+    <div class="card border-0 shadow-sm">
+
+        <div
+            class="
+                card-header
+                bg-white
+                border-bottom
+                py-3
+            "
+        >
+
+            <div
+                class="
+                    d-flex
+                    justify-content-between
+                    align-items-center
+                    gap-3
+                "
+            >
+
+                <div>
+                    <h2 class="h5 mb-0">
+                        Sales
+                    </h2>
+
+                    <small class="text-muted">
+                        {{ page_obj.paginator.count }}
+                        record{{ page_obj.paginator.count|pluralize }}
+                    </small>
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="card-body p-0">
+
+            {% if sales %}
+
+                <div class="table-responsive">
+
+                    <table
+                        class="
+                            table
+                            table-hover
+                            align-middle
+                            mb-0
+                        "
+                    >
+
+                        <thead class="table-light">
+
+                            <tr>
+                                <th class="ps-4">
+                                    Invoice
+                                </th>
+
+                                <th>
+                                    Date
+                                </th>
+
+                                <th>
+                                    Customer
+                                </th>
+
+                                <th>
+                                    Cashier
+                                </th>
+
+                                <th>
+                                    Payment
+                                </th>
+
+                                <th>
+                                    Status
+                                </th>
+
+                                <th class="text-end">
+                                    Total
+                                </th>
+
+                                <th class="text-end pe-4">
+                                    Action
+                                </th>
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody>
+
+                            {% for sale in sales %}
+
+                                <tr>
+
+                                    <!-- Invoice -->
+
+                                    <td class="ps-4">
+
+                                        <a
+                                            href="{% url 'sales:detail' sale.pk %}"
+                                            class="
+                                                fw-semibold
+                                                text-decoration-none
+                                            "
+                                        >
+                                            {{ sale.invoice_number }}
+                                        </a>
+
+                                        {% if not request.user.branch %}
+                                            <div class="small text-muted">
+                                                {{ sale.branch.name }}
+                                            </div>
+                                        {% endif %}
+
+                                    </td>
+
+
+                                    <!-- Date -->
+
+                                    <td>
+
+                                        <div>
+                                            {{ sale.created_at|date:"d M Y" }}
+                                        </div>
+
+                                        <small class="text-muted">
+                                            {{ sale.created_at|date:"h:i A" }}
+                                        </small>
+
+                                    </td>
+
+
+                                    <!-- Customer -->
+
+                                    <td>
+
+                                        {% if sale.customer_name %}
+
+                                            <div class="fw-medium">
+                                                {{ sale.customer_name }}
+                                            </div>
+
+                                            {% if sale.customer_phone %}
+                                                <small class="text-muted">
+                                                    {{ sale.customer_phone }}
+                                                </small>
+                                            {% endif %}
+
+                                        {% elif sale.customer_phone %}
+
+                                            <div>
+                                                {{ sale.customer_phone }}
+                                            </div>
+
+                                        {% else %}
+
+                                            <span class="text-muted">
+                                                Walk-in Customer
+                                            </span>
+
+                                        {% endif %}
+
+                                    </td>
+
+
+                                    <!-- Cashier -->
+
+                                    <td>
+
+                                        {% if sale.cashier.get_full_name %}
+
+                                            {{ sale.cashier.get_full_name }}
+
+                                        {% else %}
+
+                                            {{ sale.cashier.username }}
+
+                                        {% endif %}
+
+                                    </td>
+
+
+                                    <!-- Payment -->
+
+                                    <td>
+
+                                        <div class="mb-1">
+                                            {{ sale.get_payment_method_display }}
+                                        </div>
+
+
+                                        {% if sale.payment_status == "paid" %}
+
+                                            <span
+                                                class="
+                                                    badge
+                                                    text-bg-success
+                                                "
+                                            >
+                                                {{ sale.get_payment_status_display }}
+                                            </span>
+
+                                        {% elif sale.payment_status == "partial" %}
+
+                                            <span
+                                                class="
+                                                    badge
+                                                    text-bg-warning
+                                                "
+                                            >
+                                                {{ sale.get_payment_status_display }}
+                                            </span>
+
+                                        {% else %}
+
+                                            <span
+                                                class="
+                                                    badge
+                                                    text-bg-danger
+                                                "
+                                            >
+                                                {{ sale.get_payment_status_display }}
+                                            </span>
+
+                                        {% endif %}
+
+                                    </td>
+
+
+                                    <!-- Sale Status -->
+
+                                    <td>
+
+                                        {% if sale.status == "completed" %}
+
+                                            <span
+                                                class="
+                                                    badge
+                                                    text-bg-success
+                                                "
+                                            >
+                                                {{ sale.get_status_display }}
+                                            </span>
+
+                                        {% elif sale.status == "voided" %}
+
+                                            <span
+                                                class="
+                                                    badge
+                                                    text-bg-danger
+                                                "
+                                            >
+                                                {{ sale.get_status_display }}
+                                            </span>
+
+                                        {% elif sale.status == "refunded" %}
+
+                                            <span
+                                                class="
+                                                    badge
+                                                    text-bg-warning
+                                                "
+                                            >
+                                                {{ sale.get_status_display }}
+                                            </span>
+
+                                        {% else %}
+
+                                            <span
+                                                class="
+                                                    badge
+                                                    text-bg-secondary
+                                                "
+                                            >
+                                                {{ sale.get_status_display }}
+                                            </span>
+
+                                        {% endif %}
+
+                                    </td>
+
+
+                                    <!-- Total -->
+
+                                    <td
+                                        class="
+                                            text-end
+                                            fw-semibold
+                                        "
+                                    >
+                                        Rs.
+                                        {{ sale.total_amount|floatformat:2 }}
+                                    </td>
+
+
+                                    <!-- Action -->
+
+                                    <td class="text-end pe-4">
+
+                                        <a
+                                            href="{% url 'sales:detail' sale.pk %}"
+                                            class="
+                                                btn
+                                                btn-sm
+                                                btn-outline-primary
+                                            "
+                                        >
+                                            <i class="fa-solid fa-eye me-1"></i>
+                                            View
+                                        </a>
+
+                                    </td>
+
+                                </tr>
+
+                            {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            {% else %}
+
+                <!-- ========================================== -->
+                <!-- EMPTY STATE -->
+                <!-- ========================================== -->
+
+                <div class="text-center py-5">
+
+                    <i
+                        class="
+                            fa-solid
+                            fa-receipt
+                            fa-3x
+                            text-muted
+                            mb-3
+                        "
+                    ></i>
+
+                    <h3 class="h5">
+                        No sales found
+                    </h3>
+
+                    <p class="text-muted mb-3">
+                        No sale records match the selected filters.
+                    </p>
+
+                    {% if perms.sales.add_sale %}
+
+                        <a
+                            href="{% url 'sales:pos' %}"
+                            class="btn btn-primary"
+                        >
+                            <i class="fa-solid fa-cash-register me-2"></i>
+                            Start New Sale
+                        </a>
+
+                    {% endif %}
+
+                </div>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+
+    <!-- ====================================================== -->
+    <!-- PAGINATION -->
+    <!-- ====================================================== -->
+
+    {% if page_obj.paginator.num_pages > 1 %}
+
+        <nav
+            class="mt-4"
+            aria-label="Sale history pagination"
+        >
+
+            <ul class="pagination justify-content-center">
+
+                <!-- Previous -->
+
+                {% if page_obj.has_previous %}
+
+                    <li class="page-item">
+
+                        <a
+                            class="page-link"
+                            href="?q={{ query|urlencode }}&payment_method={{ selected_payment_method|urlencode }}&payment_status={{ selected_payment_status|urlencode }}&status={{ selected_status|urlencode }}&date_from={{ date_from|urlencode }}&date_to={{ date_to|urlencode }}&page={{ page_obj.previous_page_number }}"
+                        >
+                            <i class="fa-solid fa-chevron-left"></i>
+                        </a>
+
+                    </li>
+
+                {% else %}
+
+                    <li class="page-item disabled">
+
+                        <span class="page-link">
+                            <i class="fa-solid fa-chevron-left"></i>
+                        </span>
+
+                    </li>
+
+                {% endif %}
+
+
+                <!-- Page Numbers -->
+
+                {% for number in page_obj.paginator.page_range %}
+
+                    {% if number == page_obj.number %}
+
+                        <li class="page-item active">
+
+                            <span class="page-link">
+                                {{ number }}
+                            </span>
+
+                        </li>
+
+                    {% elif number >= page_obj.number|add:"-2" and number <= page_obj.number|add:"2" %}
+
+                        <li class="page-item">
+
+                            <a
+                                class="page-link"
+                                href="?q={{ query|urlencode }}&payment_method={{ selected_payment_method|urlencode }}&payment_status={{ selected_payment_status|urlencode }}&status={{ selected_status|urlencode }}&date_from={{ date_from|urlencode }}&date_to={{ date_to|urlencode }}&page={{ number }}"
+                            >
+                                {{ number }}
+                            </a>
+
+                        </li>
+
+                    {% endif %}
+
+                {% endfor %}
+
+
+                <!-- Next -->
+
+                {% if page_obj.has_next %}
+
+                    <li class="page-item">
+
+                        <a
+                            class="page-link"
+                            href="?q={{ query|urlencode }}&payment_method={{ selected_payment_method|urlencode }}&payment_status={{ selected_payment_status|urlencode }}&status={{ selected_status|urlencode }}&date_from={{ date_from|urlencode }}&date_to={{ date_to|urlencode }}&page={{ page_obj.next_page_number }}"
+                        >
+                            <i class="fa-solid fa-chevron-right"></i>
+                        </a>
+
+                    </li>
+
+                {% else %}
+
+                    <li class="page-item disabled">
+
+                        <span class="page-link">
+                            <i class="fa-solid fa-chevron-right"></i>
+                        </span>
+
+                    </li>
+
+                {% endif %}
+
+            </ul>
+
+        </nav>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}

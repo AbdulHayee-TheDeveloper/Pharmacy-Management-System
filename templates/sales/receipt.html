@@ -1,0 +1,683 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        {{ sale.invoice_number }} | Receipt
+    </title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #f5f7f9;
+            font-family: Arial, Helvetica, sans-serif;
+            color: #172033;
+        }
+
+        .receipt-wrapper {
+            max-width: 420px;
+            margin: 0 auto;
+        }
+
+        .receipt-card {
+            background: #ffffff;
+            border: 1px solid #e7eaee;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 18px rgba(0, 0, 0, 0.06);
+        }
+
+        .receipt-header {
+            text-align: center;
+            margin-bottom: 22px;
+        }
+
+        .brand-icon {
+            width: 48px;
+            height: 48px;
+            margin: 0 auto 10px;
+            border-radius: 50%;
+            background: #0f766e;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            font-weight: bold;
+        }
+
+        .brand-name {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .brand-subtitle {
+            font-size: 11px;
+            letter-spacing: 1px;
+            color: #667085;
+        }
+
+        .branch-name {
+            margin-top: 8px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .divider {
+            border-top: 1px dashed #98a2b3;
+            margin: 18px 0;
+        }
+
+        .receipt-meta {
+            font-size: 13px;
+        }
+
+        .meta-row,
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 8px;
+        }
+
+        .meta-label,
+        .summary-label {
+            color: #667085;
+        }
+
+        .meta-value,
+        .summary-value {
+            text-align: right;
+            font-weight: 600;
+        }
+
+        .items-title {
+            font-weight: 700;
+            margin-bottom: 12px;
+            font-size: 14px;
+        }
+
+        .receipt-item {
+            padding: 10px 0;
+            border-bottom: 1px solid #eef0f3;
+        }
+
+        .receipt-item:last-child {
+            border-bottom: none;
+        }
+
+        .item-name {
+            font-weight: 700;
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+
+        .item-meta {
+            font-size: 12px;
+            color: #667085;
+            margin-bottom: 6px;
+        }
+
+        .item-price-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            font-size: 13px;
+        }
+
+        .item-price-row .total {
+            font-weight: 700;
+        }
+
+        .grand-total {
+            font-size: 18px;
+            font-weight: 700;
+            margin-top: 12px;
+        }
+
+        .payment-status {
+            text-align: center;
+            margin-top: 16px;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .status-paid {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .status-partial {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-unpaid {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .receipt-footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 12px;
+            color: #667085;
+        }
+
+        .footer-title {
+            font-weight: 700;
+            color: #172033;
+            margin-bottom: 4px;
+        }
+
+        .actions {
+            max-width: 420px;
+            margin: 18px auto 0;
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            flex: 1;
+            border: none;
+            border-radius: 8px;
+            padding: 11px 14px;
+            font-size: 14px;
+            cursor: pointer;
+            text-decoration: none;
+            text-align: center;
+        }
+
+        .btn-print {
+            background: #0f766e;
+            color: #ffffff;
+        }
+
+        .btn-back {
+            background: #ffffff;
+            color: #172033;
+            border: 1px solid #d0d5dd;
+        }
+
+        @media print {
+
+            @page {
+                margin: 6mm;
+            }
+
+            body {
+                background: #ffffff;
+                padding: 0;
+            }
+
+            .receipt-wrapper {
+                max-width: 100%;
+            }
+
+            .receipt-card {
+                box-shadow: none;
+                border: none;
+                border-radius: 0;
+                padding: 0;
+            }
+
+            .actions {
+                display: none;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+
+    <div class="receipt-wrapper">
+
+        <div class="receipt-card">
+
+
+            <!-- ================================================= -->
+            <!-- HEADER -->
+            <!-- ================================================= -->
+
+            <div class="receipt-header">
+
+                <div class="brand-icon">
+                    Rx
+                </div>
+
+                <div class="brand-name">
+                    PharmaCare
+                </div>
+
+                <div class="brand-subtitle">
+                    PHARMACY MANAGEMENT
+                </div>
+
+                <div class="branch-name">
+                    {{ sale.branch.name }}
+                </div>
+
+            </div>
+
+
+            <div class="divider"></div>
+
+
+            <!-- ================================================= -->
+            <!-- SALE INFORMATION -->
+            <!-- ================================================= -->
+
+            <div class="receipt-meta">
+
+                <div class="meta-row">
+                    <span class="meta-label">
+                        Invoice
+                    </span>
+
+                    <span class="meta-value">
+                        {{ sale.invoice_number }}
+                    </span>
+                </div>
+
+
+                <div class="meta-row">
+                    <span class="meta-label">
+                        Date
+                    </span>
+
+                    <span class="meta-value">
+                        {{ sale.created_at|date:"d M Y" }}
+                    </span>
+                </div>
+
+
+                <div class="meta-row">
+                    <span class="meta-label">
+                        Time
+                    </span>
+
+                    <span class="meta-value">
+                        {{ sale.created_at|date:"h:i A" }}
+                    </span>
+                </div>
+
+
+                <div class="meta-row">
+                    <span class="meta-label">
+                        Cashier
+                    </span>
+
+                    <span class="meta-value">
+
+                        {% if sale.cashier.get_full_name %}
+                            {{ sale.cashier.get_full_name }}
+                        {% else %}
+                            {{ sale.cashier.username }}
+                        {% endif %}
+
+                    </span>
+                </div>
+
+
+                <div class="meta-row">
+                    <span class="meta-label">
+                        Customer
+                    </span>
+
+                    <span class="meta-value">
+
+                        {% if sale.customer_name %}
+                            {{ sale.customer_name }}
+                        {% else %}
+                            Walk-in
+                        {% endif %}
+
+                    </span>
+                </div>
+
+
+                {% if sale.customer_phone %}
+
+                    <div class="meta-row">
+                        <span class="meta-label">
+                            Phone
+                        </span>
+
+                        <span class="meta-value">
+                            {{ sale.customer_phone }}
+                        </span>
+                    </div>
+
+                {% endif %}
+
+
+                <div class="meta-row">
+                    <span class="meta-label">
+                        Payment
+                    </span>
+
+                    <span class="meta-value">
+                        {{ sale.get_payment_method_display }}
+                    </span>
+                </div>
+
+            </div>
+
+
+            <div class="divider"></div>
+
+
+            <!-- ================================================= -->
+            <!-- SALE ITEMS -->
+            <!-- ================================================= -->
+
+            <div class="items-title">
+                Items
+            </div>
+
+
+            {% for item in sale_items %}
+
+                <div class="receipt-item">
+
+                    <div class="item-name">
+                        {{ item.medicine_name }}
+
+                        {% if item.medicine.strength %}
+                            {{ item.medicine.strength }}
+                        {% endif %}
+                    </div>
+
+
+                    <div class="item-meta">
+
+                        Batch:
+                        {{ item.batch_number }}
+
+                        &nbsp;•&nbsp;
+
+                        {% if item.sale_type == "pack" %}
+
+                            Pack
+
+                            {% if item.pack_size > 1 %}
+                                of {{ item.pack_size }}
+                                {{ item.unit_label|lower }}s
+                            {% endif %}
+
+                        {% else %}
+
+                            {{ item.unit_label }}
+
+                        {% endif %}
+
+                    </div>
+
+
+                    <div class="item-price-row">
+
+                        <span>
+
+                            {{ item.quantity }}
+
+                            {% if item.sale_type == "pack" %}
+
+                                pack{% if item.quantity != 1 %}s{% endif %}
+
+                            {% else %}
+
+                                {{ item.unit_label|lower }}{% if item.quantity != 1 %}s{% endif %}
+
+                            {% endif %}
+
+                            × Rs.
+                            {{ item.unit_price|floatformat:2 }}
+
+                        </span>
+
+
+                        <span class="total">
+                            Rs.
+                            {{ item.line_total|floatformat:2 }}
+                        </span>
+
+                    </div>
+
+                </div>
+
+            {% empty %}
+
+                <div style="text-align: center; color: #667085; padding: 20px 0;">
+                    No items found.
+                </div>
+
+            {% endfor %}
+
+
+            <div class="divider"></div>
+
+
+            <!-- ================================================= -->
+            <!-- TOTALS -->
+            <!-- ================================================= -->
+
+            <div class="summary-row">
+
+                <span class="summary-label">
+                    Subtotal
+                </span>
+
+                <span class="summary-value">
+                    Rs.
+                    {{ sale.subtotal|floatformat:2 }}
+                </span>
+
+            </div>
+
+
+            <div class="summary-row">
+
+                <span class="summary-label">
+                    Tax
+                </span>
+
+                <span class="summary-value">
+                    Rs.
+                    {{ sale.tax_amount|floatformat:2 }}
+                </span>
+
+            </div>
+
+
+            <div class="summary-row">
+
+                <span class="summary-label">
+                    Discount
+                </span>
+
+                <span class="summary-value">
+                    - Rs.
+                    {{ sale.discount_amount|floatformat:2 }}
+                </span>
+
+            </div>
+
+
+            <div class="divider"></div>
+
+
+            <div class="summary-row grand-total">
+
+                <span>
+                    TOTAL
+                </span>
+
+                <span>
+                    Rs.
+                    {{ sale.total_amount|floatformat:2 }}
+                </span>
+
+            </div>
+
+
+            <div class="divider"></div>
+
+
+            <div class="summary-row">
+
+                <span class="summary-label">
+                    Paid
+                </span>
+
+                <span class="summary-value">
+                    Rs.
+                    {{ sale.paid_amount|floatformat:2 }}
+                </span>
+
+            </div>
+
+
+            <div class="summary-row">
+
+                <span class="summary-label">
+                    Change
+                </span>
+
+                <span class="summary-value">
+                    Rs.
+                    {{ sale.change_amount|floatformat:2 }}
+                </span>
+
+            </div>
+
+
+            <!-- ================================================= -->
+            <!-- PAYMENT STATUS -->
+            <!-- ================================================= -->
+
+            <div class="payment-status">
+
+                {% if sale.payment_status == "paid" %}
+
+                    <span class="status-badge status-paid">
+                        {{ sale.get_payment_status_display }}
+                    </span>
+
+                {% elif sale.payment_status == "partial" %}
+
+                    <span class="status-badge status-partial">
+                        {{ sale.get_payment_status_display }}
+                    </span>
+
+                {% else %}
+
+                    <span class="status-badge status-unpaid">
+                        {{ sale.get_payment_status_display }}
+                    </span>
+
+                {% endif %}
+
+            </div>
+
+
+            <!-- ================================================= -->
+            <!-- NOTES -->
+            <!-- ================================================= -->
+
+            {% if sale.notes %}
+
+                <div class="divider"></div>
+
+                <div
+                    style="
+                        font-size: 12px;
+                        color: #667085;
+                    "
+                >
+                    <strong style="color: #172033;">
+                        Notes:
+                    </strong>
+
+                    {{ sale.notes|linebreaksbr }}
+                </div>
+
+            {% endif %}
+
+
+            <!-- ================================================= -->
+            <!-- FOOTER -->
+            <!-- ================================================= -->
+
+            <div class="receipt-footer">
+
+                <div class="footer-title">
+                    Thank you for your purchase!
+                </div>
+
+                <div>
+                    Please keep this receipt for your records.
+                </div>
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+
+    <!-- ========================================================= -->
+    <!-- ACTIONS -->
+    <!-- ========================================================= -->
+
+    <div class="actions">
+
+        <a
+            href="{% url 'sales:detail' sale.pk %}"
+            class="btn btn-back"
+        >
+            Back
+        </a>
+
+        <button
+            type="button"
+            class="btn btn-print"
+            onclick="window.print()"
+        >
+            Print Receipt
+        </button>
+
+    </div>
+
+
+</body>
+
+</html>

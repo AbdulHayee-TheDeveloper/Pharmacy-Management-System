@@ -1,13 +1,29 @@
 {% extends "base/base.html" %}
 
-{% block title %}{{ medicine.name }} | PharmaCare{% endblock %}
+{% block title %}
+{{ medicine.name }} | PharmaCare
+{% endblock %}
+
 
 {% block content %}
 
 <div class="container-fluid py-4">
 
-    <!-- Page Header -->
-    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+
+    <!-- ========================================================= -->
+    <!-- PAGE HEADER -->
+    <!-- ========================================================= -->
+
+    <div
+        class="
+            d-flex
+            flex-wrap
+            justify-content-between
+            align-items-center
+            gap-3
+            mb-4
+        "
+    >
 
         <div>
 
@@ -20,7 +36,14 @@
                     Medicines
                 </a>
 
-                <i class="fa-solid fa-chevron-right text-muted small"></i>
+                <i
+                    class="
+                        fa-solid
+                        fa-chevron-right
+                        text-muted
+                        small
+                    "
+                ></i>
 
                 <span class="text-muted">
                     {{ medicine.name }}
@@ -28,48 +51,109 @@
 
             </div>
 
+
             <h1 class="h3 fw-bold mb-1">
 
                 {{ medicine.name }}
 
                 {% if medicine.strength %}
+
                     <span class="text-muted fw-normal">
                         {{ medicine.strength }}
                     </span>
+
                 {% endif %}
 
             </h1>
 
+
             <p class="text-muted mb-0">
-                Medicine details and available stock
+                Medicine details and available stock information.
             </p>
 
         </div>
 
 
-        <a
-            href="{% url 'medicines:list' %}"
-            class="btn btn-light border"
-        >
-            <i class="fa-solid fa-arrow-left me-2"></i>
-            Back to Medicines
-        </a>
+        <div class="d-flex flex-wrap gap-2">
+
+
+            {% if perms.medicines.change_medicine %}
+
+                <a
+                    href="{% url 'medicines:edit' medicine.pk %}"
+                    class="btn btn-primary"
+                >
+
+                    <i
+                        class="
+                            fa-solid
+                            fa-pen-to-square
+                            me-2
+                        "
+                    ></i>
+
+                    Edit Medicine
+
+                </a>
+
+            {% endif %}
+
+
+            <a
+                href="{% url 'medicines:list' %}"
+                class="btn btn-light border"
+            >
+
+                <i
+                    class="
+                        fa-solid
+                        fa-arrow-left
+                        me-2
+                    "
+                ></i>
+
+                Back to Medicines
+
+            </a>
+
+
+        </div>
 
     </div>
 
 
-    <!-- Overview -->
+    <!-- ========================================================= -->
+    <!-- OVERVIEW -->
+    <!-- ========================================================= -->
+
     <div class="row g-4 mb-4">
 
-        <!-- Medicine Image -->
+
+        <!-- ================================================= -->
+        <!-- MEDICINE IMAGE -->
+        <!-- ================================================= -->
+
         <div class="col-xl-3 col-lg-4">
 
             <div class="dashboard-card h-100 text-center">
 
+
                 <div
-                    class="d-flex align-items-center justify-content-center rounded-3 bg-light mx-auto mb-3"
-                    style="width: 180px; height: 180px;"
+                    class="
+                        d-flex
+                        align-items-center
+                        justify-content-center
+                        rounded-3
+                        bg-light
+                        mx-auto
+                        mb-3
+                    "
+                    style="
+                        width: 180px;
+                        height: 180px;
+                    "
                 >
+
 
                     {% if medicine.image %}
 
@@ -77,17 +161,26 @@
                             src="{{ medicine.image.url }}"
                             alt="{{ medicine.name }}"
                             class="img-fluid rounded-3"
-                            style="max-width: 100%; max-height: 100%; object-fit: contain;"
+                            style="
+                                max-width: 100%;
+                                max-height: 100%;
+                                object-fit: contain;
+                            "
                         >
 
                     {% else %}
 
                         <i
-                            class="fa-solid fa-pills text-muted"
+                            class="
+                                fa-solid
+                                fa-pills
+                                text-muted
+                            "
                             style="font-size: 4rem;"
                         ></i>
 
                     {% endif %}
+
 
                 </div>
 
@@ -108,29 +201,68 @@
 
                 {% if medicine.is_active %}
 
-                    <span class="badge bg-success-subtle text-success px-3 py-2">
-                        <i class="fa-solid fa-circle-check me-1"></i>
+                    <span
+                        class="
+                            badge
+                            bg-success-subtle
+                            text-success
+                            px-3
+                            py-2
+                        "
+                    >
+
+                        <i
+                            class="
+                                fa-solid
+                                fa-circle-check
+                                me-1
+                            "
+                        ></i>
+
                         Active
+
                     </span>
 
                 {% else %}
 
-                    <span class="badge bg-danger-subtle text-danger px-3 py-2">
-                        <i class="fa-solid fa-circle-xmark me-1"></i>
+                    <span
+                        class="
+                            badge
+                            bg-danger-subtle
+                            text-danger
+                            px-3
+                            py-2
+                        "
+                    >
+
+                        <i
+                            class="
+                                fa-solid
+                                fa-circle-xmark
+                                me-1
+                            "
+                        ></i>
+
                         Inactive
+
                     </span>
 
                 {% endif %}
+
 
             </div>
 
         </div>
 
 
-        <!-- Quick Information -->
+        <!-- ================================================= -->
+        <!-- MEDICINE OVERVIEW -->
+        <!-- ================================================= -->
+
         <div class="col-xl-9 col-lg-8">
 
             <div class="dashboard-card h-100">
+
 
                 <div class="mb-4">
 
@@ -139,13 +271,16 @@
                     </h5>
 
                     <p class="text-muted small mb-0">
-                        Core medicine information
+                        Core medicine master information.
                     </p>
 
                 </div>
 
 
                 <div class="row g-4">
+
+
+                    <!-- Brand -->
 
                     <div class="col-md-4">
 
@@ -160,6 +295,8 @@
                     </div>
 
 
+                    <!-- Generic -->
+
                     <div class="col-md-4">
 
                         <div class="text-muted small mb-1">
@@ -172,6 +309,8 @@
 
                     </div>
 
+
+                    <!-- Category -->
 
                     <div class="col-md-4">
 
@@ -186,6 +325,8 @@
                     </div>
 
 
+                    <!-- Manufacturer -->
+
                     <div class="col-md-4">
 
                         <div class="text-muted small mb-1">
@@ -198,6 +339,8 @@
 
                     </div>
 
+
+                    <!-- Country -->
 
                     <div class="col-md-4">
 
@@ -212,6 +355,8 @@
                     </div>
 
 
+                    <!-- Dosage -->
+
                     <div class="col-md-4">
 
                         <div class="text-muted small mb-1">
@@ -224,6 +369,8 @@
 
                     </div>
 
+
+                    <!-- Strength -->
 
                     <div class="col-md-4">
 
@@ -238,10 +385,12 @@
                     </div>
 
 
+                    <!-- Unit -->
+
                     <div class="col-md-4">
 
                         <div class="text-muted small mb-1">
-                            Unit
+                            Smallest Sellable Unit
                         </div>
 
                         <div class="fw-semibold">
@@ -251,10 +400,12 @@
                     </div>
 
 
+                    <!-- Pack Size -->
+
                     <div class="col-md-4">
 
                         <div class="text-muted small mb-1">
-                            Pack Size
+                            Units Per Pack
                         </div>
 
                         <div class="fw-semibold">
@@ -263,7 +414,61 @@
 
                     </div>
 
+
+                    <!-- Pack Label -->
+
+                    <div class="col-md-4">
+
+                        <div class="text-muted small mb-1">
+                            Pack
+                        </div>
+
+                        <div class="fw-semibold">
+                            {{ medicine.pack_label }}
+                        </div>
+
+                    </div>
+
+
+                    <!-- Loose Sale -->
+
+                    <div class="col-md-4">
+
+                        <div class="text-muted small mb-1">
+                            Loose Sale
+                        </div>
+
+                        {% if medicine.allow_loose_sale %}
+
+                            <span
+                                class="
+                                    badge
+                                    bg-success-subtle
+                                    text-success
+                                "
+                            >
+                                Allowed
+                            </span>
+
+                        {% else %}
+
+                            <span
+                                class="
+                                    badge
+                                    bg-secondary-subtle
+                                    text-secondary
+                                "
+                            >
+                                Full Pack Only
+                            </span>
+
+                        {% endif %}
+
+                    </div>
+
+
                 </div>
+
 
             </div>
 
@@ -272,59 +477,124 @@
     </div>
 
 
-    <!-- Available Stock -->
-    <div class="dashboard-card mb-4">
+<!-- ========================================================= -->
+<!-- AVAILABLE STOCK -->
+<!-- ========================================================= -->
 
-        <div class="mb-4">
+<div class="dashboard-card mb-4">
 
-            <h5 class="fw-bold mb-1">
-                <i class="fa-solid fa-boxes-stacked text-primary me-2"></i>
-                Available Stock
-            </h5>
+    <div class="mb-4">
 
-            <p class="text-muted small mb-0">
-                Current inventory information for this medicine
-            </p>
+        <h5 class="fw-bold mb-1">
+
+            <i
+                class="
+                    fa-solid
+                    fa-boxes-stacked
+                    text-primary
+                    me-2
+                "
+            ></i>
+
+            Available Stock
+
+        </h5>
+
+        <p class="text-muted small mb-0">
+            Current usable inventory across active and non-expired batches.
+        </p>
+
+    </div>
+
+
+    <div class="row g-4">
+
+
+        <!-- Total Units -->
+
+        <div class="col-md-6 col-xl-3">
+
+            <div class="border rounded-3 p-3 h-100">
+
+                <div class="text-muted small mb-1">
+                    Available Units
+                </div>
+
+                <div class="fs-4 fw-bold">
+                    {{ total_quantity }}
+                </div>
+
+                <div class="small text-muted mt-1">
+                    {{ medicine.unit_label }}{{ total_quantity|pluralize }}
+                </div>
+
+            </div>
 
         </div>
 
 
-        <div class="row g-4">
+        <!-- Full Packs -->
 
-            <div class="col-md-4">
+        <div class="col-md-6 col-xl-3">
+
+            <div class="border rounded-3 p-3 h-100">
 
                 <div class="text-muted small mb-1">
-                    Available Quantity
+                    Full Packs
                 </div>
 
                 <div class="fs-4 fw-bold">
-                    —
+                    {{ full_packs }}
+                </div>
+
+                <div class="small text-muted mt-1">
+                    {{ medicine.pack_label }}
                 </div>
 
             </div>
 
+        </div>
 
-            <div class="col-md-4">
+
+        <!-- Active Batches -->
+
+        <div class="col-md-6 col-xl-3">
+
+            <div class="border rounded-3 p-3 h-100">
 
                 <div class="text-muted small mb-1">
-                    Total Batches
+                    Active Batches
                 </div>
 
                 <div class="fs-4 fw-bold">
-                    —
+                    {{ total_batches }}
+                </div>
+
+                <div class="small text-muted mt-1">
+                    With usable stock
                 </div>
 
             </div>
 
+        </div>
 
-            <div class="col-md-4">
+
+        <!-- Branches -->
+
+        <div class="col-md-6 col-xl-3">
+
+            <div class="border rounded-3 p-3 h-100">
 
                 <div class="text-muted small mb-1">
                     Branches
                 </div>
 
                 <div class="fs-4 fw-bold">
-                    —
+                    {{ total_branches }}
+                </div>
+
+                <div class="small text-muted mt-1">
+                    Currently holding stock
                 </div>
 
             </div>
@@ -332,36 +602,185 @@
         </div>
 
 
-        <div class="alert alert-light border mt-4 mb-0">
+    </div>
 
-            <i class="fa-solid fa-circle-info me-2"></i>
 
-            Detailed stock information will be shown here from the
-            Inventory module.
+    <!-- ========================================================= -->
+    <!-- STOCK BREAKDOWN -->
+    <!-- ========================================================= -->
+
+    <div class="border rounded-3 p-3 mt-4">
+
+        <div
+            class="
+                d-flex
+                flex-wrap
+                justify-content-between
+                align-items-center
+                gap-3
+            "
+        >
+
+            <div>
+
+                <div class="fw-semibold mb-1">
+                    Stock Breakdown
+                </div>
+
+                <div class="text-muted small">
+                    Based on {{ medicine.pack_size }}
+                    {{ medicine.unit_label|lower }}{{ medicine.pack_size|pluralize }}
+                    per pack.
+                </div>
+
+            </div>
+
+
+            <div class="text-md-end">
+
+                <div class="fw-semibold">
+
+                    {{ full_packs }}
+                    full pack{{ full_packs|pluralize }}
+
+                    {% if loose_units %}
+
+                        +
+
+                        {{ loose_units }}
+                        loose
+                        {{ medicine.unit_label|lower }}{{ loose_units|pluralize }}
+
+                    {% endif %}
+
+                </div>
+
+
+                {% if medicine.allow_loose_sale %}
+
+                    <span
+                        class="
+                            badge
+                            bg-success-subtle
+                            text-success
+                            mt-1
+                        "
+                    >
+                        Loose Sale Allowed
+                    </span>
+
+                {% else %}
+
+                    <span
+                        class="
+                            badge
+                            bg-secondary-subtle
+                            text-secondary
+                            mt-1
+                        "
+                    >
+                        Full Pack Sale
+                    </span>
+
+                {% endif %}
+
+            </div>
 
         </div>
 
     </div>
 
 
-    <!-- Identification -->
+    {% if total_quantity == 0 %}
+
+        <div
+            class="
+                alert
+                alert-warning
+                border
+                mt-4
+                mb-0
+            "
+        >
+
+            <i
+                class="
+                    fa-solid
+                    fa-triangle-exclamation
+                    me-2
+                "
+            ></i>
+
+            No usable stock is currently available for this medicine.
+
+        </div>
+
+    {% else %}
+
+        <div
+            class="
+                alert
+                alert-light
+                border
+                mt-4
+                mb-0
+            "
+        >
+
+            <i
+                class="
+                    fa-solid
+                    fa-circle-info
+                    me-2
+                "
+            ></i>
+
+            Expired, inactive and zero-quantity batches are excluded
+            from the available stock calculation.
+
+        </div>
+
+    {% endif %}
+
+</div>
+
+
+    <!-- ========================================================= -->
+    <!-- IDENTIFICATION -->
+    <!-- ========================================================= -->
+
     <div class="dashboard-card mb-4">
+
 
         <div class="mb-4">
 
             <h5 class="fw-bold mb-1">
-                <i class="fa-solid fa-barcode text-primary me-2"></i>
+
+                <i
+                    class="
+                        fa-solid
+                        fa-barcode
+                        text-primary
+                        me-2
+                    "
+                ></i>
+
                 Identification
+
             </h5>
 
+
             <p class="text-muted small mb-0">
-                Product identification information
+                Product identification information.
             </p>
 
         </div>
 
 
         <div class="row g-4">
+
+
+            <!-- Barcode -->
 
             <div class="col-md-4">
 
@@ -376,6 +795,8 @@
             </div>
 
 
+            <!-- SKU -->
+
             <div class="col-md-4">
 
                 <div class="text-muted small mb-1">
@@ -389,6 +810,8 @@
             </div>
 
 
+            <!-- Unit -->
+
             <div class="col-md-4">
 
                 <div class="text-muted small mb-1">
@@ -401,23 +824,40 @@
 
             </div>
 
+
         </div>
+
 
     </div>
 
 
-    <!-- Safety & Storage -->
+    <!-- ========================================================= -->
+    <!-- DEFAULT PRICING & STOCK SETTINGS -->
+    <!-- ========================================================= -->
+
     <div class="dashboard-card mb-4">
+
 
         <div class="mb-4">
 
             <h5 class="fw-bold mb-1">
-                <i class="fa-solid fa-shield-halved text-primary me-2"></i>
-                Safety & Storage
+
+                <i
+                    class="
+                        fa-solid
+                        fa-tags
+                        text-primary
+                        me-2
+                    "
+                ></i>
+
+                Default Pricing & Stock Settings
+
             </h5>
 
+
             <p class="text-muted small mb-0">
-                Prescription and storage requirements
+                Default medicine values used for reference and stock configuration.
             </p>
 
         </div>
@@ -425,28 +865,165 @@
 
         <div class="row g-4">
 
+
+            <!-- Purchase Price -->
+
+            <div class="col-md-4">
+
+                <div class="text-muted small mb-1">
+                    Default Purchase Price
+                </div>
+
+                <div class="fw-semibold">
+                    Rs. {{ medicine.purchase_price|floatformat:2 }}
+                </div>
+
+            </div>
+
+
+            <!-- Selling Price -->
+
+            <div class="col-md-4">
+
+                <div class="text-muted small mb-1">
+                    Default Selling Price
+                </div>
+
+                <div class="fw-semibold">
+                    Rs. {{ medicine.selling_price|floatformat:2 }}
+                </div>
+
+            </div>
+
+
+            <!-- Tax -->
+
+            <div class="col-md-4">
+
+                <div class="text-muted small mb-1">
+                    Tax Rate
+                </div>
+
+                <div class="fw-semibold">
+                    {{ medicine.tax_rate|floatformat:2 }}%
+                </div>
+
+            </div>
+
+
+            <!-- Minimum Stock -->
+
+            <div class="col-md-4">
+
+                <div class="text-muted small mb-1">
+                    Minimum Stock Level
+                </div>
+
+                <div class="fw-semibold">
+                    {{ medicine.minimum_stock_level }}
+                    {{ medicine.unit_label|lower }}{{ medicine.minimum_stock_level|pluralize }}
+                </div>
+
+            </div>
+
+
+            <!-- Reorder -->
+
+            <div class="col-md-4">
+
+                <div class="text-muted small mb-1">
+                    Reorder Level
+                </div>
+
+                <div class="fw-semibold">
+                    {{ medicine.reorder_level }}
+                    {{ medicine.unit_label|lower }}{{ medicine.reorder_level|pluralize }}
+                </div>
+
+            </div>
+
+
+        </div>
+
+
+    </div>
+
+
+    <!-- ========================================================= -->
+    <!-- SAFETY & STORAGE -->
+    <!-- ========================================================= -->
+
+    <div class="dashboard-card mb-4">
+
+
+        <div class="mb-4">
+
+            <h5 class="fw-bold mb-1">
+
+                <i
+                    class="
+                        fa-solid
+                        fa-shield-halved
+                        text-primary
+                        me-2
+                    "
+                ></i>
+
+                Safety & Storage
+
+            </h5>
+
+
+            <p class="text-muted small mb-0">
+                Prescription, control and storage requirements.
+            </p>
+
+        </div>
+
+
+        <div class="row g-4">
+
+
+            <!-- Prescription -->
+
             <div class="col-md-4">
 
                 <div class="text-muted small mb-1">
                     Prescription
                 </div>
 
+
                 {% if medicine.prescription_required %}
 
-                    <span class="badge bg-warning-subtle text-warning-emphasis">
+                    <span
+                        class="
+                            badge
+                            bg-warning-subtle
+                            text-warning-emphasis
+                        "
+                    >
                         Required
                     </span>
 
                 {% else %}
 
-                    <span class="badge bg-success-subtle text-success">
+                    <span
+                        class="
+                            badge
+                            bg-success-subtle
+                            text-success
+                        "
+                    >
                         Not Required
                     </span>
 
                 {% endif %}
 
+
             </div>
 
+
+            <!-- Controlled -->
 
             <div class="col-md-4">
 
@@ -454,22 +1031,38 @@
                     Controlled Medicine
                 </div>
 
+
                 {% if medicine.controlled_medicine %}
 
-                    <span class="badge bg-danger-subtle text-danger">
+                    <span
+                        class="
+                            badge
+                            bg-danger-subtle
+                            text-danger
+                        "
+                    >
                         Controlled
                     </span>
 
                 {% else %}
 
-                    <span class="badge bg-success-subtle text-success">
+                    <span
+                        class="
+                            badge
+                            bg-success-subtle
+                            text-success
+                        "
+                    >
                         No
                     </span>
 
                 {% endif %}
 
+
             </div>
 
+
+            <!-- Storage -->
 
             <div class="col-md-4">
 
@@ -483,52 +1076,88 @@
 
             </div>
 
+
         </div>
+
 
     </div>
 
 
-    <!-- Description -->
+    <!-- ========================================================= -->
+    <!-- DESCRIPTION -->
+    <!-- ========================================================= -->
+
     {% if medicine.description %}
 
         <div class="dashboard-card mb-4">
 
+
             <div class="mb-3">
 
                 <h5 class="fw-bold mb-1">
-                    <i class="fa-solid fa-circle-info text-primary me-2"></i>
+
+                    <i
+                        class="
+                            fa-solid
+                            fa-circle-info
+                            text-primary
+                            me-2
+                        "
+                    ></i>
+
                     Description
+
                 </h5>
 
             </div>
 
+
             <p class="text-muted mb-0">
                 {{ medicine.description|linebreaksbr }}
             </p>
+
 
         </div>
 
     {% endif %}
 
 
-    <!-- Record Information -->
+    <!-- ========================================================= -->
+    <!-- RECORD INFORMATION -->
+    <!-- ========================================================= -->
+
     <div class="dashboard-card mb-4">
+
 
         <div class="mb-4">
 
             <h5 class="fw-bold mb-1">
-                <i class="fa-solid fa-clock-rotate-left text-primary me-2"></i>
+
+                <i
+                    class="
+                        fa-solid
+                        fa-clock-rotate-left
+                        text-primary
+                        me-2
+                    "
+                ></i>
+
                 Record Information
+
             </h5>
 
+
             <p class="text-muted small mb-0">
-                Medicine record metadata
+                Medicine record metadata.
             </p>
 
         </div>
 
 
         <div class="row g-4">
+
+
+            <!-- Created -->
 
             <div class="col-md-4">
 
@@ -543,6 +1172,8 @@
             </div>
 
 
+            <!-- Updated -->
+
             <div class="col-md-4">
 
                 <div class="text-muted small mb-1">
@@ -556,45 +1187,108 @@
             </div>
 
 
+            <!-- Status -->
+
             <div class="col-md-4">
 
                 <div class="text-muted small mb-1">
                     Current Status
                 </div>
 
+
                 {% if medicine.is_active %}
 
-                    <span class="badge bg-success-subtle text-success">
+                    <span
+                        class="
+                            badge
+                            bg-success-subtle
+                            text-success
+                        "
+                    >
                         Active
                     </span>
 
                 {% else %}
 
-                    <span class="badge bg-danger-subtle text-danger">
+                    <span
+                        class="
+                            badge
+                            bg-danger-subtle
+                            text-danger
+                        "
+                    >
                         Inactive
                     </span>
 
                 {% endif %}
 
+
             </div>
 
+
         </div>
+
 
     </div>
 
 
-    <!-- Bottom Navigation -->
-    <div class="d-flex justify-content-end mb-4">
+    <!-- ========================================================= -->
+    <!-- BOTTOM NAVIGATION -->
+    <!-- ========================================================= -->
+
+    <div
+        class="
+            d-flex
+            flex-wrap
+            justify-content-end
+            gap-2
+            mb-4
+        "
+    >
+
+
+        {% if perms.medicines.change_medicine %}
+
+            <a
+                href="{% url 'medicines:edit' medicine.pk %}"
+                class="btn btn-primary"
+            >
+
+                <i
+                    class="
+                        fa-solid
+                        fa-pen-to-square
+                        me-2
+                    "
+                ></i>
+
+                Edit Medicine
+
+            </a>
+
+        {% endif %}
+
 
         <a
             href="{% url 'medicines:list' %}"
             class="btn btn-light border px-4"
         >
-            <i class="fa-solid fa-arrow-left me-2"></i>
+
+            <i
+                class="
+                    fa-solid
+                    fa-arrow-left
+                    me-2
+                "
+            ></i>
+
             Back to Medicines
+
         </a>
 
+
     </div>
+
 
 </div>
 
