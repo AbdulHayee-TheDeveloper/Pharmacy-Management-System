@@ -1,0 +1,188 @@
+
+{% extends "base/base.html" %}
+
+{% block title %}{{ page_title }} | PharmaCare{% endblock %}
+
+{% block content %}
+<div class="customer-form-page">
+
+    <style>
+        .customer-form-page .form-card {
+            background: white;
+            border: 1px solid #e7eaee;
+            border-radius: 12px;
+        }
+        .customer-form-page .btn-teal {
+            background: #0f766e;
+            border-color: #0f766e;
+            color: white;
+        }
+        .customer-form-page .btn-teal:hover {
+            background: #115e59;
+            color: white;
+        }
+        .customer-form-page .form-control:focus,
+        .customer-form-page .form-select:focus {
+            border-color: #0f766e;
+            box-shadow: 0 0 0 .2rem rgba(15,118,110,.12);
+        }
+        .customer-form-page .field-error {
+            color: #dc3545;
+            font-size: 13px;
+            margin-top: 5px;
+        }
+    </style>
+
+    <div class="d-flex flex-wrap justify-content-between
+                align-items-center gap-3 mb-4">
+        <div>
+            <h3 class="fw-bold mb-1">{{ page_title }}</h3>
+            <p class="text-muted mb-0">
+                Enter customer details and contact information.
+            </p>
+        </div>
+
+        <a href="{% url 'customers:list' %}"
+           class="btn btn-light border">
+            <i class="fa-solid fa-arrow-left me-2"></i>
+            Back to Customers
+        </a>
+    </div>
+
+    <div class="form-card p-4">
+
+        <form method="post">
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+            <div class="alert alert-danger">
+                {{ form.non_field_errors }}
+            </div>
+            {% endif %}
+
+            <div class="row g-3">
+
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold"
+                           for="{{ form.name.id_for_label }}">
+                        Customer Name *
+                    </label>
+                    {{ form.name }}
+                    {% for error in form.name.errors %}
+                    <div class="field-error">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold"
+                           for="{{ form.customer_type.id_for_label }}">
+                        Customer Type *
+                    </label>
+                    {{ form.customer_type }}
+                    {% for error in form.customer_type.errors %}
+                    <div class="field-error">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold"
+                           for="{{ form.phone.id_for_label }}">
+                        Phone
+                    </label>
+                    {{ form.phone }}
+                    {% for error in form.phone.errors %}
+                    <div class="field-error">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold"
+                           for="{{ form.alternate_phone.id_for_label }}">
+                        Alternate Phone
+                    </label>
+                    {{ form.alternate_phone }}
+                    {% for error in form.alternate_phone.errors %}
+                    <div class="field-error">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold"
+                           for="{{ form.email.id_for_label }}">
+                        Email
+                    </label>
+                    {{ form.email }}
+                    {% for error in form.email.errors %}
+                    <div class="field-error">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold"
+                           for="{{ form.city.id_for_label }}">
+                        City
+                    </label>
+                    {{ form.city }}
+                    {% for error in form.city.errors %}
+                    <div class="field-error">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+                <div class="col-12">
+                    <label class="form-label fw-semibold"
+                           for="{{ form.address.id_for_label }}">
+                        Address
+                    </label>
+                    {{ form.address }}
+                    {% for error in form.address.errors %}
+                    <div class="field-error">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+                <div class="col-12">
+                    <label class="form-label fw-semibold"
+                           for="{{ form.notes.id_for_label }}">
+                        Notes
+                    </label>
+                    {{ form.notes }}
+                    {% for error in form.notes.errors %}
+                    <div class="field-error">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+                <div class="col-12">
+                    <div class="form-check">
+                        {{ form.is_active }}
+                        <label class="form-check-label fw-semibold"
+                               for="{{ form.is_active.id_for_label }}">
+                            Active Customer
+                        </label>
+                    </div>
+                    {% for error in form.is_active.errors %}
+                    <div class="field-error">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+            </div>
+
+            <hr class="my-4">
+
+            <div class="d-flex flex-wrap gap-2">
+                <button type="submit" class="btn btn-teal px-4">
+                    <i class="fa-solid fa-floppy-disk me-2"></i>
+                    {% if is_edit %}
+                        Update Customer
+                    {% else %}
+                        Save Customer
+                    {% endif %}
+                </button>
+
+                <a href="{% url 'customers:list' %}"
+                   class="btn btn-outline-secondary px-4">
+                    Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

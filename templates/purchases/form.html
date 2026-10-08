@@ -1,0 +1,677 @@
+
+{% extends "base/base.html" %}
+
+{% block title %}{{ page_title }} | PharmaCare{% endblock %}
+
+{% block content %}
+
+<style>
+    .purchase-form-page {
+        color: #172033;
+    }
+
+    .purchase-form-page .page-subtitle {
+        color: #667085;
+        font-size: 14px;
+    }
+
+    .purchase-form-page .form-card {
+        background: #fff;
+        border: 1px solid #e7eaee;
+        border-radius: 12px;
+        overflow: hidden;
+        margin-bottom: 22px;
+    }
+
+    .purchase-form-page .card-heading {
+        padding: 18px 22px;
+        border-bottom: 1px solid #e7eaee;
+        background: #fff;
+    }
+
+    .purchase-form-page .card-heading h5 {
+        margin-bottom: 4px;
+        font-size: 16px;
+        font-weight: 700;
+    }
+
+    .purchase-form-page .card-heading p {
+        margin-bottom: 0;
+        color: #667085;
+        font-size: 13px;
+    }
+
+    .purchase-form-page .card-body-custom {
+        padding: 22px;
+    }
+
+    .purchase-form-page .form-label {
+        font-weight: 600;
+        color: #344054;
+        font-size: 13px;
+        margin-bottom: 7px;
+    }
+
+    .purchase-form-page .form-control,
+    .purchase-form-page .form-select {
+        border: 1px solid #dfe3e8;
+        border-radius: 8px;
+        min-height: 42px;
+        font-size: 14px;
+    }
+
+    .purchase-form-page textarea.form-control {
+        min-height: 95px;
+    }
+
+    .purchase-form-page .form-control:focus,
+    .purchase-form-page .form-select:focus {
+        border-color: #0f766e;
+        box-shadow: 0 0 0 3px rgba(15, 118, 110, .1);
+    }
+
+    .purchase-form-page .btn-teal {
+        background: #0f766e;
+        border: 1px solid #0f766e;
+        color: #fff;
+    }
+
+    .purchase-form-page .btn-teal:hover {
+        background: #115e59;
+        border-color: #115e59;
+        color: #fff;
+    }
+
+    .purchase-form-page .btn-outline-teal {
+        color: #0f766e;
+        border: 1px solid #0f766e;
+        background: #fff;
+    }
+
+    .purchase-form-page .btn-outline-teal:hover {
+        color: #fff;
+        background: #0f766e;
+    }
+
+    .purchase-form-page .purchase-items-table {
+        min-width: 1080px;
+        margin-bottom: 0;
+    }
+
+    .purchase-form-page .purchase-items-table th {
+        background: #f8fafb;
+        color: #667085;
+        text-transform: uppercase;
+        font-size: 11px;
+        letter-spacing: .035em;
+        white-space: nowrap;
+        font-weight: 700;
+        padding: 13px 12px;
+    }
+
+    .purchase-form-page .purchase-items-table td {
+        vertical-align: top;
+        padding: 14px 10px;
+        border-color: #eef0f3;
+    }
+
+    .purchase-form-page .purchase-items-table .form-control,
+    .purchase-form-page .purchase-items-table .form-select {
+        min-height: 40px;
+        font-size: 13px;
+    }
+
+    .purchase-form-page .medicine-col {
+        min-width: 220px;
+    }
+
+    .purchase-form-page .numeric-col {
+        min-width: 110px;
+    }
+
+    .purchase-form-page .total-col {
+        min-width: 130px;
+    }
+
+    .purchase-form-page .remove-item-btn {
+        border: 1px solid #fecaca;
+        color: #dc2626;
+        border-radius: 8px;
+        background: #fff;
+        width: 36px;
+        height: 36px;
+    }
+
+    .purchase-form-page .remove-item-btn:hover {
+        background: #fef2f2;
+    }
+
+    .purchase-form-page .line-total {
+        display: block;
+        font-weight: 700;
+        white-space: nowrap;
+        color: #172033;
+        padding-top: 10px;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .purchase-form-page .summary-card {
+        background: #f8fafb;
+        border: 1px solid #e7eaee;
+        border-radius: 10px;
+        padding: 20px;
+    }
+
+    .purchase-form-page .summary-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 15px;
+        padding: 10px 0;
+        font-size: 14px;
+    }
+
+    .purchase-form-page .summary-row + .summary-row {
+        border-top: 1px solid #e7eaee;
+    }
+
+    .purchase-form-page .summary-total {
+        font-size: 20px;
+        font-weight: 700;
+        color: #0f766e;
+    }
+
+    .purchase-form-page .errorlist {
+        list-style: none;
+        margin: 6px 0 0;
+        padding: 0;
+        color: #dc2626;
+        font-size: 12px;
+    }
+
+    .purchase-form-page .field-error {
+        color: #dc2626;
+        font-size: 12px;
+        margin-top: 5px;
+    }
+
+    .purchase-form-page .info-note {
+        background: #f0fdfa;
+        border: 1px solid #99f6e4;
+        color: #115e59;
+        border-radius: 9px;
+        padding: 12px 15px;
+        font-size: 13px;
+    }
+
+    .purchase-form-page .item-error-alert {
+        font-size: 12px;
+    }
+
+    .purchase-form-page .purchase-item-row.is-removed {
+        display: none;
+    }
+
+    .purchase-form-page .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    @media (max-width: 768px) {
+        .purchase-form-page .card-body-custom {
+            padding: 16px;
+        }
+
+        .purchase-form-page .card-heading {
+            padding: 16px;
+        }
+    }
+</style>
+
+
+<div class="purchase-form-page" id="purchaseFormPage">
+
+    <!-- PAGE HEADER -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+
+        <div>
+            <h3 class="fw-bold mb-1">
+                {{ page_title }}
+            </h3>
+
+            <div class="page-subtitle">
+                {% if is_edit %}
+                    Update the draft purchase order and its medicine items.
+                {% else %}
+                    Create a new supplier purchase order.
+                {% endif %}
+            </div>
+        </div>
+
+        <a href="{% url 'purchases:list' %}"
+           class="btn btn-outline-secondary">
+            <i class="fa-solid fa-arrow-left me-2"></i>
+            Back to Purchases
+        </a>
+
+    </div>
+
+
+    <!-- GLOBAL FORM ERRORS -->
+    {% if form.non_field_errors %}
+    <div class="alert alert-danger">
+        {{ form.non_field_errors }}
+    </div>
+    {% endif %}
+
+    {% if formset.non_form_errors %}
+    <div class="alert alert-danger">
+        {{ formset.non_form_errors }}
+    </div>
+    {% endif %}
+
+    <!-- MAIN PURCHASE FORM -->
+    <form method="post" id="purchase-order-form" novalidate>
+        {% csrf_token %}
+
+        <!-- PURCHASE INFORMATION -->
+        <div class="form-card">
+
+            <div class="card-heading">
+                <h5>
+                    <i class="fa-solid fa-file-invoice me-2 text-success"></i>
+                    Purchase Information
+                </h5>
+                <p>
+                    Supplier and purchasing details.
+                </p>
+            </div>
+
+            <div class="card-body-custom">
+
+                <div class="row g-3">
+
+                    <!-- SUPPLIER -->
+                    <div class="col-md-6">
+                        <label class="form-label" for="{{ form.supplier.id_for_label }}">
+                            Supplier <span class="text-danger">*</span>
+                        </label>
+
+                        {{ form.supplier }}
+                        {{ form.supplier.errors }}
+                    </div>
+
+                    <!-- BRANCH -->
+                    <div class="col-md-6">
+                        <label class="form-label" for="{{ form.branch.id_for_label }}">
+                            Branch <span class="text-danger">*</span>
+                        </label>
+
+                        {{ form.branch }}
+                        {{ form.branch.errors }}
+                    </div>
+
+                    <!-- PURCHASE DATE -->
+                    <div class="col-md-6">
+                        <label class="form-label" for="{{ form.purchase_date.id_for_label }}">
+                            Purchase Date <span class="text-danger">*</span>
+                        </label>
+
+                        {{ form.purchase_date }}
+                        {{ form.purchase_date.errors }}
+                    </div>
+
+                    <!-- EXPECTED DELIVERY -->
+                    <div class="col-md-6">
+                        <label class="form-label"
+                               for="{{ form.expected_delivery_date.id_for_label }}">
+                            Expected Delivery Date
+                        </label>
+
+                        {{ form.expected_delivery_date }}
+                        {{ form.expected_delivery_date.errors }}
+                    </div>
+
+                    <!-- SUPPLIER INVOICE -->
+                    <div class="col-md-6">
+                        <label class="form-label"
+                               for="{{ form.supplier_invoice_number.id_for_label }}">
+                            Supplier Invoice Number
+                        </label>
+
+                        {{ form.supplier_invoice_number }}
+                        {{ form.supplier_invoice_number.errors }}
+                    </div>
+
+                    <!-- ORDER STATUS -->
+                    <div class="col-md-6">
+                        <label class="form-label">
+                            Purchase Status
+                        </label>
+
+                        <div class="form-control bg-light d-flex align-items-center">
+                            <span class="badge bg-secondary">
+                                Draft
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- NOTES -->
+                    <div class="col-12">
+                        <label class="form-label"
+                               for="{{ form.notes.id_for_label }}">
+                            Notes
+                        </label>
+
+                        {{ form.notes }}
+                        {{ form.notes.errors }}
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- PURCHASE ITEMS -->
+        <div class="form-card">
+
+            <div class="card-heading d-flex flex-wrap justify-content-between align-items-center gap-3">
+
+                <div>
+                    <h5>
+                        <i class="fa-solid fa-pills me-2 text-success"></i>
+                        Purchase Medicines
+                    </h5>
+
+                    <p>
+                        Add the medicines being ordered from this supplier.
+                    </p>
+                </div>
+
+                <button
+                    type="button"
+                    class="btn btn-outline-teal"
+                    id="addPurchaseItem"
+                >
+                    <i class="fa-solid fa-plus me-1"></i>
+                    Add Medicine
+                </button>
+
+            </div>
+
+
+            <!-- DJANGO FORMSET MANAGEMENT -->
+            {{ formset.management_form }}
+
+            <div class="table-responsive">
+
+                <table class="table purchase-items-table">
+
+                    <thead>
+                        <tr>
+                            <th class="medicine-col">Medicine</th>
+                            <th class="numeric-col">Packs</th>
+                            <th class="numeric-col">Purchase Price / Pack</th>
+                            <th class="numeric-col">Selling Price / Pack</th>
+                            <th class="numeric-col">Discount (Rs.)</th>
+                            <th class="total-col">Line Total</th>
+                            <th>Remove</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="purchaseItemsBody">
+
+                        {% for item_form in formset %}
+
+                        <tr class="purchase-item-row">
+
+                            <td class="medicine-col">
+
+                                {% for hidden in item_form.hidden_fields %}
+                                    {{ hidden }}
+                                {% endfor %}
+
+                                <div class="d-none purchase-delete-field">
+                                    {% if item_form.DELETE %}
+                                        {{ item_form.DELETE }}
+                                    {% endif %}
+                                </div>
+
+                                {{ item_form.medicine }}
+                                {{ item_form.medicine.errors }}
+
+                                {{ item_form.non_field_errors }}
+
+                                {% if item_form.notes %}
+                                <div class="mt-2">
+                                    {{ item_form.notes }}
+                                    {{ item_form.notes.errors }}
+                                </div>
+                                {% endif %}
+
+                            </td>
+
+                            <td>
+                                {{ item_form.ordered_packs }}
+                                {{ item_form.ordered_packs.errors }}
+                            </td>
+
+                            <td>
+                                {{ item_form.purchase_price }}
+                                {{ item_form.purchase_price.errors }}
+                            </td>
+
+                            <td>
+                                {{ item_form.selling_price }}
+                                {{ item_form.selling_price.errors }}
+                            </td>
+
+                            <td>
+                                {{ item_form.discount_amount }}
+                                {{ item_form.discount_amount.errors }}
+                            </td>
+
+                            <td>
+                                <span class="line-total">
+                                    Rs. 0.00
+                                </span>
+                            </td>
+
+                            <td>
+                                <button
+                                    type="button"
+                                    class="remove-item-btn"
+                                    title="Remove Medicine"
+                                    aria-label="Remove Medicine"
+                                >
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            </td>
+
+                        </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+            <div class="px-3 py-3 border-top">
+
+                <div class="info-note">
+                    <i class="fa-solid fa-circle-info me-2"></i>
+                    Quantities and prices are entered per full pack.
+                    Stock is not added until the purchase is received.
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- PURCHASE SUMMARY -->
+        <div class="row justify-content-end mb-4">
+
+            <div class="col-12 col-md-7 col-lg-5">
+
+                <div class="summary-card">
+
+                    <h6 class="fw-bold mb-3">
+                        Order Summary
+                    </h6>
+
+                    <div class="summary-row">
+                        <span class="text-muted">Medicine Lines</span>
+                        <strong id="purchaseMedicineCount">0</strong>
+                    </div>
+
+                    <div class="summary-row">
+                        <span class="text-muted">Total Packs</span>
+                        <strong id="purchaseTotalPacks">0</strong>
+                    </div>
+
+                    <div class="summary-row">
+                        <span class="text-muted">Gross Amount</span>
+                        <strong id="purchaseGrossAmount">Rs. 0.00</strong>
+                    </div>
+
+                    <div class="summary-row">
+                        <span class="text-muted">Item Discounts</span>
+                        <strong id="purchaseDiscountAmount">Rs. 0.00</strong>
+                    </div>
+
+                    <div class="summary-row">
+                        <span class="text-muted fw-semibold">
+                            Estimated Grand Total
+                        </span>
+
+                        <span class="summary-total"
+                              id="purchaseGrandTotal">
+                            Rs. 0.00
+                        </span>
+                    </div>
+
+                    <div class="small text-muted mt-3">
+                        Final amounts will be calculated and saved
+                        by the server.
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- SUBMISSION ERRORS -->
+        <div
+            id="purchaseClientError"
+            class="alert alert-danger d-none"
+            role="alert"
+        ></div>
+
+
+        <!-- FORM ACTIONS -->
+        <div class="form-actions">
+
+            <a
+                href="{% if is_edit %}{% url 'purchases:detail' purchase.pk %}{% else %}{% url 'purchases:list' %}{% endif %}"
+                class="btn btn-outline-secondary px-4"
+            >
+                Cancel
+            </a>
+
+            <button
+                type="submit"
+                class="btn btn-teal px-4"
+                id="savePurchaseButton"
+            >
+                <i class="fa-solid fa-floppy-disk me-2"></i>
+
+                {% if is_edit %}
+                    Update Draft Purchase
+                {% else %}
+                    Save Draft Purchase
+                {% endif %}
+
+            </button>
+
+        </div>
+
+    </form>
+
+</div>
+
+
+<!-- ======================================================
+     DJANGO FORMSET EMPTY ROW TEMPLATE
+     __prefix__ WILL BE REPLACED BY JAVASCRIPT
+     ====================================================== -->
+
+<template id="purchaseItemEmptyTemplate">
+
+    <tr class="purchase-item-row">
+
+        <td class="medicine-col">
+
+            {% for hidden in formset.empty_form.hidden_fields %}
+                {{ hidden }}
+            {% endfor %}
+
+            <div class="d-none purchase-delete-field">
+                {% if formset.empty_form.DELETE %}
+                    {{ formset.empty_form.DELETE }}
+                {% endif %}
+            </div>
+
+            {{ formset.empty_form.medicine }}
+
+            {% if formset.empty_form.notes %}
+            <div class="mt-2">
+                {{ formset.empty_form.notes }}
+            </div>
+            {% endif %}
+
+        </td>
+
+        <td>
+            {{ formset.empty_form.ordered_packs }}
+        </td>
+
+        <td>
+            {{ formset.empty_form.purchase_price }}
+        </td>
+
+        <td>
+            {{ formset.empty_form.selling_price }}
+        </td>
+
+        <td>
+            {{ formset.empty_form.discount_amount }}
+        </td>
+
+        <td>
+            <span class="line-total">Rs. 0.00</span>
+        </td>
+
+        <td>
+            <button
+                type="button"
+                class="remove-item-btn"
+                title="Remove Medicine"
+                aria-label="Remove Medicine"
+            >
+                <i class="fa-solid fa-trash"></i>
+            </button>
+        </td>
+
+    </tr>
+
+</template>
+
+{% endblock %}

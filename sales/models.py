@@ -54,7 +54,18 @@ class Sale(models.Model):
         null=True,
         related_name="processed_sales",
     )
-
+    customer = models.ForeignKey(
+    "customers.Customer",
+    on_delete=models.PROTECT,
+    related_name="sales",
+    null=True,
+    blank=True,
+    db_index=True,
+    help_text=(
+        "Optional registered customer. "
+        "Null means a walk-in or unlinked sale."
+    ),
+)
     customer_name = models.CharField(
         max_length=200,
         blank=True,
@@ -484,3 +495,104 @@ class SaleItem(models.Model):
             f"{self.sale.invoice_number} - "
             f"{self.medicine_name}"
         )
+
+
+class SalePayment(models.Model):
+    """
+    Additional payment received against a completed sale.
+
+    Original checkout payment remains stored in Sale.
+    Subsequent payments are recorded here.
+    """
+
+    sale = models.ForeignKey(
+        "sales.Sale",
+        on_delete=models.PROTECT,
+        related_name="additional_payments",
+    )
+
+    payment_number = models.CharField(
+        max_length=30,
+        unique=True,
+        null=True,
+        blank=True,
+        editable=False,
+    )
+
+    amount = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        validators=[
+            MinValueValidator(Decimal("0.01"))
+        ],
+    )
+
+    payment_method = models.CharField(
+        max_length=30,
+        choices=[
+            ("cash", "Cash"),
+            ("card", "Card"),
+            ("bank_transfer", "Bank Transfer"),
+            ("mobile_wallet", "Mobile Wallet"),
+        ],
+    )
+
+    reference_number = models.CharField(
+        max_length=100,
+        blank=True,
+    )
+
+    notes = models.TextField(blank=True)
+
+    received_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name="received_sale_payments",
+    )
+
+    received_at = models.DateTimeField(
+        default=timezone.now,
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+    )
+
+    class Meta:
+        ordering = ["-received_at", "-pk"]
+
+        indexes = [
+            models.Index(
+                fields=["sale", "received_at"]
+            ),
+        ]
+
+        constraints = [
+            models.CheckConstraint(
+                condition=Q(amount__gt=0),
+                name="sale_payment_positive_amount",
+            ),
+        ]
+
+    def __str__(self):
+        return (
+            self.payment_number
+            or f"Payment #{self.pk}"
+        )
+
+    def save(self, *args, **kwargs):
+        is_new = self._state.adding
+
+        super().save(*args, **kwargs)
+
+        if is_new and not self.payment_number:
+            number = f"PAY-{self.pk:06d}"
+
+            type(self).objects.filter(
+                pk=self.pk,
+                payment_number__isnull=True,
+            ).update(
+                payment_number=number
+            )
+
+            self.payment_number = number

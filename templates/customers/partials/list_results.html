@@ -1,0 +1,133 @@
+<div class="table-responsive">
+    <table class="table align-middle mb-0">
+        <thead class="table-light">
+            <tr>
+                <th>Customer</th>
+                <th>Contact</th>
+                <th>Type</th>
+                <th>City</th>
+                {% if can_view_sales %}
+                <th>Total Purchases</th>
+                <th>Outstanding</th>
+                {% endif %}
+                <th>Status</th>
+                <th class="text-end">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for customer in customers %}
+            <tr>
+                <td>
+                    <a href="{% url 'customers:detail' customer.pk %}" class="fw-semibold text-decoration-none"
+                        style="color:#0f766e;">
+                        {{ customer.name }}
+                    </a>
+                    <div class="small text-muted">
+                        {{ customer.customer_code }}
+                    </div>
+                </td>
+                <td>
+                    <div>{{ customer.phone|default:"—" }}</div>
+                    <div class="small text-muted">
+                        {{ customer.email|default:"" }}
+                    </div>
+                </td>
+                <td>
+                    <span class="badge rounded-pill text-bg-light border">
+                        {{ customer.get_customer_type_display }}
+                    </span>
+                </td>
+                <td>{{ customer.city|default:"—" }}</td>
+                {% if can_view_sales %}
+                <td>
+                    <span class="fw-semibold">
+                        {{ customer.purchase_count }}
+                    </span>
+                </td>
+
+                <td>
+                    <span
+                        class="fw-semibold {% if customer.outstanding_total > 0 %}text-danger{% else %}text-success{% endif %}">
+                        Rs. {{ customer.outstanding_total|floatformat:2 }}
+                    </span>
+                </td>
+                {% endif %}
+                <td>
+                    {% if customer.is_active %}
+                    <span class="badge rounded-pill bg-success-subtle text-success">
+                        Active
+                    </span>
+                    {% else %}
+                    <span class="badge rounded-pill bg-danger-subtle text-danger">
+                        Inactive
+                    </span>
+                    {% endif %}
+                </td>
+                <td class="text-end">
+                    <a href="{% url 'customers:detail' customer.pk %}" class="btn btn-sm btn-light border" title="View">
+                        <i class="fa-regular fa-eye"></i>
+                    </a>
+                    {% if perms.customers.change_customer %}
+                    <a href="{% url 'customers:edit' customer.pk %}" class="btn btn-sm btn-light border" title="Edit">
+                        <i class="fa-solid fa-pen"></i>
+                    </a>
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="{% if can_view_sales %}8{% else %}6{% endif %}"
+    class="text-center py-5">
+                    <i class="fa-solid fa-users fa-2x text-muted mb-3"></i>
+                    <h6>No customers found</h6>
+                    <p class="small text-muted mb-0">
+                        Try changing your search or filters.
+                    </p>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="p-3 border-top d-flex flex-wrap
+            justify-content-between align-items-center gap-3">
+    <div class="small text-muted">
+        {% if page_obj.paginator.count %}
+        Showing {{ page_obj.start_index }}–{{ page_obj.end_index }}
+        of {{ page_obj.paginator.count }} customers
+        {% else %}
+        Showing 0 customers
+        {% endif %}
+    </div>
+
+    {% if page_obj.paginator.num_pages > 1 %}
+    <nav aria-label="Customer pagination">
+        <ul class="pagination pagination-sm mb-0 customer-pagination">
+            {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link"
+                    href="?q={{ query|urlencode }}&status={{ status|urlencode }}&type={{ customer_type|urlencode }}&page={{ page_obj.previous_page_number }}">
+                    Previous
+                </a>
+            </li>
+            {% endif %}
+
+            <li class="page-item active">
+                <span class="page-link" style="background:#0f766e;border-color:#0f766e;">
+                    {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}
+                </span>
+            </li>
+
+            {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link"
+                    href="?q={{ query|urlencode }}&status={{ status|urlencode }}&type={{ customer_type|urlencode }}&page={{ page_obj.next_page_number }}">
+                    Next
+                </a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+</div>

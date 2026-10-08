@@ -1,5 +1,12 @@
 import json
-
+from django.contrib import messages
+from django.shortcuts import redirect
+from .payment_forms import ReceivePaymentForm
+from .payment_services import (
+    PaymentError,
+    get_sale_outstanding,
+    receive_sale_payment,
+)
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db.models import Q
@@ -324,7 +331,7 @@ def checkout(request):
         sale = checkout_sale(
             user=request.user,
             branch=branch,
-
+            customer_id=payload.get("customer_id"),
             items=items,
 
             payment_method=payload.get(
@@ -644,6 +651,10 @@ def sale_detail(request, pk):
 
     context = {
         "sale": sale,
+        "outstanding": get_sale_outstanding(sale),
+        "additional_payments": sale.additional_payments.select_related( 
+    "received_by"
+).all(),
         "sale_items": (
             sale.items.all()
         ),
@@ -689,4 +700,93 @@ def sale_receipt(request, pk):
         request,
         "sales/receipt.html",
         context,
+    )
+
+
+# ============================================================
+# CUSTOMER PAYMENT COLLECTION
+# ============================================================
+
+@login_required
+@role_permission_required("sales.change_sale")
+def sale_receive_payment(request, pk):
+
+    authorized_sales = get_sales_queryset_for_user(
+        request.user
+    )
+
+    sale = get_object_or_404(
+        authorized_sales,
+        pk=pk,
+    )
+
+    if sale.status != Sale.Status.COMPLETED:
+        messages.error(
+            request,
+            "Only completed sales can receive payments."
+        )
+        return redirect(
+            "sales:detail",
+            pk=sale.pk,
+        )
+
+    outstanding = get_sale_outstanding(sale)
+
+    if outstanding <= 0:
+        messages.info(
+            request,
+            "This sale is already fully paid."
+        )
+        return redirect(
+            "sales:detail",
+            pk=sale.pk,
+        )
+
+    form = ReceivePaymentForm(
+        request.POST or None,
+        sale=sale,
+    )
+
+    if request.method == "POST" and form.is_valid():
+
+        try:
+            payment = receive_sale_payment(
+                sale_id=sale.pk,
+                user=request.user,
+                authorized_sales=authorized_sales,
+                amount=form.cleaned_data["amount"],
+                payment_method=form.cleaned_data[
+                    "payment_method"
+                ],
+                reference_number=form.cleaned_data[
+                    "reference_number"
+                ],
+                notes=form.cleaned_data["notes"],
+            )
+
+        except PaymentError as exc:
+            form.add_error(None, str(exc))
+
+        else:
+            messages.success(
+                request,
+                (
+                    f"Payment {payment.payment_number} "
+                    "received successfully."
+                ),
+            )
+
+            return redirect(
+                "sales:detail",
+                pk=sale.pk,
+            )
+
+    return render(
+        request,
+        "sales/receive_payment.html",
+        {   "settled_amount": sale.paid_amount - sale.change_amount,
+            "sale": sale,
+            "form": form,
+            "outstanding": outstanding,
+        },
     )

@@ -1,0 +1,1272 @@
+
+{% extends "base/base.html" %}
+
+{% block title %}{{ purchase.purchase_number }} | PharmaCare{% endblock %}
+
+{% block content %}
+
+<style>
+    .purchase-detail-page {
+        color: #172033;
+    }
+
+    .purchase-detail-page .page-subtitle {
+        color: #667085;
+        font-size: 14px;
+    }
+
+    .purchase-detail-page .detail-card {
+        background: #fff;
+        border: 1px solid #e7eaee;
+        border-radius: 12px;
+        overflow: hidden;
+        margin-bottom: 22px;
+    }
+
+    .purchase-detail-page .card-header-custom {
+        padding: 18px 22px;
+        border-bottom: 1px solid #e7eaee;
+        background: #fff;
+    }
+
+    .purchase-detail-page .card-header-custom h5 {
+        font-size: 16px;
+        font-weight: 700;
+        margin-bottom: 0;
+    }
+
+    .purchase-detail-page .card-body-custom {
+        padding: 22px;
+    }
+
+    .purchase-detail-page .info-label {
+        color: #667085;
+        font-size: 12px;
+        font-weight: 500;
+        margin-bottom: 6px;
+    }
+
+    .purchase-detail-page .info-value {
+        font-weight: 600;
+        font-size: 14px;
+        overflow-wrap: anywhere;
+    }
+
+    .purchase-detail-page .info-group {
+        margin-bottom: 20px;
+    }
+
+    .purchase-detail-page .btn-teal {
+        color: #fff;
+        background: #0f766e;
+        border: 1px solid #0f766e;
+    }
+
+    .purchase-detail-page .btn-teal:hover {
+        background: #115e59;
+        border-color: #115e59;
+        color: #fff;
+    }
+
+    .purchase-detail-page .status-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 7px 12px;
+        border-radius: 25px;
+        font-weight: 600;
+        font-size: 12px;
+    }
+
+    .purchase-detail-page .status-draft {
+        background: #f2f4f7;
+        color: #475467;
+    }
+
+    .purchase-detail-page .status-ordered {
+        background: #dbeafe;
+        color: #1d4ed8;
+    }
+
+    .purchase-detail-page .status-partially-received {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .purchase-detail-page .status-received {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .purchase-detail-page .status-cancelled {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .purchase-detail-page .summary-box {
+        background: #f8fafb;
+        border: 1px solid #e7eaee;
+        border-radius: 12px;
+        padding: 20px;
+    }
+
+    .purchase-detail-page .summary-label {
+        font-size: 12px;
+        color: #667085;
+        margin-bottom: 8px;
+    }
+
+    .purchase-detail-page .summary-number {
+        font-size: 24px;
+        font-weight: 700;
+        line-height: 1.2;
+    }
+
+    .purchase-detail-page .items-table {
+        margin-bottom: 0;
+        min-width: 1050px;
+    }
+
+    .purchase-detail-page .items-table th,
+    .purchase-detail-page .receipt-items-table th {
+        background: #f8fafb;
+        color: #667085;
+        font-size: 11px;
+        text-transform: uppercase;
+        font-weight: 700;
+        letter-spacing: .04em;
+        padding: 15px;
+        white-space: nowrap;
+    }
+
+    .purchase-detail-page .items-table td,
+    .purchase-detail-page .receipt-items-table td {
+        padding: 16px 15px;
+        vertical-align: middle;
+        border-color: #eef0f3;
+        font-size: 13px;
+    }
+
+    .purchase-detail-page .medicine-name {
+        font-weight: 700;
+        font-size: 14px;
+    }
+
+    .purchase-detail-page .muted-text {
+        font-size: 12px;
+        color: #667085;
+    }
+
+    .purchase-detail-page .money {
+        white-space: nowrap;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .purchase-detail-page .total-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 0;
+        gap: 16px;
+    }
+
+    .purchase-detail-page .total-row + .total-row {
+        border-top: 1px solid #e7eaee;
+    }
+
+    .purchase-detail-page .grand-total {
+        color: #0f766e;
+        font-size: 22px;
+        font-weight: 800;
+    }
+
+    .purchase-detail-page .receiving-note {
+        background: #f0fdfa;
+        border: 1px solid #99f6e4;
+        border-radius: 10px;
+        padding: 18px;
+        color: #115e59;
+        font-size: 13px;
+    }
+
+    /* RECEIPT HISTORY STYLES */
+
+    .purchase-detail-page .receipt-card {
+        border: 1px solid #e7eaee;
+        border-radius: 12px;
+        background: #fff;
+        overflow: hidden;
+        margin-bottom: 18px;
+    }
+
+    .purchase-detail-page .receipt-card:last-child {
+        margin-bottom: 0;
+    }
+
+    .purchase-detail-page .receipt-header {
+        padding: 18px 20px;
+        background: #f8fafb;
+        border-bottom: 1px solid #e7eaee;
+    }
+
+    .purchase-detail-page .receipt-number {
+        font-size: 15px;
+        font-weight: 700;
+        color: #0f766e;
+    }
+
+    .purchase-detail-page .receipt-meta {
+        font-size: 12px;
+        color: #667085;
+    }
+
+    .purchase-detail-page .receipt-items-table {
+        margin-bottom: 0;
+        min-width: 920px;
+    }
+
+    .purchase-detail-page .receipt-summary {
+        padding: 15px 20px;
+        background: #f8fafb;
+        border-top: 1px solid #e7eaee;
+    }
+
+    .purchase-detail-page .receipt-badge {
+        background: #ccfbf1;
+        color: #115e59;
+        font-size: 12px;
+        font-weight: 600;
+        padding: 7px 12px;
+        border-radius: 20px;
+    }
+
+    .purchase-detail-page .empty-receipts {
+        text-align: center;
+        padding: 45px 20px;
+    }
+
+    .purchase-detail-page .empty-receipts i {
+        font-size: 35px;
+        color: #98a2b3;
+        margin-bottom: 15px;
+    }
+
+    @media (max-width: 768px) {
+        .purchase-detail-page .card-body-custom,
+        .purchase-detail-page .card-header-custom {
+            padding: 16px;
+        }
+
+        .purchase-detail-page .summary-number {
+            font-size: 21px;
+        }
+
+        .purchase-detail-page .receipt-header {
+            padding: 15px;
+        }
+    }
+</style>
+
+
+<div class="purchase-detail-page">
+
+    <!-- ========================================
+         PAGE HEADER
+         ======================================== -->
+
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+
+        <div>
+            <h3 class="fw-bold mb-1">
+                Purchase {{ purchase.purchase_number }}
+            </h3>
+
+            <div class="page-subtitle">
+                Purchase order details and received stock information.
+            </div>
+        </div>
+
+        <div class="d-flex flex-wrap gap-2 align-items-center">
+
+            <a href="{% url 'purchases:list' %}"
+               class="btn btn-outline-secondary">
+                <i class="fa-solid fa-arrow-left me-2"></i>
+                Back
+            </a>
+
+            <!-- EDIT DRAFT -->
+
+            {% if perms.purchases.change_purchase and is_draft %}
+
+                <a href="{% url 'purchases:edit' purchase.pk %}"
+                   class="btn btn-teal">
+                    <i class="fa-solid fa-pen me-2"></i>
+                    Edit Draft
+                </a>
+
+            {% endif %}
+
+            <!-- CONFIRM ORDER -->
+
+            {% if perms.purchases.change_purchase and is_draft %}
+
+                <form method="post"
+                      action="{% url 'purchases:confirm' purchase.pk %}"
+                      class="d-inline"
+                      onsubmit="return confirm('Confirm this purchase order? Once confirmed, the draft cannot be edited.');">
+
+                    {% csrf_token %}
+
+                    <button type="submit" class="btn btn-teal">
+                        <i class="fa-solid fa-circle-check me-2"></i>
+                        Confirm Order
+                    </button>
+
+                </form>
+
+            {% endif %}
+
+            <!-- RECEIVE STOCK -->
+
+            {% if perms.purchases.change_purchase %}
+
+                {% if purchase.status == "ordered" or purchase.status == "partially_received" %}
+
+                    <a href="{% url 'purchases:receive' purchase.pk %}"
+                       class="btn btn-success">
+
+                        <i class="fa-solid fa-boxes-stacked me-2"></i>
+                        Receive Stock
+                    </a>
+
+                {% endif %}
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+
+    <!-- ========================================
+         PURCHASE STATUS & SUMMARY
+         ======================================== -->
+
+    <div class="row g-3 mb-4">
+
+        <div class="col-sm-6 col-xl-3">
+            <div class="summary-box h-100">
+
+                <div class="summary-label">
+                    Purchase Status
+                </div>
+
+                {% if purchase.status == "draft" %}
+
+                    <span class="status-pill status-draft">
+                        <i class="fa-solid fa-circle fa-2xs"></i>
+                        Draft
+                    </span>
+
+                {% elif purchase.status == "ordered" %}
+
+                    <span class="status-pill status-ordered">
+                        <i class="fa-solid fa-circle fa-2xs"></i>
+                        Ordered
+                    </span>
+
+                {% elif purchase.status == "partially_received" %}
+
+                    <span class="status-pill status-partially-received">
+                        <i class="fa-solid fa-circle fa-2xs"></i>
+                        Partially Received
+                    </span>
+
+                {% elif purchase.status == "received" %}
+
+                    <span class="status-pill status-received">
+                        <i class="fa-solid fa-circle fa-2xs"></i>
+                        Received
+                    </span>
+
+                {% elif purchase.status == "cancelled" %}
+
+                    <span class="status-pill status-cancelled">
+                        <i class="fa-solid fa-circle fa-2xs"></i>
+                        Cancelled
+                    </span>
+
+                {% else %}
+
+                    <span class="status-pill status-draft">
+                        {{ purchase.get_status_display }}
+                    </span>
+
+                {% endif %}
+
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-xl-3">
+            <div class="summary-box h-100">
+
+                <div class="summary-label">
+                    Total Medicines
+                </div>
+
+                <div class="summary-number">
+                    {{ items|length }}
+                </div>
+
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-xl-3">
+            <div class="summary-box h-100">
+
+                <div class="summary-label">
+                    Ordered Packs
+                </div>
+
+                <div class="summary-number">
+                    {{ total_ordered_packs }}
+                </div>
+
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-xl-3">
+            <div class="summary-box h-100">
+
+                <div class="summary-label">
+                    Received Packs
+                </div>
+
+                <div class="summary-number">
+                    {{ total_received_packs }}
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+
+    <!-- ========================================
+         SUPPLIER & PURCHASE INFORMATION
+         ======================================== -->
+
+    <div class="row g-4 mb-4">
+
+        <!-- SUPPLIER INFORMATION -->
+
+        <div class="col-lg-6">
+
+            <div class="detail-card h-100 mb-0">
+
+                <div class="card-header-custom">
+                    <h5>
+                        <i class="fa-solid fa-truck me-2 text-success"></i>
+                        Supplier Information
+                    </h5>
+                </div>
+
+                <div class="card-body-custom">
+
+                    <div class="info-group">
+
+                        <div class="info-label">
+                            Supplier Name
+                        </div>
+
+                        <div class="info-value">
+                            {{ purchase.supplier.name }}
+                        </div>
+
+                    </div>
+
+                    <div class="info-group">
+
+                        <div class="info-label">
+                            Supplier Code
+                        </div>
+
+                        <div class="info-value">
+                            {{ purchase.supplier.supplier_code|default:"—" }}
+                        </div>
+
+                    </div>
+
+                    <div class="info-group">
+
+                        <div class="info-label">
+                            Company
+                        </div>
+
+                        <div class="info-value">
+                            {{ purchase.supplier.company_name|default:"—" }}
+                        </div>
+
+                    </div>
+
+                    <div class="info-group">
+
+                        <div class="info-label">
+                            Contact Person
+                        </div>
+
+                        <div class="info-value">
+                            {{ purchase.supplier.contact_person|default:"—" }}
+                        </div>
+
+                    </div>
+
+                    <div class="info-group">
+
+                        <div class="info-label">
+                            Phone
+                        </div>
+
+                        <div class="info-value">
+                            {{ purchase.supplier.phone|default:"—" }}
+                        </div>
+
+                    </div>
+
+                    <div class="info-group mb-0">
+
+                        <div class="info-label">
+                            City
+                        </div>
+
+                        <div class="info-value">
+                            {{ purchase.supplier.city|default:"—" }}
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- PURCHASE INFORMATION -->
+
+        <div class="col-lg-6">
+
+            <div class="detail-card h-100 mb-0">
+
+                <div class="card-header-custom">
+                    <h5>
+                        <i class="fa-solid fa-file-invoice me-2 text-success"></i>
+                        Purchase Information
+                    </h5>
+                </div>
+
+                <div class="card-body-custom">
+
+                    <div class="info-group">
+
+                        <div class="info-label">
+                            Purchase Number
+                        </div>
+
+                        <div class="info-value">
+                            {{ purchase.purchase_number }}
+                        </div>
+
+                    </div>
+
+                    <div class="info-group">
+
+                        <div class="info-label">
+                            Branch
+                        </div>
+
+                        <div class="info-value">
+                            {{ purchase.branch.name }}
+                        </div>
+
+                    </div>
+
+                    <div class="info-group">
+
+                        <div class="info-label">
+                            Purchase Date
+                        </div>
+
+                        <div class="info-value">
+                            {{ purchase.purchase_date|date:"d M Y" }}
+                        </div>
+
+                    </div>
+
+                    <div class="info-group">
+
+                        <div class="info-label">
+                            Expected Delivery
+                        </div>
+
+                        <div class="info-value">
+
+                            {% if purchase.expected_delivery_date %}
+                                {{ purchase.expected_delivery_date|date:"d M Y" }}
+                            {% else %}
+                                —
+                            {% endif %}
+
+                        </div>
+
+                    </div>
+
+                    <div class="info-group">
+
+                        <div class="info-label">
+                            Supplier Invoice Number
+                        </div>
+
+                        <div class="info-value">
+                            {{ purchase.supplier_invoice_number|default:"—" }}
+                        </div>
+
+                    </div>
+
+                    <div class="info-group mb-0">
+
+                        <div class="info-label">
+                            Created By
+                        </div>
+
+                        <div class="info-value">
+                            {{ purchase.created_by }}
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ========================================
+         PURCHASE ITEMS
+         ======================================== -->
+
+    <div class="detail-card">
+
+        <div class="card-header-custom">
+            <h5>
+                <i class="fa-solid fa-pills me-2 text-success"></i>
+                Purchased Medicines
+            </h5>
+        </div>
+
+        <div class="table-responsive">
+
+            <table class="table items-table">
+
+                <thead>
+                    <tr>
+                        <th>Medicine</th>
+                        <th>Pack Size</th>
+                        <th>Ordered</th>
+                        <th>Received</th>
+                        <th>Remaining</th>
+                        <th>Purchase Price</th>
+                        <th>Selling Price</th>
+                        <th>Discount</th>
+                        <th class="text-end">Line Total</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for item in items %}
+
+                        <tr>
+
+                            <td>
+
+                                <div class="medicine-name">
+                                    {{ item.medicine.name }}
+                                </div>
+
+                                <div class="muted-text">
+                                    {{ item.medicine.generic_name|default:"—" }}
+                                </div>
+
+                                {% if item.notes %}
+
+                                    <div class="muted-text mt-1">
+                                        {{ item.notes }}
+                                    </div>
+
+                                {% endif %}
+
+                            </td>
+
+                            <td>
+
+                                {{ item.pack_size }}
+
+                                <div class="muted-text">
+                                    units / pack
+                                </div>
+
+                            </td>
+
+                            <td>
+
+                                <strong>
+                                    {{ item.ordered_packs }}
+                                </strong>
+
+                                <div class="muted-text">
+                                    packs
+                                </div>
+
+                            </td>
+
+                            <td>
+
+                                {{ item.received_packs }}
+
+                                <div class="muted-text">
+                                    packs
+                                </div>
+
+                            </td>
+
+                            <td>
+
+                                <strong>
+                                    {{ item.remaining_packs }}
+                                </strong>
+
+                                <div class="muted-text">
+                                    packs
+                                </div>
+
+                            </td>
+
+                            <td class="money">
+                                Rs. {{ item.purchase_price|floatformat:2 }}
+                            </td>
+
+                            <td class="money">
+                                Rs. {{ item.selling_price|floatformat:2 }}
+                            </td>
+
+                            <td class="money">
+                                Rs. {{ item.discount_amount|floatformat:2 }}
+                            </td>
+
+                            <td class="text-end money fw-bold">
+                                Rs. {{ item.line_total|floatformat:2 }}
+                            </td>
+
+                        </tr>
+
+                    {% empty %}
+
+                        <tr>
+                            <td colspan="9"
+                                class="text-center text-muted py-5">
+                                No medicines have been added.
+                            </td>
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+
+    <!-- ========================================
+         PURCHASE NOTES & FINANCIAL SUMMARY
+         ======================================== -->
+
+    <div class="row g-4 mb-4">
+
+        <!-- PURCHASE NOTES -->
+
+        <div class="col-lg-7">
+
+            <div class="detail-card h-100 mb-0">
+
+                <div class="card-header-custom">
+                    <h5>
+                        <i class="fa-regular fa-note-sticky me-2 text-success"></i>
+                        Purchase Notes
+                    </h5>
+                </div>
+
+                <div class="card-body-custom">
+
+                    {% if purchase.notes %}
+
+                        <div style="white-space: pre-wrap;">{{ purchase.notes }}</div>
+
+                    {% else %}
+
+                        <p class="text-muted mb-0">
+                            No additional notes for this purchase.
+                        </p>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- FINANCIAL SUMMARY -->
+
+        <div class="col-lg-5">
+
+            <div class="detail-card h-100 mb-0">
+
+                <div class="card-header-custom">
+                    <h5>
+                        <i class="fa-solid fa-calculator me-2 text-success"></i>
+                        Purchase Summary
+                    </h5>
+                </div>
+
+                <div class="card-body-custom">
+
+                    <div class="total-row">
+
+                        <span class="text-muted">
+                            Items Subtotal
+                        </span>
+
+                        <strong class="money">
+                            Rs. {{ purchase.subtotal|floatformat:2 }}
+                        </strong>
+
+                    </div>
+
+                    <div class="total-row">
+
+                        <span class="text-muted">
+                            Order Discount
+                        </span>
+
+                        <strong class="money">
+                            − Rs. {{ purchase.discount_amount|floatformat:2 }}
+                        </strong>
+
+                    </div>
+
+                    <div class="total-row">
+
+                        <span class="text-muted">
+                            Tax
+                        </span>
+
+                        <strong class="money">
+                            Rs. {{ purchase.tax_amount|floatformat:2 }}
+                        </strong>
+
+                    </div>
+
+                    <div class="total-row">
+
+                        <strong>
+                            Grand Total
+                        </strong>
+
+                        <span class="grand-total money">
+                            Rs. {{ purchase.total_amount|floatformat:2 }}
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ========================================
+         STOCK RECEIVING STATUS
+         ======================================== -->
+
+    <div class="receiving-note mb-4">
+
+        <div class="d-flex align-items-start gap-3">
+
+            <i class="fa-solid fa-box-open fs-4 mt-1"></i>
+
+            <div>
+
+                <h6 class="fw-bold mb-2">
+                    Stock Receiving Status
+                </h6>
+
+                {% if purchase.status == "draft" %}
+
+                    <p class="mb-0">
+                        This purchase is currently a draft.
+                        Confirm the purchase order before
+                        receiving supplier stock.
+                    </p>
+
+                {% elif purchase.status == "ordered" %}
+
+                    <p class="mb-0">
+                        This purchase order is confirmed
+                        and ready for stock receiving.
+                        Use the Receive Stock button to
+                        record delivered medicines,
+                        batches and expiry dates.
+                    </p>
+
+                {% elif purchase.status == "partially_received" %}
+
+                    <p class="mb-0">
+                        This purchase has been partially
+                        received. You can continue receiving
+                        its remaining medicines.
+                        Previous deliveries are recorded
+                        in the history below.
+                    </p>
+
+                {% elif purchase.status == "received" %}
+
+                    <p class="mb-0">
+                        This purchase has been fully received.
+                        All ordered packs have been recorded
+                        in inventory.
+                        Receiving history is available below.
+                    </p>
+
+                {% elif purchase.status == "cancelled" %}
+
+                    <p class="mb-0">
+                        This purchase has been cancelled.
+                        Stock receiving is not permitted
+                        for cancelled purchases.
+                    </p>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ========================================
+         PHASE 7.8.6 — STOCK RECEIVING HISTORY
+         ======================================== -->
+
+    <div class="detail-card">
+
+        <div class="card-header-custom">
+
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+
+                <h5>
+                    <i class="fa-solid fa-clock-rotate-left me-2 text-success"></i>
+                    Stock Receiving History
+                </h5>
+
+                <span class="badge bg-light text-dark border">
+                    {{ receipts|length }} Receipt(s)
+                </span>
+
+            </div>
+
+        </div>
+
+        <div class="card-body-custom">
+
+            {% for receipt in receipts %}
+
+                <div class="receipt-card">
+
+                    <!-- RECEIPT HEADER -->
+
+                    <div class="receipt-header">
+
+                        <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+
+                            <div>
+
+                                <div class="receipt-number">
+                                    <i class="fa-solid fa-receipt me-2"></i>
+                                    {{ receipt.receipt_number }}
+                                </div>
+
+                                <div class="receipt-meta mt-2">
+
+                                    <i class="fa-regular fa-calendar me-1"></i>
+                                    {{ receipt.received_at|date:"d M Y, h:i A" }}
+
+                                </div>
+
+                                <div class="receipt-meta mt-1">
+
+                                    <i class="fa-regular fa-user me-1"></i>
+                                    Received by:
+                                    <strong>{{ receipt.received_by }}</strong>
+
+                                </div>
+
+                            </div>
+
+                            <span class="receipt-badge">
+
+                                <i class="fa-solid fa-check-circle me-1"></i>
+                                Stock Received
+
+                            </span>
+
+                        </div>
+
+                        <!-- DELIVERY NOTE -->
+
+                        {% if receipt.supplier_delivery_note %}
+
+                            <div class="mt-3">
+
+                                <span class="muted-text">
+                                    Supplier Delivery Note:
+                                </span>
+
+                                <strong class="small">
+                                    {{ receipt.supplier_delivery_note }}
+                                </strong>
+
+                            </div>
+
+                        {% endif %}
+
+                        <!-- RECEIVING NOTES -->
+
+                        {% if receipt.notes %}
+
+                            <div class="mt-2">
+
+                                <span class="muted-text">
+                                    Receiving Notes:
+                                </span>
+
+                                <div class="small mt-1" style="white-space: pre-wrap;">{{ receipt.notes }}</div>
+
+                            </div>
+
+                        {% endif %}
+
+                    </div>
+
+
+                    <!-- RECEIVED MEDICINE BATCHES -->
+
+                    <div class="table-responsive">
+
+                        <table class="table receipt-items-table">
+
+                            <thead>
+
+                                <tr>
+                                    <th>Medicine</th>
+                                    <th>Batch Number</th>
+                                    <th>Expiry Date</th>
+                                    <th>Received Packs</th>
+                                    <th>Pack Size</th>
+                                    <th>Total Units</th>
+                                    <th>Purchase Price</th>
+                                    <th>Selling Price</th>
+                                </tr>
+
+                            </thead>
+
+                            <tbody>
+
+                                {% for receipt_item in receipt.items.all %}
+
+                                    <tr>
+
+                                        <td>
+
+                                            <div class="medicine-name">
+                                                {{ receipt_item.purchase_item.medicine.name }}
+                                            </div>
+
+                                            <div class="muted-text">
+                                                {{ receipt_item.purchase_item.medicine.generic_name|default:"—" }}
+                                            </div>
+
+                                        </td>
+
+                                        <td>
+
+                                            <span class="fw-semibold">
+                                                {{ receipt_item.batch_number }}
+                                            </span>
+
+                                        </td>
+
+                                        <td>
+
+                                            {{ receipt_item.expiry_date|date:"d M Y" }}
+
+                                        </td>
+
+                                        <td>
+
+                                            <strong class="text-success">
+                                                {{ receipt_item.received_packs }}
+                                            </strong>
+
+                                            <div class="muted-text">
+                                                packs
+                                            </div>
+
+                                        </td>
+
+                                        <td>
+
+                                            {{ receipt_item.pack_size }}
+
+                                            <div class="muted-text">
+                                                units / pack
+                                            </div>
+
+                                        </td>
+
+                                        <td>
+
+                                            <strong>
+                                                {{ receipt_item.received_units }}
+                                            </strong>
+
+                                            <div class="muted-text">
+                                                units
+                                            </div>
+
+                                        </td>
+
+                                        <td class="money">
+
+                                            Rs. {{ receipt_item.purchase_price|floatformat:2 }}
+
+                                        </td>
+
+                                        <td class="money">
+
+                                            Rs. {{ receipt_item.selling_price|floatformat:2 }}
+
+                                        </td>
+
+                                    </tr>
+
+                                {% empty %}
+
+                                    <tr>
+                                        <td colspan="8"
+                                            class="text-center text-muted py-4">
+                                            No receipt items found.
+                                        </td>
+                                    </tr>
+
+                                {% endfor %}
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+
+                    <!-- RECEIPT FOOTER -->
+
+                    <div class="receipt-summary">
+
+                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+
+                            <span class="text-muted small">
+
+                                <i class="fa-solid fa-boxes-stacked me-1"></i>
+                                Total Received in This Delivery
+
+                            </span>
+
+                            <span class="fw-bold text-success">
+                                {{ receipt.total_received_packs }} Pack(s)
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            {% empty %}
+
+                <!-- NO RECEIVING HISTORY -->
+
+                <div class="empty-receipts">
+
+                    <i class="fa-solid fa-box-open d-block"></i>
+
+                    <h6 class="fw-bold mb-2">
+                        No Stock Receiving History
+                    </h6>
+
+                    <p class="text-muted small mb-0">
+                        No supplier deliveries have been
+                        recorded against this purchase yet.
+                        Once stock is received, all receiving
+                        records and medicine batches will
+                        appear here.
+                    </p>
+
+                </div>
+
+            {% endfor %}
+
+        </div>
+
+    </div>
+
+
+    <!-- ========================================
+         AUDIT INFORMATION
+         ======================================== -->
+
+    <div class="text-muted small mb-3">
+
+        Created:
+        {{ purchase.created_at|date:"d M Y, h:i A" }}
+
+        <span class="mx-2">|</span>
+
+        Last Updated:
+        {{ purchase.updated_at|date:"d M Y, h:i A" }}
+
+    </div>
+
+</div>
+
+{% endblock %}

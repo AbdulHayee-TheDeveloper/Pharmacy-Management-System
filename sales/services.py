@@ -1,6 +1,6 @@
 from collections import defaultdict
 from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
-
+from customers.models import Customer
 from django.db import transaction
 from django.utils import timezone
 
@@ -64,12 +64,61 @@ def checkout_sale(
     discount_amount=Decimal("0.00"),
     customer_name="",
     customer_phone="",
+    customer_id=None,
     notes="",
 ):
     # ============================================================
     # BASIC VALIDATION
     # ============================================================
+        # ============================================================
+    # REGISTERED CUSTOMER VALIDATION
+    # ============================================================
 
+    registered_customer = None
+
+    if customer_id not in (None, ""):
+        try:
+            parsed_customer_id = int(customer_id)
+
+            if (
+                isinstance(customer_id, bool)
+                or parsed_customer_id <= 0
+                or str(customer_id).strip() != str(parsed_customer_id)
+            ):
+                raise ValueError
+
+        except (TypeError, ValueError, OverflowError):
+            raise CheckoutError(
+                "Invalid customer selected."
+            )
+
+        registered_customer = Customer.objects.filter(
+            pk=parsed_customer_id,
+            is_active=True,
+        ).first()
+
+        if registered_customer is None:
+            raise CheckoutError(
+                "Selected customer was not found or is inactive."
+            )
+
+        # Use trusted database values, not frontend-submitted names.
+        customer_name = registered_customer.name
+        customer_phone = registered_customer.phone
+
+    else:
+        customer_name = str(customer_name or "").strip()
+        customer_phone = str(customer_phone or "").strip()
+
+    if len(customer_name) > 200:
+        raise CheckoutError(
+            "Customer name is too long."
+        )
+
+    if len(customer_phone) > 30:
+        raise CheckoutError(
+            "Customer phone number is too long."
+        )
     if not isinstance(items, list) or not items:
         raise CheckoutError(
             "Cart is empty."
@@ -488,15 +537,13 @@ def checkout_sale(
         branch=branch,
         cashier=user,
 
-        customer_name=str(
-            customer_name or ""
-        ).strip(),
+        customer=registered_customer,
 
-        customer_phone=str(
-            customer_phone or ""
-        ).strip(),
+        customer_name=customer_name,
+        customer_phone=customer_phone,
 
         subtotal=subtotal,
+
 
         discount_amount=(
             discount_amount

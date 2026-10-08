@@ -287,6 +287,58 @@ Sales / POS | PharmaCare
 
                     </div>
 
+<!-- REGISTERED CUSTOMER SELECTION -->
+<div
+    id="posCustomerPicker"
+    data-search-url="{% url 'customers:pos_search' %}"
+    class="mb-3"
+>
+    <label for="posCustomerSearch" class="form-label fw-semibold">
+        Registered Customer
+    </label>
+
+    <div class="input-group">
+        <span class="input-group-text bg-white">
+            <i class="fa-solid fa-user-magnifying-glass"></i>
+        </span>
+
+        <input
+            type="search"
+            id="posCustomerSearch"
+            class="form-control"
+            placeholder="Search customer name, phone or code..."
+            autocomplete="off"
+        >
+
+        <button
+            type="button"
+            id="posCustomerClear"
+            class="btn btn-outline-secondary"
+        >
+            <i class="fa-solid fa-xmark"></i>
+            Clear
+        </button>
+    </div>
+
+    <input type="hidden" id="posSelectedCustomerId" value="">
+
+    <div
+        id="posCustomerResults"
+        class="list-group mt-2"
+        style="max-height:250px;overflow-y:auto;"
+    ></div>
+
+    <div
+        id="posSelectedCustomer"
+        class="alert alert-success py-2 mt-2 mb-0"
+        hidden
+    ></div>
+
+    <div class="form-text">
+        Optional. Leave empty for a walk-in customer.
+    </div>
+</div>
+
 
                     <!-- ====================================== -->
                     <!-- CUSTOMER DETAILS -->

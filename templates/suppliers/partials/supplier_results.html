@@ -1,0 +1,323 @@
+
+<!-- ============================================================
+     SUPPLIER RESULTS PARTIAL
+     AJAX Search | Status Filters | Pagination
+     ============================================================ -->
+
+<!-- SUPPLIERS TABLE -->
+<div class="table-responsive">
+
+    <table class="table supplier-table">
+
+        <thead>
+            <tr>
+                <th>Supplier</th>
+                <th>Company</th>
+                <th>Contact Person</th>
+                <th>Phone</th>
+                <th>City</th>
+                <th>Status</th>
+                <th class="text-end">Actions</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+            {% for supplier in suppliers %}
+
+            <tr>
+
+                <!-- SUPPLIER NAME & CODE -->
+                <td>
+                    <a
+                        href="{% url 'suppliers:detail' supplier.pk %}"
+                        class="supplier-name"
+                    >
+                        {{ supplier.name }}
+                    </a>
+
+                    <div class="supplier-code">
+                        {{ supplier.supplier_code }}
+                    </div>
+                </td>
+
+                <!-- COMPANY -->
+                <td>
+                    {{ supplier.company_name|default:"—" }}
+                </td>
+
+                <!-- CONTACT PERSON -->
+                <td>
+                    {{ supplier.contact_person|default:"—" }}
+                </td>
+
+                <!-- PHONE -->
+                <td>
+                    {{ supplier.phone }}
+                </td>
+
+                <!-- CITY -->
+                <td>
+                    {{ supplier.city|default:"—" }}
+                </td>
+
+                <!-- STATUS -->
+                <td>
+
+                    {% if supplier.is_active %}
+
+                    <span class="status-pill status-active">
+                        <i class="fa-solid fa-circle fa-2xs"></i>
+                        Active
+                    </span>
+
+                    {% else %}
+
+                    <span class="status-pill status-inactive">
+                        <i class="fa-solid fa-circle fa-2xs"></i>
+                        Inactive
+                    </span>
+
+                    {% endif %}
+
+                </td>
+
+                <!-- ACTION BUTTONS -->
+                <td class="text-end">
+
+                    <div class="d-inline-flex align-items-center gap-2">
+
+                        <!-- View -->
+                        <a
+                            href="{% url 'suppliers:detail' supplier.pk %}"
+                            class="action-btn"
+                            title="View Supplier"
+                            aria-label="View {{ supplier.name }}"
+                        >
+                            <i class="fa-regular fa-eye"></i>
+                        </a>
+
+                        <!-- Edit -->
+                        {% if perms.suppliers.change_supplier %}
+
+                        <a
+                            href="{% url 'suppliers:edit' supplier.pk %}"
+                            class="action-btn"
+                            title="Edit Supplier"
+                            aria-label="Edit {{ supplier.name }}"
+                        >
+                            <i class="fa-solid fa-pen"></i>
+                        </a>
+
+                        {% endif %}
+
+                    </div>
+
+                </td>
+
+            </tr>
+
+            {% empty %}
+
+            <!-- EMPTY STATE -->
+            <tr>
+                <td colspan="7">
+
+                    <div class="empty-state">
+
+                        <i class="fa-solid fa-truck-ramp-box d-block"></i>
+
+                        <h5 class="fw-semibold text-dark">
+                            No suppliers found
+                        </h5>
+
+                        {% if query or status %}
+
+                        <p class="mb-0">
+                            No suppliers match your current
+                            search or filter.
+                        </p>
+
+                        {% else %}
+
+                        <p class="mb-3">
+                            No suppliers have been registered yet.
+                        </p>
+
+                        {% if perms.suppliers.add_supplier %}
+
+                        <a
+                            href="{% url 'suppliers:create' %}"
+                            class="btn btn-teal"
+                        >
+                            <i class="fa-solid fa-plus me-2"></i>
+                            Add First Supplier
+                        </a>
+
+                        {% endif %}
+
+                        {% endif %}
+
+                    </div>
+
+                </td>
+            </tr>
+
+            {% endfor %}
+
+        </tbody>
+
+    </table>
+
+</div>
+
+
+<!-- ============================================================
+     RESULTS FOOTER AND PAGINATION
+     ============================================================ -->
+
+<div
+    class="d-flex flex-wrap justify-content-between align-items-center gap-3 p-3 border-top"
+>
+
+    <!-- RESULTS COUNT -->
+    <div class="text-muted small">
+
+        {% if page_obj.paginator.count > 0 %}
+
+            Showing
+            <strong>{{ page_obj.start_index }}</strong>
+            –
+            <strong>{{ page_obj.end_index }}</strong>
+            of
+            <strong>{{ page_obj.paginator.count }}</strong>
+            suppliers
+
+        {% else %}
+
+            Showing 0 suppliers
+
+        {% endif %}
+
+    </div>
+
+
+    <!-- PAGINATION -->
+    {% if page_obj.paginator.num_pages > 1 %}
+
+    <nav aria-label="Supplier pagination">
+
+        <ul class="pagination pagination-sm mb-0 supplier-pagination">
+
+            <!-- FIRST PAGE -->
+            {% if page_obj.has_previous %}
+
+            <li class="page-item">
+
+                <a
+                    class="page-link"
+                    href="?q={{ query|urlencode }}&status={{ status|urlencode }}&page=1"
+                    aria-label="First page"
+                    title="First Page"
+                >
+                    <i class="fa-solid fa-angles-left"></i>
+                </a>
+
+            </li>
+
+
+            <!-- PREVIOUS PAGE -->
+            <li class="page-item">
+
+                <a
+                    class="page-link"
+                    href="?q={{ query|urlencode }}&status={{ status|urlencode }}&page={{ page_obj.previous_page_number }}"
+                >
+                    Previous
+                </a>
+
+            </li>
+
+            {% else %}
+
+            <li class="page-item disabled">
+                <span class="page-link">
+                    <i class="fa-solid fa-angles-left"></i>
+                </span>
+            </li>
+
+            <li class="page-item disabled">
+                <span class="page-link">
+                    Previous
+                </span>
+            </li>
+
+            {% endif %}
+
+
+            <!-- CURRENT PAGE -->
+            <li class="page-item active">
+
+                <span
+                    class="page-link"
+                    aria-current="page"
+                >
+                    {{ page_obj.number }}
+                    / {{ page_obj.paginator.num_pages }}
+                </span>
+
+            </li>
+
+
+            <!-- NEXT PAGE -->
+            {% if page_obj.has_next %}
+
+            <li class="page-item">
+
+                <a
+                    class="page-link"
+                    href="?q={{ query|urlencode }}&status={{ status|urlencode }}&page={{ page_obj.next_page_number }}"
+                >
+                    Next
+                </a>
+
+            </li>
+
+
+            <!-- LAST PAGE -->
+            <li class="page-item">
+
+                <a
+                    class="page-link"
+                    href="?q={{ query|urlencode }}&status={{ status|urlencode }}&page={{ page_obj.paginator.num_pages }}"
+                    aria-label="Last page"
+                    title="Last Page"
+                >
+                    <i class="fa-solid fa-angles-right"></i>
+                </a>
+
+            </li>
+
+            {% else %}
+
+            <li class="page-item disabled">
+                <span class="page-link">
+                    Next
+                </span>
+            </li>
+
+            <li class="page-item disabled">
+                <span class="page-link">
+                    <i class="fa-solid fa-angles-right"></i>
+                </span>
+            </li>
+
+            {% endif %}
+
+        </ul>
+
+    </nav>
+
+    {% endif %}
+
+</div>

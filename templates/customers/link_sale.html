@@ -1,0 +1,226 @@
+
+{% extends "base/base.html" %}
+
+{% block title %}
+Link Historical Sale | PharmaCare
+{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid py-3">
+
+    <div class="d-flex flex-wrap justify-content-between
+                align-items-center gap-3 mb-4">
+        <div>
+            <h3 class="fw-bold mb-1">
+                Link Historical Invoice
+            </h3>
+            <p class="text-muted mb-0">
+                Customer:
+                <strong>{{ customer.name }}</strong>
+                ({{ customer.customer_code }})
+            </p>
+        </div>
+
+        <a href="{% url 'customers:detail' customer.pk %}"
+           class="btn btn-light border">
+            <i class="fa-solid fa-arrow-left me-2"></i>
+            Back to Customer
+        </a>
+    </div>
+
+    <div class="alert alert-warning">
+        Verify the original invoice and customer identity before
+        linking. This operation changes the customer association
+        but does not change invoice totals, payment records,
+        inventory or historical customer name/phone.
+    </div>
+
+    {% if error %}
+    <div class="alert alert-danger">
+        {{ error }}
+    </div>
+    {% endif %}
+
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-2">
+                <div class="col-md-9">
+                    <input
+                        type="search"
+                        name="q"
+                        value="{{ query }}"
+                        class="form-control"
+                        placeholder="Search invoice number (minimum 4 characters)"
+                        minlength="4"
+                        required
+                    >
+                </div>
+
+                <div class="col-md-3">
+                    <button
+                        type="submit"
+                        class="btn w-100 text-white"
+                        style="background:#0f766e;">
+                        <i class="fa-solid fa-search me-2"></i>
+                        Find Invoice
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {% if query|length >= 4 %}
+
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-white py-3">
+            <h6 class="fw-semibold mb-0">
+                Unlinked Invoices
+            </h6>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Invoice</th>
+                        <th>Customer Snapshot</th>
+                        <th>Branch</th>
+                        <th>Total</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for sale in candidates %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'sales:detail' sale.pk %}"
+                               target="_blank" rel="noopener">
+                                {{ sale.invoice_number }}
+                            </a>
+                        </td>
+                        <td>
+                            {{ sale.customer_name|default:"Walk-in" }}
+                            <div class="text-muted small">
+                                {{ sale.customer_phone|default:"No phone" }}
+                            </div>
+                        </td>
+                        <td>{{ sale.branch.name }}</td>
+                        <td>
+                            Rs. {{ sale.total_amount|floatformat:2 }}
+                        </td>
+                        <td>
+                            {{ sale.created_at|date:"d M Y" }}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5"
+                            class="text-muted text-center py-4">
+                            No unlinked invoice found.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {% endif %}
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-4">
+            <h5 class="fw-semibold mb-3">
+                Confirm Invoice Linking
+            </h5>
+
+            <form method="post">
+                {% csrf_token %}
+
+                <div class="row g-3">
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">
+                            Sale Database ID *
+                        </label>
+                        <input
+                            type="number"
+                            name="sale_id"
+                            class="form-control"
+                            min="1"
+                            required
+                            value="{{ request.POST.sale_id }}"
+                            placeholder="Enter Sale ID"
+                        >
+                        <div class="form-text">
+                            Open the invoice from search results.
+                            Its URL ends with the Sale ID.
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">
+                            Confirm Exact Invoice Number *
+                        </label>
+                        <input
+                            type="text"
+                            name="invoice_confirmation"
+                            class="form-control"
+                            required
+                            value="{{ request.POST.invoice_confirmation }}"
+                            placeholder="SALE-..."
+                            autocomplete="off"
+                        >
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">
+                            Reason for Linking *
+                        </label>
+                        <textarea
+                            name="reason"
+                            class="form-control"
+                            rows="3"
+                            minlength="10"
+                            required
+                            placeholder="Explain how the invoice was verified"
+                        >{{ request.POST.reason }}</textarea>
+                    </div>
+
+                    <div class="col-12">
+                        <div class="form-check">
+                            <input
+                                class="form-check-input"
+                                type="checkbox"
+                                name="confirm"
+                                value="yes"
+                                id="confirmInvoice"
+                                required
+                            >
+                            <label
+                                class="form-check-label"
+                                for="confirmInvoice">
+                                I verified this invoice belongs to
+                                <strong>{{ customer.name }}</strong>.
+                            </label>
+                        </div>
+                    </div>
+
+                </div>
+
+                <hr class="my-4">
+
+                <button
+                    type="submit"
+                    class="btn text-white px-4"
+                    style="background:#0f766e;">
+                    <i class="fa-solid fa-link me-2"></i>
+                    Link Invoice
+                </button>
+            </form>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

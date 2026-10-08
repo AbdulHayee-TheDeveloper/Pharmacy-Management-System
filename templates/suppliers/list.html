@@ -1,0 +1,435 @@
+
+{% extends "base/base.html" %}
+
+{% block title %}Suppliers | PharmaCare{% endblock %}
+
+{% block content %}
+
+<style>
+    .supplier-page {
+        color: #172033;
+    }
+
+    .supplier-page .page-subtitle {
+        color: #667085;
+        font-size: 14px;
+    }
+
+    .supplier-page .supplier-card {
+        background: #fff;
+        border: 1px solid #e7eaee;
+        border-radius: 12px;
+        padding: 20px;
+        height: 100%;
+    }
+
+    .supplier-page .stat-label {
+        color: #667085;
+        font-size: 13px;
+        font-weight: 500;
+    }
+
+    .supplier-page .stat-number {
+        font-size: 28px;
+        font-weight: 700;
+        margin-top: 8px;
+        line-height: 1.2;
+    }
+
+    .supplier-page .stat-icon {
+        width: 44px;
+        height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
+        background: #ccfbf1;
+        color: #0f766e;
+        font-size: 19px;
+    }
+
+    .supplier-page .btn-teal {
+        background: #0f766e;
+        border: 1px solid #0f766e;
+        color: #fff;
+    }
+
+    .supplier-page .btn-teal:hover {
+        background: #115e59;
+        border-color: #115e59;
+        color: #fff;
+    }
+
+    .supplier-page .supplier-filter {
+        border: 1px solid #e7eaee;
+        border-radius: 8px;
+        padding: 9px 12px;
+        background: #fff;
+        min-height: 42px;
+        font-size: 14px;
+    }
+
+    .supplier-page .supplier-filter:focus {
+        outline: none;
+        border-color: #0f766e;
+        box-shadow: 0 0 0 3px rgba(15, 118, 110, .1);
+    }
+
+    .supplier-page .supplier-table {
+        width: 100%;
+        margin-bottom: 0;
+    }
+
+    .supplier-page .supplier-table th {
+        background: #f8fafb;
+        color: #667085;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: .04em;
+        padding: 15px 16px;
+        white-space: nowrap;
+    }
+
+    .supplier-page .supplier-table td {
+        padding: 16px;
+        vertical-align: middle;
+        font-size: 14px;
+        border-color: #eef0f3;
+    }
+
+    .supplier-page .supplier-name {
+        font-weight: 600;
+        color: #172033;
+        text-decoration: none;
+    }
+
+    .supplier-page .supplier-name:hover {
+        color: #0f766e;
+    }
+
+    .supplier-page .supplier-code {
+        color: #667085;
+        font-size: 12px;
+    }
+
+    .supplier-page .status-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 5px 10px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .supplier-page .status-active {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .supplier-page .status-inactive {
+        background: #f2f4f7;
+        color: #667085;
+    }
+
+    .supplier-page .action-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 34px;
+        height: 34px;
+        border: 1px solid #e7eaee;
+        border-radius: 8px;
+        color: #667085;
+        text-decoration: none;
+        background: #fff;
+    }
+
+    .supplier-page .action-btn:hover {
+        background: #ccfbf1;
+        border-color: #0f766e;
+        color: #0f766e;
+    }
+
+    .supplier-page .pagination .page-link {
+        color: #0f766e;
+    }
+
+    .supplier-page .pagination .active .page-link {
+        background: #0f766e;
+        border-color: #0f766e;
+        color: #fff;
+    }
+
+    .supplier-page .empty-state {
+        padding: 60px 20px;
+        text-align: center;
+        color: #667085;
+    }
+
+    .supplier-page .empty-state > i {
+        font-size: 42px;
+        margin-bottom: 15px;
+        color: #98a2b3;
+    }
+
+    /* AJAX RESULTS */
+    .supplier-page #supplier-results {
+        transition: opacity 0.15s ease;
+        min-height: 100px;
+    }
+
+    .supplier-page #supplier-results[aria-busy="true"] {
+        pointer-events: none;
+    }
+
+    .supplier-page #supplier-search-feedback {
+        font-size: 12px;
+    }
+
+    .supplier-page #supplier-search-feedback[hidden] {
+        display: none !important;
+    }
+
+    @media (max-width: 576px) {
+        .supplier-page .supplier-card {
+            padding: 16px;
+        }
+
+        .supplier-page .stat-number {
+            font-size: 24px;
+        }
+
+        .supplier-page .supplier-filter {
+            font-size: 13px;
+        }
+    }
+</style>
+
+<div class="supplier-page">
+
+    <!-- =====================================================
+         PAGE HEADER
+         ===================================================== -->
+
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+
+        <div>
+            <h3 class="fw-bold mb-1">
+                Supplier Management
+            </h3>
+
+            <div class="page-subtitle">
+                Manage pharmaceutical suppliers and distributors.
+            </div>
+        </div>
+
+        {% if perms.suppliers.add_supplier %}
+        <a
+            href="{% url 'suppliers:create' %}"
+            class="btn btn-teal px-3 py-2"
+        >
+            <i class="fa-solid fa-plus me-2"></i>
+            Add Supplier
+        </a>
+        {% endif %}
+
+    </div>
+
+
+    <!-- =====================================================
+         SUPPLIER SUMMARY CARDS
+         ===================================================== -->
+
+    <div class="row g-3 mb-4">
+
+        <!-- TOTAL SUPPLIERS -->
+        <div class="col-md-4">
+
+            <div class="supplier-card d-flex justify-content-between align-items-center">
+
+                <div>
+                    <div class="stat-label">
+                        Total Suppliers
+                    </div>
+
+                    <div class="stat-number">
+                        {{ total_suppliers }}
+                    </div>
+                </div>
+
+                <div class="stat-icon">
+                    <i class="fa-solid fa-truck"></i>
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ACTIVE SUPPLIERS -->
+        <div class="col-md-4">
+
+            <div class="supplier-card d-flex justify-content-between align-items-center">
+
+                <div>
+                    <div class="stat-label">
+                        Active Suppliers
+                    </div>
+
+                    <div class="stat-number">
+                        {{ active_suppliers }}
+                    </div>
+                </div>
+
+                <div class="stat-icon">
+                    <i class="fa-solid fa-circle-check"></i>
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- INACTIVE SUPPLIERS -->
+        <div class="col-md-4">
+
+            <div class="supplier-card d-flex justify-content-between align-items-center">
+
+                <div>
+                    <div class="stat-label">
+                        Inactive Suppliers
+                    </div>
+
+                    <div class="stat-number">
+                        {{ inactive_suppliers }}
+                    </div>
+                </div>
+
+                <div class="stat-icon">
+                    <i class="fa-solid fa-circle-pause"></i>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         SUPPLIER RECORDS CARD
+         ===================================================== -->
+
+    <div class="supplier-card p-0 overflow-hidden">
+
+        <!-- SEARCH AND FILTERS -->
+        <div class="p-3 border-bottom">
+
+            <form
+                method="get"
+                id="supplier-filter-form"
+                class="row g-2 align-items-center"
+                role="search"
+            >
+
+                <!-- LIVE SEARCH -->
+                <div class="col-12 col-lg-7">
+
+                    <input
+                        type="search"
+                        id="supplier-search"
+                        name="q"
+                        value="{{ query }}"
+                        class="supplier-filter w-100"
+                        placeholder="Search by supplier name, code, company, phone..."
+                        autocomplete="off"
+                        aria-label="Search suppliers"
+                    >
+
+                </div>
+
+
+                <!-- STATUS FILTER -->
+                <div class="col-8 col-lg-3">
+
+                    <select
+                        name="status"
+                        id="supplier-status"
+                        class="supplier-filter w-100"
+                        aria-label="Filter suppliers by status"
+                    >
+
+                        <option value="">
+                            All Status
+                        </option>
+
+                        <option
+                            value="active"
+                            {% if status == "active" %}selected{% endif %}
+                        >
+                            Active
+                        </option>
+
+                        <option
+                            value="inactive"
+                            {% if status == "inactive" %}selected{% endif %}
+                        >
+                            Inactive
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- SEARCH BUTTON -->
+                <div class="col-4 col-lg-2">
+
+                    <button
+                        type="submit"
+                        class="btn btn-teal w-100"
+                    >
+                        <i class="fa-solid fa-magnifying-glass me-1"></i>
+                        Search
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+
+        <!-- =================================================
+             AJAX SEARCH FEEDBACK
+             ================================================= -->
+
+        <div
+            id="supplier-search-feedback"
+            class="small px-3 pt-2"
+            role="status"
+            aria-live="polite"
+            hidden
+        ></div>
+
+
+        <!-- =================================================
+             AJAX RESULTS CONTAINER
+             ================================================= -->
+
+        <div
+            id="supplier-results"
+            aria-busy="false"
+        >
+
+            {% include "suppliers/partials/supplier_results.html" %}
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

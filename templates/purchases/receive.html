@@ -1,0 +1,636 @@
+
+{% extends "base/base.html" %}
+
+{% block content %}
+
+<style>
+    .receiving-page {
+        color: #172033;
+    }
+
+    .receiving-page .page-heading {
+        font-size: 1.65rem;
+        font-weight: 700;
+        color: #172033;
+    }
+
+    .receiving-page .section-card {
+        background: #fff;
+        border: 1px solid #e7eaee;
+        border-radius: 14px;
+        overflow: hidden;
+        margin-bottom: 22px;
+    }
+
+    .receiving-page .section-heading {
+        padding: 18px 22px;
+        border-bottom: 1px solid #e7eaee;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    .receiving-page .section-heading h5 {
+        margin: 0;
+        font-size: 1rem;
+        font-weight: 700;
+    }
+
+    .receiving-page .section-body {
+        padding: 22px;
+    }
+
+    .receiving-page .info-label {
+        font-size: .76rem;
+        color: #6b7280;
+        margin-bottom: 5px;
+    }
+
+    .receiving-page .info-value {
+        font-size: .94rem;
+        font-weight: 600;
+        overflow-wrap: anywhere;
+    }
+
+    .receiving-page .btn-teal {
+        background: #0f766e;
+        border: 1px solid #0f766e;
+        color: #fff;
+    }
+
+    .receiving-page .btn-teal:hover {
+        background: #115e59;
+        border-color: #115e59;
+        color: #fff;
+    }
+
+    .receiving-page .text-teal {
+        color: #0f766e;
+    }
+
+    .receiving-page .receiving-table {
+        min-width: 950px;
+        margin-bottom: 0;
+    }
+
+    .receiving-page .receiving-table th {
+        background: #f8fafb;
+        color: #475569;
+        font-size: .78rem;
+        font-weight: 700;
+        padding: 13px 12px;
+        white-space: nowrap;
+    }
+
+    .receiving-page .receiving-table td {
+        padding: 12px;
+        vertical-align: top;
+    }
+
+    .receiving-page .receiving-table .form-control,
+    .receiving-page .receiving-table .form-select {
+        font-size: .88rem;
+        min-width: 110px;
+    }
+
+    .receiving-page .receiving-table .medicine-cell {
+        min-width: 240px;
+    }
+
+    .receiving-page .field-error {
+        font-size: .75rem;
+        color: #dc3545;
+        margin-top: 5px;
+    }
+
+    .receiving-page .summary-card {
+        background: #f8fafb;
+        border: 1px solid #e7eaee;
+        border-radius: 12px;
+        padding: 18px;
+        height: 100%;
+    }
+
+    .receiving-page .summary-label {
+        font-size: .8rem;
+        color: #64748b;
+    }
+
+    .receiving-page .summary-value {
+        font-size: 1.4rem;
+        font-weight: 700;
+        margin-top: 5px;
+    }
+
+    .receiving-page .remaining-help {
+        display: block;
+        font-size: .75rem;
+        color: #64748b;
+        margin-top: 5px;
+    }
+
+    .receiving-page .receiving-warning {
+        border: 1px solid #f5d68b;
+        border-radius: 10px;
+        background: #fffbeb;
+        padding: 13px 16px;
+        font-size: .87rem;
+        color: #92400e;
+    }
+
+    @media (max-width: 767px) {
+        .receiving-page .section-body {
+            padding: 16px;
+        }
+
+        .receiving-page .section-heading {
+            padding: 15px 16px;
+        }
+
+        .receiving-page .page-heading {
+            font-size: 1.3rem;
+        }
+    }
+</style>
+
+<div class="container-fluid receiving-page py-3" id="purchaseReceivingPage">
+
+    <!-- PAGE HEADER -->
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+
+        <div>
+            <h2 class="page-heading mb-1">
+                <i class="fa-solid fa-boxes-stacked text-teal me-2"></i>
+                Receive Purchase Stock
+            </h2>
+
+            <div class="text-muted small">
+                Record delivered medicines against purchase
+                {{ purchase.purchase_number }}
+            </div>
+        </div>
+
+        <a href="{% url 'purchases:detail' purchase.pk %}"
+           class="btn btn-outline-secondary">
+
+            <i class="fa-solid fa-arrow-left me-1"></i>
+            Back to Purchase
+        </a>
+    </div>
+
+    <!-- DJANGO MESSAGES -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show"
+                 role="alert">
+                {{ message }}
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="alert"
+                        aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- PURCHASE INFORMATION -->
+    <div class="section-card">
+
+        <div class="section-heading">
+            <h5>
+                <i class="fa-solid fa-file-invoice text-teal me-2"></i>
+                Purchase Information
+            </h5>
+
+            <span class="badge bg-info-subtle text-info-emphasis border">
+                {{ purchase.get_status_display }}
+            </span>
+        </div>
+
+        <div class="section-body">
+
+            <div class="row g-4">
+
+                <div class="col-md-3 col-sm-6">
+                    <div class="info-label">Purchase Number</div>
+                    <div class="info-value">
+                        {{ purchase.purchase_number }}
+                    </div>
+                </div>
+
+                <div class="col-md-3 col-sm-6">
+                    <div class="info-label">Supplier</div>
+                    <div class="info-value">
+                        {{ purchase.supplier.name }}
+                    </div>
+                </div>
+
+                <div class="col-md-3 col-sm-6">
+                    <div class="info-label">Branch</div>
+                    <div class="info-value">
+                        {{ purchase.branch.name }}
+                    </div>
+                </div>
+
+                <div class="col-md-3 col-sm-6">
+                    <div class="info-label">Purchase Date</div>
+                    <div class="info-value">
+                        {{ purchase.purchase_date|date:"d M Y" }}
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- RECEIVING FORM -->
+    <form method="post"
+          id="purchaseReceivingForm"
+          action="{% url 'purchases:receive' purchase.pk %}"
+          novalidate>
+
+        {% csrf_token %}
+
+        <!-- DELIVERY INFORMATION -->
+        <div class="section-card">
+
+            <div class="section-heading">
+                <h5>
+                    <i class="fa-solid fa-truck-ramp-box text-teal me-2"></i>
+                    Delivery Information
+                </h5>
+            </div>
+
+            <div class="section-body">
+
+                {% if header_form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        {{ header_form.non_field_errors }}
+                    </div>
+                {% endif %}
+
+                <div class="row g-3">
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">
+                            {{ header_form.supplier_delivery_note.label }}
+                        </label>
+
+                        {{ header_form.supplier_delivery_note }}
+
+                        {% for error in header_form.supplier_delivery_note.errors %}
+                            <div class="field-error">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">
+                            Receiving Notes
+                        </label>
+
+                        {{ header_form.notes }}
+
+                        {% for error in header_form.notes.errors %}
+                            <div class="field-error">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+
+        <!-- AVAILABLE PURCHASE ITEMS -->
+        <div class="section-card">
+
+            <div class="section-heading">
+                <h5>
+                    <i class="fa-solid fa-list-check text-teal me-2"></i>
+                    Remaining Ordered Medicines
+                </h5>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-3">Medicine</th>
+                            <th>Ordered Packs</th>
+                            <th>Already Received</th>
+                            <th>Remaining Packs</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for item in remaining_items %}
+                            <tr>
+                                <td class="ps-3 fw-semibold">
+                                    {{ item.medicine.name }}
+                                </td>
+
+                                <td>{{ item.ordered_packs }}</td>
+
+                                <td>{{ item.received_packs }}</td>
+
+                                <td>
+                                    <span class="badge bg-warning-subtle text-warning-emphasis border">
+                                        {{ item.remaining_packs }}
+                                    </span>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="4"
+                                    class="text-center text-muted py-4">
+                                    No outstanding purchase items found.
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+
+                </table>
+            </div>
+        </div>
+
+        <!-- RECEIVING BATCH ROWS -->
+        <div class="section-card">
+
+            <div class="section-heading">
+
+                <div>
+                    <h5>
+                        <i class="fa-solid fa-pills text-teal me-2"></i>
+                        Delivered Medicine Batches
+                    </h5>
+
+                    <div class="small text-muted mt-1">
+                        Add each delivered batch with its expiry date and quantity.
+                    </div>
+                </div>
+
+                <button type="button"
+                        class="btn btn-teal btn-sm"
+                        id="addReceivingBatch">
+
+                    <i class="fa-solid fa-plus me-1"></i>
+                    Add Batch
+                </button>
+            </div>
+
+            <div class="section-body pb-0">
+
+                {{ item_formset.management_form }}
+
+                {% if item_formset.non_form_errors %}
+                    <div class="alert alert-danger">
+                        {% for error in item_formset.non_form_errors %}
+                            <div>{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <div id="receivingClientError"
+                     class="alert alert-danger d-none"
+                     role="alert"></div>
+
+            </div>
+
+            <div class="table-responsive">
+
+                <table class="table receiving-table">
+
+                    <thead>
+                        <tr>
+                            <th style="width: 27%;">Medicine</th>
+                            <th style="width: 17%;">Batch Number</th>
+                            <th style="width: 17%;">Expiry Date</th>
+                            <th style="width: 15%;">Received Packs</th>
+                            <th style="width: 14%;">Remaining</th>
+                            <th style="width: 10%;">Action</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="receivingItemsBody">
+
+                        {% for form in item_formset %}
+                            <tr class="receiving-item-row">
+
+                                <td class="medicine-cell">
+
+                                    {% for hidden in form.hidden_fields %}
+                                        {{ hidden }}
+                                    {% endfor %}
+
+                                    {{ form.purchase_item }}
+
+                                    {% for error in form.purchase_item.errors %}
+                                        <div class="field-error">{{ error }}</div>
+                                    {% endfor %}
+
+                                </td>
+
+                                <td>
+                                    {{ form.batch_number }}
+
+                                    {% for error in form.batch_number.errors %}
+                                        <div class="field-error">{{ error }}</div>
+                                    {% endfor %}
+                                </td>
+
+                                <td>
+                                    {{ form.expiry_date }}
+
+                                    {% for error in form.expiry_date.errors %}
+                                        <div class="field-error">{{ error }}</div>
+                                    {% endfor %}
+                                </td>
+
+                                <td>
+                                    {{ form.received_packs }}
+
+                                    {% for error in form.received_packs.errors %}
+                                        <div class="field-error">{{ error }}</div>
+                                    {% endfor %}
+                                </td>
+
+                                <td>
+                                    <span class="remaining-help receiving-remaining-label">
+                                        Select medicine
+                                    </span>
+                                </td>
+
+                                <td>
+                                    <div class="d-none">
+                                        {{ form.DELETE }}
+                                    </div>
+
+                                    <button type="button"
+                                            class="btn btn-outline-danger btn-sm remove-receiving-row"
+                                            title="Remove batch"
+                                            aria-label="Remove batch">
+
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
+                                </td>
+
+                            </tr>
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+            <div class="section-body border-top">
+
+                <div class="receiving-warning">
+                    <i class="fa-solid fa-circle-info me-1"></i>
+                    Stock will be added to inventory only after you
+                    submit this receiving form successfully.
+                    Quantities are recorded in packs and converted
+                    into stock units using the medicine's saved pack size.
+                </div>
+
+            </div>
+        </div>
+
+        <!-- RECEIVING SUMMARY -->
+        <div class="section-card">
+
+            <div class="section-heading">
+                <h5>
+                    <i class="fa-solid fa-chart-simple text-teal me-2"></i>
+                    Receiving Summary
+                </h5>
+            </div>
+
+            <div class="section-body">
+
+                <div class="row g-3">
+
+                    <div class="col-md-4">
+                        <div class="summary-card">
+                            <div class="summary-label">
+                                Delivery Batch Rows
+                            </div>
+
+                            <div class="summary-value"
+                                 id="receivingBatchCount">
+                                0
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="summary-card">
+                            <div class="summary-label">
+                                Total Packs to Receive
+                            </div>
+
+                            <div class="summary-value text-teal"
+                                 id="receivingTotalPacks">
+                                0
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="summary-card">
+                            <div class="summary-label">
+                                Different Purchase Items
+                            </div>
+
+                            <div class="summary-value"
+                                 id="receivingMedicineCount">
+                                0
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+
+        <!-- SUBMIT BUTTONS -->
+        <div class="d-flex justify-content-end flex-wrap gap-2 mb-4">
+
+            <a href="{% url 'purchases:detail' purchase.pk %}"
+               class="btn btn-outline-secondary px-4">
+                Cancel
+            </a>
+
+            <button type="submit"
+                    id="submitPurchaseReceiving"
+                    class="btn btn-teal px-4"
+                    {% if not remaining_items %}disabled{% endif %}>
+
+                <i class="fa-solid fa-box-circle-check me-1"></i>
+                Confirm Stock Receiving
+            </button>
+
+        </div>
+
+    </form>
+
+    <!-- Data used by centralized app.js -->
+    <div id="receivingMedicineData" class="d-none">
+        {% for item in remaining_items %}
+            <span data-item-id="{{ item.pk }}"
+                  data-medicine-id="{{ item.medicine_id }}"
+                  data-medicine-name="{{ item.medicine.name }}"
+                  data-remaining="{{ item.remaining_packs }}"></span>
+        {% endfor %}
+    </div>
+
+    <!-- Blank Django formset row used by JavaScript -->
+    <template id="receivingEmptyRowTemplate">
+
+        <tr class="receiving-item-row">
+
+            <td class="medicine-cell">
+                {{ item_formset.empty_form.purchase_item }}
+            </td>
+
+            <td>
+                {{ item_formset.empty_form.batch_number }}
+            </td>
+
+            <td>
+                {{ item_formset.empty_form.expiry_date }}
+            </td>
+
+            <td>
+                {{ item_formset.empty_form.received_packs }}
+            </td>
+
+            <td>
+                <span class="remaining-help receiving-remaining-label">
+                    Select medicine
+                </span>
+            </td>
+
+            <td>
+                <div class="d-none">
+                    {{ item_formset.empty_form.DELETE }}
+                </div>
+
+                <button type="button"
+                        class="btn btn-outline-danger btn-sm remove-receiving-row"
+                        title="Remove batch"
+                        aria-label="Remove batch">
+
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+            </td>
+
+        </tr>
+
+    </template>
+
+</div>
+
+{% endblock %}

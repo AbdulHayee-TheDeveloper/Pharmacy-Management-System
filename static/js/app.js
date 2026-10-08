@@ -3266,7 +3266,7 @@ updateInventoryPreview();
                                     item.sale_type,
                             })
                         ),
-
+                            
                     payment_method:
                         posPaymentMethod
                             ?.value ||
@@ -3293,6 +3293,8 @@ updateInventoryPreview();
                             ?.value
                             .trim() ||
                         "",
+                    customer_id:
+    document.getElementById("posSelectedCustomerId")?.value || null,
                 };
 
                 try {
@@ -3515,4 +3517,2281 @@ updateInventoryPreview();
     }
 
     renderCart();
+});
+
+"use strict";
+
+document.addEventListener("DOMContentLoaded", () => {
+    const form = document.getElementById(
+        "supplier-filter-form"
+    );
+
+    const searchInput = document.getElementById(
+        "supplier-search"
+    );
+
+    const statusSelect = document.getElementById(
+        "supplier-status"
+    );
+
+    const resultsContainer = document.getElementById(
+        "supplier-results"
+    );
+
+    const feedback = document.getElementById(
+        "supplier-search-feedback"
+    );
+
+    if (
+        !form ||
+        !searchInput ||
+        !statusSelect ||
+        !resultsContainer ||
+        !feedback
+    ) {
+        return;
+    }
+
+    const DEBOUNCE_DELAY = 200;
+
+    let debounceTimer = null;
+    let activeController = null;
+    let requestSequence = 0;
+
+    function setFeedback(message, isError = false) {
+        feedback.textContent = message;
+        feedback.hidden = !message;
+
+        feedback.classList.toggle(
+            "text-danger",
+            isError
+        );
+
+        feedback.classList.toggle(
+            "text-muted",
+            !isError
+        );
+    }
+
+    function setLoading(isLoading) {
+        resultsContainer.setAttribute(
+            "aria-busy",
+            String(isLoading)
+        );
+
+        resultsContainer.style.opacity = isLoading
+            ? "0.55"
+            : "1";
+    }
+
+    function buildUrl(page = 1) {
+        const url = new URL(window.location.href);
+
+        const query = searchInput.value.trim();
+        const status = statusSelect.value;
+
+        url.searchParams.delete("q");
+        url.searchParams.delete("status");
+        url.searchParams.delete("page");
+
+        if (query) {
+            url.searchParams.set("q", query);
+        }
+
+        if (status) {
+            url.searchParams.set("status", status);
+        }
+
+        if (page > 1) {
+            url.searchParams.set("page", String(page));
+        }
+
+        return url;
+    }
+
+    function clearDebounce() {
+        if (debounceTimer !== null) {
+            clearTimeout(debounceTimer);
+            debounceTimer = null;
+        }
+    }
+
+    async function loadSuppliers(url, updateHistory = true) {
+        // Cancel the previous unfinished request.
+        if (activeController) {
+            activeController.abort();
+        }
+
+        const controller = new AbortController();
+        activeController = controller;
+
+        // Unique request ID avoids stale results.
+        const currentSequence = ++requestSequence;
+
+        setLoading(true);
+        setFeedback("Searching suppliers...");
+
+        try {
+            const response = await fetch(url.toString(), {
+                method: "GET",
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest",
+                    "Accept": "application/json"
+                },
+                signal: controller.signal,
+                credentials: "same-origin"
+            });
+
+            if (!response.ok) {
+                throw new Error(
+                    `Request failed: ${response.status}`
+                );
+            }
+
+            const contentType = response.headers.get(
+                "content-type"
+            ) || "";
+
+            if (!contentType.includes("application/json")) {
+                throw new Error(
+                    "Unexpected response from server."
+                );
+            }
+
+            const data = await response.json();
+
+            // Ignore outdated results.
+            if (currentSequence !== requestSequence) {
+                return;
+            }
+
+            resultsContainer.innerHTML = data.html;
+
+            if (updateHistory) {
+                window.history.replaceState(
+                    null,
+                    "",
+                    url.toString()
+                );
+            }
+
+            setFeedback("");
+
+        } catch (error) {
+            if (error.name === "AbortError") {
+                return;
+            }
+
+            if (currentSequence !== requestSequence) {
+                return;
+            }
+
+            console.error(
+                "Supplier search failed:",
+                error
+            );
+
+            setFeedback(
+                "Unable to load suppliers. Please try again.",
+                true
+            );
+
+        } finally {
+            if (currentSequence === requestSequence) {
+                setLoading(false);
+                activeController = null;
+            }
+        }
+    }
+
+    function scheduleSearch() {
+        clearDebounce();
+
+        // Invalidate and cancel current results
+        // immediately when the user types.
+        requestSequence++;
+
+        if (activeController) {
+            activeController.abort();
+            activeController = null;
+        }
+
+        setLoading(false);
+        setFeedback("");
+
+        debounceTimer = setTimeout(() => {
+            debounceTimer = null;
+
+            loadSuppliers(buildUrl(1));
+        }, DEBOUNCE_DELAY);
+    }
+
+    // Live search: 200ms after typing stops.
+    searchInput.addEventListener(
+        "input",
+        scheduleSearch
+    );
+
+    // Status filter: no debounce.
+    statusSelect.addEventListener("change", () => {
+        clearDebounce();
+        loadSuppliers(buildUrl(1));
+    });
+
+    // Search button / Enter key.
+    form.addEventListener("submit", (event) => {
+        event.preventDefault();
+
+        clearDebounce();
+        loadSuppliers(buildUrl(1));
+    });
+
+    // AJAX pagination with event delegation.
+    resultsContainer.addEventListener(
+        "click",
+        (event) => {
+            const link = event.target.closest(
+                ".supplier-pagination a.page-link"
+            );
+
+            if (!link) {
+                return;
+            }
+
+            // Preserve standard browser interactions.
+            if (
+                event.button !== 0 ||
+                event.ctrlKey ||
+                event.metaKey ||
+                event.shiftKey ||
+                event.altKey
+            ) {
+                return;
+            }
+
+            event.preventDefault();
+
+            clearDebounce();
+
+            const url = new URL(
+                link.href,
+                window.location.origin
+            );
+
+            loadSuppliers(url);
+        }
+    );
+
+    // Synchronize filters when browser history changes.
+    window.addEventListener("popstate", () => {
+        clearDebounce();
+
+        const url = new URL(window.location.href);
+
+        searchInput.value = url.searchParams.get("q") || "";
+
+        const savedStatus = url.searchParams.get("status") || "";
+
+        statusSelect.value = (
+            savedStatus === "active" ||
+            savedStatus === "inactive"
+        ) ? savedStatus : "";
+
+        loadSuppliers(url, false);
+    });
+});
+
+/* ============================================================
+   PURCHASE MANAGEMENT — CREATE / EDIT FORM
+   ============================================================ */
+
+document.addEventListener("DOMContentLoaded", () => {
+    "use strict";
+
+    const purchasePage = document.getElementById(
+        "purchaseFormPage"
+    );
+
+    if (!purchasePage) {
+        return;
+    }
+
+    const purchaseForm = document.getElementById(
+        "purchase-order-form"
+    );
+
+    const itemsBody = document.getElementById(
+        "purchaseItemsBody"
+    );
+
+    const addItemButton = document.getElementById(
+        "addPurchaseItem"
+    );
+
+    const emptyTemplate = document.getElementById(
+        "purchaseItemEmptyTemplate"
+    );
+
+    const totalFormsInput = document.getElementById(
+        "id_items-TOTAL_FORMS"
+    );
+
+    const medicineCountElement = document.getElementById(
+        "purchaseMedicineCount"
+    );
+
+    const totalPacksElement = document.getElementById(
+        "purchaseTotalPacks"
+    );
+
+    const grossAmountElement = document.getElementById(
+        "purchaseGrossAmount"
+    );
+
+    const discountAmountElement = document.getElementById(
+        "purchaseDiscountAmount"
+    );
+
+    const grandTotalElement = document.getElementById(
+        "purchaseGrandTotal"
+    );
+
+    const errorBox = document.getElementById(
+        "purchaseClientError"
+    );
+
+    const saveButton = document.getElementById(
+        "savePurchaseButton"
+    );
+
+    if (
+        !purchaseForm ||
+        !itemsBody ||
+        !addItemButton ||
+        !emptyTemplate ||
+        !totalFormsInput
+    ) {
+        console.error(
+            "Purchase form initialization failed: " +
+            "required HTML elements are missing."
+        );
+
+        return;
+    }
+
+    /* ========================================================
+       HELPERS
+       ======================================================== */
+
+    const formatMoney = (value) => {
+        const amount = Number(value);
+
+        const safeAmount = Number.isFinite(amount)
+            ? amount
+            : 0;
+
+        return (
+            "Rs. " +
+            safeAmount.toLocaleString("en-PK", {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            })
+        );
+    };
+
+    const toNumber = (value) => {
+        const parsed = Number(value);
+
+        return Number.isFinite(parsed)
+            ? parsed
+            : 0;
+    };
+
+    const findField = (row, fieldName) => {
+        return row.querySelector(
+            `[name$="-${fieldName}"]`
+        );
+    };
+
+    const getRows = () => {
+        return Array.from(
+            itemsBody.querySelectorAll(
+                ".purchase-item-row"
+            )
+        );
+    };
+
+    const isRemoved = (row) => {
+        const deleteField = findField(
+            row,
+            "DELETE"
+        );
+
+        return (
+            row.classList.contains("is-removed") ||
+            Boolean(deleteField?.checked)
+        );
+    };
+
+    const getActiveRows = () => {
+        return getRows().filter(
+            row => !isRemoved(row)
+        );
+    };
+
+    const showError = (message) => {
+        if (!errorBox) {
+            return;
+        }
+
+        errorBox.textContent = message;
+
+        errorBox.classList.remove("d-none");
+
+        errorBox.scrollIntoView({
+            behavior: "smooth",
+            block: "center"
+        });
+    };
+
+    const clearError = () => {
+        if (!errorBox) {
+            return;
+        }
+
+        errorBox.textContent = "";
+
+        errorBox.classList.add("d-none");
+    };
+
+    /* ========================================================
+       CALCULATE A SINGLE MEDICINE ROW
+       ======================================================== */
+
+    const calculateRow = (row) => {
+        if (isRemoved(row)) {
+            return {
+                packs: 0,
+                gross: 0,
+                discount: 0,
+                total: 0
+            };
+        }
+
+        const packsInput = findField(
+            row,
+            "ordered_packs"
+        );
+
+        const purchasePriceInput = findField(
+            row,
+            "purchase_price"
+        );
+
+        const discountInput = findField(
+            row,
+            "discount_amount"
+        );
+
+        const packs = toNumber(
+            packsInput?.value
+        );
+
+        const purchasePrice = toNumber(
+            purchasePriceInput?.value
+        );
+
+        const discount = toNumber(
+            discountInput?.value
+        );
+
+        const gross = packs * purchasePrice;
+
+        const total = Math.max(
+            0,
+            gross - discount
+        );
+
+        const lineTotalElement = row.querySelector(
+            ".line-total"
+        );
+
+        if (lineTotalElement) {
+            lineTotalElement.textContent = (
+                formatMoney(total)
+            );
+        }
+
+        return {
+            packs,
+            gross,
+            discount,
+            total
+        };
+    };
+
+    /* ========================================================
+       CALCULATE COMPLETE PURCHASE SUMMARY
+       ======================================================== */
+
+    const calculatePurchaseSummary = () => {
+        const rows = getActiveRows();
+
+        let totalPacks = 0;
+        let grossAmount = 0;
+        let discountAmount = 0;
+        let grandTotal = 0;
+
+        rows.forEach((row) => {
+            const result = calculateRow(row);
+
+            totalPacks += result.packs;
+
+            grossAmount += result.gross;
+
+            discountAmount += result.discount;
+
+            grandTotal += result.total;
+        });
+
+        if (medicineCountElement) {
+            medicineCountElement.textContent = (
+                String(rows.length)
+            );
+        }
+
+        if (totalPacksElement) {
+            totalPacksElement.textContent = (
+                String(totalPacks)
+            );
+        }
+
+        if (grossAmountElement) {
+            grossAmountElement.textContent = (
+                formatMoney(grossAmount)
+            );
+        }
+
+        if (discountAmountElement) {
+            discountAmountElement.textContent = (
+                formatMoney(discountAmount)
+            );
+        }
+
+        if (grandTotalElement) {
+            grandTotalElement.textContent = (
+                formatMoney(grandTotal)
+            );
+        }
+    };
+
+    /* ========================================================
+       ADD NEW MEDICINE ROW
+       ======================================================== */
+
+    const addMedicineRow = () => {
+        const currentTotal = Number.parseInt(
+            totalFormsInput.value,
+            10
+        );
+
+        if (!Number.isInteger(currentTotal)) {
+            showError(
+                "Invalid purchase formset configuration."
+            );
+
+            return;
+        }
+
+        const maxFormsInput = document.getElementById(
+            "id_items-MAX_NUM_FORMS"
+        );
+
+        const maxForms = maxFormsInput
+            ? Number.parseInt(maxFormsInput.value, 10)
+            : 1000;
+
+        if (
+            Number.isInteger(maxForms) &&
+            currentTotal >= maxForms
+        ) {
+            showError(
+                "Maximum medicine rows limit reached."
+            );
+
+            return;
+        }
+
+        const rowHTML = emptyTemplate.innerHTML.replace(
+            /__prefix__/g,
+            String(currentTotal)
+        );
+
+        const rowContainer = document.createElement(
+            "tbody"
+        );
+
+        rowContainer.innerHTML = rowHTML.trim();
+
+        const newRow = rowContainer.querySelector(
+            ".purchase-item-row"
+        );
+
+        if (!newRow) {
+            showError(
+                "Unable to create the medicine row."
+            );
+
+            return;
+        }
+
+        itemsBody.appendChild(newRow);
+
+        totalFormsInput.value = String(
+            currentTotal + 1
+        );
+
+        clearError();
+
+        calculatePurchaseSummary();
+
+        const medicineSelect = findField(
+            newRow,
+            "medicine"
+        );
+
+        if (medicineSelect) {
+            medicineSelect.focus();
+        }
+    };
+
+    /* ========================================================
+       REMOVE MEDICINE ROW
+       ======================================================== */
+
+    const removeMedicineRow = (row) => {
+        const activeRows = getActiveRows();
+
+        if (activeRows.length <= 1) {
+            showError(
+                "At least one medicine row is required."
+            );
+
+            return;
+        }
+
+        const deleteField = findField(
+            row,
+            "DELETE"
+        );
+
+        if (!deleteField) {
+            showError(
+                "Cannot remove this medicine row. " +
+                "Formset DELETE field is missing."
+            );
+
+            return;
+        }
+
+        // Preserve the form index and mark it for deletion.
+        // This works for existing items and newly added rows.
+        deleteField.checked = true;
+
+        row.classList.add("is-removed");
+
+        clearError();
+
+        calculatePurchaseSummary();
+    };
+
+    /* ========================================================
+       DUPLICATE MEDICINE VALIDATION
+       ======================================================== */
+
+    const hasDuplicateMedicines = () => {
+        const selectedMedicines = new Set();
+
+        for (const row of getActiveRows()) {
+            const medicineField = findField(
+                row,
+                "medicine"
+            );
+
+            const medicineId = medicineField?.value;
+
+            if (!medicineId) {
+                continue;
+            }
+
+            if (selectedMedicines.has(medicineId)) {
+                return true;
+            }
+
+            selectedMedicines.add(medicineId);
+        }
+
+        return false;
+    };
+
+    /* ========================================================
+       FORM VALIDATION
+       ======================================================== */
+
+    const validatePurchaseForm = () => {
+        const activeRows = getActiveRows();
+
+        if (activeRows.length < 1) {
+            showError(
+                "Add at least one medicine."
+            );
+
+            return false;
+        }
+
+        if (hasDuplicateMedicines()) {
+            showError(
+                "The same medicine cannot be added " +
+                "multiple times in one purchase."
+            );
+
+            return false;
+        }
+
+        for (const row of activeRows) {
+            const medicineField = findField(
+                row,
+                "medicine"
+            );
+
+            const packsField = findField(
+                row,
+                "ordered_packs"
+            );
+
+            const purchasePriceField = findField(
+                row,
+                "purchase_price"
+            );
+
+            const sellingPriceField = findField(
+                row,
+                "selling_price"
+            );
+
+            const discountField = findField(
+                row,
+                "discount_amount"
+            );
+
+            if (!medicineField?.value) {
+                showError(
+                    "Please select a medicine " +
+                    "in every active row."
+                );
+
+                medicineField?.focus();
+
+                return false;
+            }
+
+            const packs = Number(
+                packsField?.value
+            );
+
+            if (
+                !Number.isInteger(packs) ||
+                packs < 1
+            ) {
+                showError(
+                    "Pack quantity must be a " +
+                    "positive whole number."
+                );
+
+                packsField?.focus();
+
+                return false;
+            }
+
+            const purchasePrice = Number(
+                purchasePriceField?.value
+            );
+
+            const sellingPrice = Number(
+                sellingPriceField?.value
+            );
+
+            const discount = discountField?.value
+                ? Number(discountField.value)
+                : 0;
+
+            if (
+                purchasePriceField?.value === "" ||
+                !Number.isFinite(purchasePrice) ||
+                purchasePrice < 0
+            ) {
+                showError(
+                    "Enter a valid purchase price."
+                );
+
+                purchasePriceField?.focus();
+
+                return false;
+            }
+
+            if (
+                sellingPriceField?.value === "" ||
+                !Number.isFinite(sellingPrice) ||
+                sellingPrice < purchasePrice
+            ) {
+                showError(
+                    "Selling price must be greater than " +
+                    "or equal to purchase price."
+                );
+
+                sellingPriceField?.focus();
+
+                return false;
+            }
+
+            if (
+                !Number.isFinite(discount) ||
+                discount < 0 ||
+                discount > packs * purchasePrice
+            ) {
+                showError(
+                    "Discount must be between zero " +
+                    "and the medicine's gross amount."
+                );
+
+                discountField?.focus();
+
+                return false;
+            }
+        }
+
+        return true;
+    };
+
+    /* ========================================================
+       EVENT: ADD MEDICINE
+       ======================================================== */
+
+    addItemButton.addEventListener(
+        "click",
+        addMedicineRow
+    );
+
+    /* ========================================================
+       EVENT: REMOVE MEDICINE
+       ======================================================== */
+
+    itemsBody.addEventListener("click", (event) => {
+        const removeButton = event.target.closest(
+            ".remove-item-btn"
+        );
+
+        if (!removeButton) {
+            return;
+        }
+
+        const row = removeButton.closest(
+            ".purchase-item-row"
+        );
+
+        if (!row) {
+            return;
+        }
+
+        removeMedicineRow(row);
+    });
+
+    /* ========================================================
+       EVENTS: LIVE TOTALS
+       ======================================================== */
+
+    itemsBody.addEventListener("input", () => {
+        calculatePurchaseSummary();
+    });
+
+    itemsBody.addEventListener("change", () => {
+        calculatePurchaseSummary();
+    });
+
+    /* ========================================================
+       EVENT: FORM SUBMISSION
+       ======================================================== */
+
+    purchaseForm.addEventListener(
+        "submit",
+        (event) => {
+            clearError();
+
+            if (!validatePurchaseForm()) {
+                event.preventDefault();
+                return;
+            }
+
+            if (saveButton) {
+                saveButton.disabled = true;
+
+                saveButton.innerHTML = (
+                    '<i class="fa-solid fa-spinner ' +
+                    'fa-spin me-2"></i>Saving...'
+                );
+            }
+        }
+    );
+
+    /* ========================================================
+       INITIAL STATE
+       ======================================================== */
+
+    getRows().forEach((row) => {
+        const deleteField = findField(
+            row,
+            "DELETE"
+        );
+
+        if (deleteField?.checked) {
+            row.classList.add("is-removed");
+        }
+    });
+
+    calculatePurchaseSummary();
+
+});
+
+// ============================================================
+// PHASE 7.8.5 — PURCHASE STOCK RECEIVING FORM
+// ============================================================
+
+document.addEventListener("DOMContentLoaded", function () {
+    "use strict";
+
+    const page = document.getElementById("purchaseReceivingPage");
+
+    if (!page) {
+        return;
+    }
+
+    const form = document.getElementById("purchaseReceivingForm");
+    const tbody = document.getElementById("receivingItemsBody");
+
+    const addButton = document.getElementById("addReceivingBatch");
+    const emptyTemplate = document.getElementById(
+        "receivingEmptyRowTemplate"
+    );
+
+    const totalFormsInput = document.getElementById(
+        "id_receiving-TOTAL_FORMS"
+    );
+
+    const batchCountElement = document.getElementById(
+        "receivingBatchCount"
+    );
+
+    const totalPacksElement = document.getElementById(
+        "receivingTotalPacks"
+    );
+
+    const medicineCountElement = document.getElementById(
+        "receivingMedicineCount"
+    );
+
+    const errorElement = document.getElementById(
+        "receivingClientError"
+    );
+
+    const submitButton = document.getElementById(
+        "submitPurchaseReceiving"
+    );
+
+    const medicineDataContainer = document.getElementById(
+        "receivingMedicineData"
+    );
+
+    if (
+        !form ||
+        !tbody ||
+        !addButton ||
+        !emptyTemplate ||
+        !totalFormsInput ||
+        !medicineDataContainer
+    ) {
+        console.error(
+            "Purchase receiving form initialization failed."
+        );
+        return;
+    }
+
+    const MAX_FORMS = 100;
+
+    // --------------------------------------------------------
+    // LOAD PURCHASE ITEM DATA
+    // --------------------------------------------------------
+
+    const purchaseItems = new Map();
+
+    medicineDataContainer
+        .querySelectorAll("[data-item-id]")
+        .forEach(function (element) {
+            const itemId = element.dataset.itemId;
+
+            purchaseItems.set(itemId, {
+                medicineId: element.dataset.medicineId,
+                name: element.dataset.medicineName,
+                remaining: Number(element.dataset.remaining) || 0,
+            });
+        });
+
+    // --------------------------------------------------------
+    // HELPERS
+    // --------------------------------------------------------
+
+    function activeRows() {
+        return Array.from(
+            tbody.querySelectorAll(".receiving-item-row")
+        ).filter(function (row) {
+            const deleteInput = row.querySelector(
+                'input[name$="-DELETE"]'
+            );
+
+            return !deleteInput || !deleteInput.checked;
+        });
+    }
+
+    function getRowFields(row) {
+        return {
+            medicine: row.querySelector(
+                'select[name$="-purchase_item"]'
+            ),
+
+            batch: row.querySelector(
+                'input[name$="-batch_number"]'
+            ),
+
+            expiry: row.querySelector(
+                'input[name$="-expiry_date"]'
+            ),
+
+            packs: row.querySelector(
+                'input[name$="-received_packs"]'
+            ),
+
+            remainingLabel: row.querySelector(
+                ".receiving-remaining-label"
+            ),
+
+            deleteInput: row.querySelector(
+                'input[name$="-DELETE"]'
+            ),
+        };
+    }
+
+    function showError(message) {
+        if (!errorElement) {
+            return;
+        }
+
+        errorElement.textContent = message;
+        errorElement.classList.remove("d-none");
+
+        errorElement.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+        });
+    }
+
+    function clearError() {
+        if (!errorElement) {
+            return;
+        }
+
+        errorElement.textContent = "";
+        errorElement.classList.add("d-none");
+    }
+
+    function todayISO() {
+        const now = new Date();
+
+        const year = now.getFullYear();
+        const month = String(
+            now.getMonth() + 1
+        ).padStart(2, "0");
+
+        const day = String(
+            now.getDate()
+        ).padStart(2, "0");
+
+        return `${year}-${month}-${day}`;
+    }
+
+    function initializeRow(row) {
+        const fields = getRowFields(row);
+
+        if (fields.expiry) {
+            // An expiry date must be later than today.
+            const today = todayISO();
+
+            const tomorrow = new Date(
+                `${today}T12:00:00`
+            );
+
+            tomorrow.setDate(
+                tomorrow.getDate() + 1
+            );
+
+            const minYear = tomorrow.getFullYear();
+            const minMonth = String(
+                tomorrow.getMonth() + 1
+            ).padStart(2, "0");
+
+            const minDay = String(
+                tomorrow.getDate()
+            ).padStart(2, "0");
+
+            fields.expiry.min = (
+                `${minYear}-${minMonth}-${minDay}`
+            );
+        }
+
+        if (fields.packs) {
+            fields.packs.min = "1";
+            fields.packs.step = "1";
+        }
+
+        updateRowRemaining(row);
+    }
+
+    function updateRowRemaining(row) {
+        const fields = getRowFields(row);
+
+        if (
+            !fields.medicine ||
+            !fields.remainingLabel
+        ) {
+            return;
+        }
+
+        const selectedItem = purchaseItems.get(
+            fields.medicine.value
+        );
+
+        if (!selectedItem) {
+            fields.remainingLabel.textContent = (
+                "Select medicine"
+            );
+
+            return;
+        }
+
+        fields.remainingLabel.textContent = (
+            `${selectedItem.remaining} pack(s) available`
+        );
+
+        if (fields.packs) {
+            fields.packs.max = String(
+                selectedItem.remaining
+            );
+        }
+    }
+
+    // --------------------------------------------------------
+    // LIVE SUMMARY
+    // --------------------------------------------------------
+
+    function updateReceivingSummary() {
+        const rows = activeRows();
+
+        let totalPacks = 0;
+        let batchCount = 0;
+
+        const selectedMedicines = new Set();
+
+        rows.forEach(function (row) {
+            const fields = getRowFields(row);
+
+            if (
+                !fields.medicine ||
+                !fields.medicine.value
+            ) {
+                return;
+            }
+
+            batchCount += 1;
+
+            selectedMedicines.add(
+                fields.medicine.value
+            );
+
+            const packs = Number(
+                fields.packs ? fields.packs.value : 0
+            );
+
+            if (
+                Number.isInteger(packs) &&
+                packs > 0
+            ) {
+                totalPacks += packs;
+            }
+
+            updateRowRemaining(row);
+        });
+
+        if (batchCountElement) {
+            batchCountElement.textContent = String(
+                batchCount
+            );
+        }
+
+        if (totalPacksElement) {
+            totalPacksElement.textContent = String(
+                totalPacks
+            );
+        }
+
+        if (medicineCountElement) {
+            medicineCountElement.textContent = String(
+                selectedMedicines.size
+            );
+        }
+    }
+
+    // --------------------------------------------------------
+    // ADD BATCH ROW
+    // --------------------------------------------------------
+
+    function addReceivingRow() {
+        clearError();
+
+        const totalForms = Number(
+            totalFormsInput.value
+        );
+
+        if (
+            !Number.isInteger(totalForms) ||
+            totalForms < 0
+        ) {
+            showError(
+                "Invalid formset state. Refresh the page."
+            );
+            return;
+        }
+
+        if (totalForms >= MAX_FORMS) {
+            showError(
+                "Maximum 100 receiving rows are allowed."
+            );
+            return;
+        }
+
+        const newIndex = totalForms;
+
+        const html = emptyTemplate.innerHTML.replace(
+            /__prefix__/g,
+            String(newIndex)
+        );
+
+        const temporaryBody = document.createElement(
+            "tbody"
+        );
+
+        temporaryBody.innerHTML = html.trim();
+
+        const newRow = temporaryBody.querySelector(
+            ".receiving-item-row"
+        );
+
+        if (!newRow) {
+            showError(
+                "Unable to add a receiving batch row."
+            );
+            return;
+        }
+
+        tbody.appendChild(newRow);
+
+        totalFormsInput.value = String(
+            totalForms + 1
+        );
+
+        initializeRow(newRow);
+        updateReceivingSummary();
+
+        const medicineSelect = newRow.querySelector(
+            'select[name$="-purchase_item"]'
+        );
+
+        if (medicineSelect) {
+            medicineSelect.focus();
+        }
+    }
+
+    // --------------------------------------------------------
+    // REMOVE BATCH ROW
+    // --------------------------------------------------------
+
+    function removeReceivingRow(row) {
+        clearError();
+
+        const fields = getRowFields(row);
+
+        if (fields.deleteInput) {
+            // Django formsets use DELETE markers rather
+            // than removing indexed forms from POST.
+            fields.deleteInput.checked = true;
+            row.classList.add("d-none");
+        } else {
+            row.remove();
+        }
+
+        updateReceivingSummary();
+    }
+
+    // --------------------------------------------------------
+    // VALIDATION
+    // --------------------------------------------------------
+
+    function validateReceivingRows() {
+        const rows = activeRows();
+
+        if (!rows.length) {
+            return "Add at least one receiving batch.";
+        }
+
+        const totalByItem = new Map();
+        const seenBatches = new Set();
+
+        let validRowCount = 0;
+
+        for (const row of rows) {
+            const fields = getRowFields(row);
+
+            if (
+                !fields.medicine ||
+                !fields.batch ||
+                !fields.expiry ||
+                !fields.packs
+            ) {
+                return (
+                    "The receiving form contains an invalid row."
+                );
+            }
+
+            const itemId = fields.medicine.value;
+            const batch = fields.batch.value.trim();
+            const expiry = fields.expiry.value;
+            const packs = Number(fields.packs.value);
+
+            const isCompletelyEmpty = (
+                !itemId &&
+                !batch &&
+                !expiry &&
+                !fields.packs.value
+            );
+
+            // A blank extra form is ignored by Django.
+            if (isCompletelyEmpty) {
+                continue;
+            }
+
+            validRowCount += 1;
+
+            if (!itemId || !purchaseItems.has(itemId)) {
+                return (
+                    "Select a valid medicine in every filled row."
+                );
+            }
+
+            if (!batch) {
+                return (
+                    "Enter a batch number for every medicine."
+                );
+            }
+
+            if (batch.length > 100) {
+                return (
+                    "Batch numbers cannot exceed 100 characters."
+                );
+            }
+
+            if (!expiry || expiry <= todayISO()) {
+                return (
+                    "Every batch needs a future expiry date."
+                );
+            }
+
+            if (
+                !Number.isSafeInteger(packs) ||
+                packs < 1
+            ) {
+                return (
+                    "Received packs must be positive whole numbers."
+                );
+            }
+
+            const item = purchaseItems.get(itemId);
+
+            // Batch uniqueness is per medicine, not
+            // per purchase-item row.
+            const batchKey = (
+                `${item.medicineId}::${batch}`
+            );
+
+            if (seenBatches.has(batchKey)) {
+                return (
+                    `Duplicate batch "${batch}" for ` +
+                    `${item.name}.`
+                );
+            }
+
+            seenBatches.add(batchKey);
+
+            totalByItem.set(
+                itemId,
+                (totalByItem.get(itemId) || 0) + packs
+            );
+        }
+
+        if (validRowCount === 0) {
+            return (
+                "Select at least one medicine and enter "
+                + "its receiving details."
+            );
+        }
+
+        for (const [itemId, receivedPacks] of totalByItem) {
+            const item = purchaseItems.get(itemId);
+
+            if (receivedPacks > item.remaining) {
+                return (
+                    `${item.name}: only ` +
+                    `${item.remaining} pack(s) remain, ` +
+                    `but ${receivedPacks} pack(s) ` +
+                    "were entered."
+                );
+            }
+        }
+
+        return null;
+    }
+
+    // --------------------------------------------------------
+    // EVENTS
+    // --------------------------------------------------------
+
+    addButton.addEventListener(
+        "click",
+        addReceivingRow
+    );
+
+    tbody.addEventListener("click", function (event) {
+        const removeButton = event.target.closest(
+            ".remove-receiving-row"
+        );
+
+        if (!removeButton) {
+            return;
+        }
+
+        const row = removeButton.closest(
+            ".receiving-item-row"
+        );
+
+        if (row) {
+            removeReceivingRow(row);
+        }
+    });
+
+    tbody.addEventListener("change", function (event) {
+        const row = event.target.closest(
+            ".receiving-item-row"
+        );
+
+        if (!row) {
+            return;
+        }
+
+        clearError();
+        updateRowRemaining(row);
+        updateReceivingSummary();
+    });
+
+    tbody.addEventListener("input", function (event) {
+        if (
+            !event.target.closest(
+                ".receiving-item-row"
+            )
+        ) {
+            return;
+        }
+
+        clearError();
+        updateReceivingSummary();
+    });
+
+    form.addEventListener("submit", function (event) {
+        clearError();
+
+        const error = validateReceivingRows();
+
+        if (error) {
+            event.preventDefault();
+            showError(error);
+            return;
+        }
+
+        // Prevent accidental double-click submissions.
+        // Do not disable the submit button until the
+        // form data has been captured by the browser.
+        if (submitButton) {
+            submitButton.classList.add("disabled");
+            submitButton.setAttribute(
+                "aria-disabled",
+                "true"
+            );
+        }
+    });
+
+    // --------------------------------------------------------
+    // INITIALIZE EXISTING ROWS
+    // --------------------------------------------------------
+
+    tbody.querySelectorAll(
+        ".receiving-item-row"
+    ).forEach(function (row) {
+        initializeRow(row);
+    });
+
+    updateReceivingSummary();
+});
+
+// ============================================================
+// PURCHASE MANAGEMENT — 200ms AJAX LIVE SEARCH AND PAGINATION
+// ============================================================
+document.addEventListener("DOMContentLoaded", () => {
+    "use strict";
+
+    // Separate initializer: the earlier POS handler returns early on
+    // non-POS pages, so Purchase search must not be nested inside it.
+    const form = document.getElementById("purchase-filter-form");
+    const searchInput = document.getElementById("purchase-search");
+    const statusSelect = document.getElementById("purchase-status");
+    const resultsContainer = document.getElementById("purchase-results");
+    const feedback = document.getElementById("purchase-search-feedback");
+
+    if (!form || !searchInput || !statusSelect || !resultsContainer || !feedback) {
+        return;
+    }
+
+    const DEBOUNCE_MS = 200;
+    let debounceTimer = null;
+    let activeController = null;
+    let sequence = 0;
+
+    function setFeedback(message, isError = false) {
+        feedback.textContent = message;
+        feedback.hidden = !message;
+        feedback.classList.toggle("text-danger", isError);
+        feedback.classList.toggle("text-muted", !isError);
+    }
+
+    function setLoading(loading) {
+        resultsContainer.setAttribute("aria-busy", String(loading));
+        resultsContainer.style.opacity = loading ? "0.6" : "1";
+    }
+
+    function buildUrl(page = 1) {
+        const url = new URL(form.action || window.location.href, window.location.origin);
+        // Preserve unrelated query parameters without retaining stale filters.
+        const currentParams = new URLSearchParams(window.location.search);
+        for (const [key, value] of currentParams) {
+            if (!["q", "status", "page"].includes(key)) {
+                url.searchParams.set(key, value);
+            }
+        }
+        url.searchParams.delete("q");
+        url.searchParams.delete("status");
+        url.searchParams.delete("page");
+
+        const query = searchInput.value.trim();
+        const status = statusSelect.value;
+        if (query) url.searchParams.set("q", query);
+        if (status) url.searchParams.set("status", status);
+        if (page > 1) url.searchParams.set("page", String(page));
+        return url;
+    }
+
+    function cancelPending() {
+        if (debounceTimer !== null) {
+            clearTimeout(debounceTimer);
+            debounceTimer = null;
+        }
+        // Invalidate even if the response arrives before abort completes.
+        sequence++;
+        if (activeController) {
+            activeController.abort();
+            activeController = null;
+        }
+        setLoading(false);
+    }
+
+    async function loadPurchases(url, historyMode = "replace") {
+        cancelPending();
+        const controller = new AbortController();
+        activeController = controller;
+        const mySequence = ++sequence;
+        setLoading(true);
+        setFeedback("Searching purchase orders...");
+
+        try {
+            const response = await fetch(url.toString(), {
+                method: "GET",
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest",
+                    "Accept": "application/json"
+                },
+                credentials: "same-origin",
+                signal: controller.signal
+            });
+
+            if (!response.ok) {
+                throw new Error(`Request failed (${response.status})`);
+            }
+            if (!(response.headers.get("content-type") || "").includes("application/json")) {
+                throw new Error("Unexpected response. Please check your login session.");
+            }
+
+            const data = await response.json();
+            if (mySequence !== sequence) return;
+            if (typeof data.html !== "string") {
+                throw new Error("Invalid purchase results returned by the server.");
+            }
+
+            resultsContainer.innerHTML = data.html;
+            if (historyMode === "push") {
+                window.history.pushState(null, "", url.toString());
+            } else if (historyMode === "replace") {
+                window.history.replaceState(null, "", url.toString());
+            }
+            setFeedback("");
+        } catch (error) {
+            if (error.name === "AbortError" || mySequence !== sequence) return;
+            console.error("Purchase AJAX search failed:", error);
+            setFeedback("Unable to load purchases. Please retry.", true);
+        } finally {
+            if (mySequence === sequence) {
+                setLoading(false);
+                activeController = null;
+            }
+        }
+    }
+
+    // Typing: wait 200ms after the last keystroke, then fetch page 1.
+    searchInput.addEventListener("input", () => {
+        cancelPending();
+        setFeedback("");
+        debounceTimer = setTimeout(() => {
+            debounceTimer = null;
+            loadPurchases(buildUrl(1));
+        }, DEBOUNCE_MS);
+    });
+
+    // Status filter changes immediately, without waiting 200ms.
+    statusSelect.addEventListener("change", () => {
+        loadPurchases(buildUrl(1));
+    });
+
+    // Search button and Enter key still work, without reloading.
+    form.addEventListener("submit", (event) => {
+        event.preventDefault();
+        loadPurchases(buildUrl(1));
+    });
+
+    // Pagination links and Clear Filters work after each DOM replacement.
+    resultsContainer.addEventListener("click", (event) => {
+        const link = event.target.closest(
+            ".purchase-pagination a.page-link, a.purchase-clear-filters"
+        );
+        if (!link || event.defaultPrevented) return;
+        if (event.button !== 0 || event.ctrlKey || event.metaKey ||
+            event.shiftKey || event.altKey) return;
+        if (link.target && link.target !== "_self") return;
+
+        event.preventDefault();
+        const url = new URL(link.href, window.location.href);
+        searchInput.value = url.searchParams.get("q") || "";
+        statusSelect.value = url.searchParams.get("status") || "";
+        loadPurchases(url, "push");
+    });
+
+    window.addEventListener("popstate", () => {
+        const url = new URL(window.location.href);
+        searchInput.value = url.searchParams.get("q") || "";
+        const nextStatus = url.searchParams.get("status") || "";
+        statusSelect.value = Array.from(statusSelect.options).some(
+            (option) => option.value === nextStatus
+        ) ? nextStatus : "";
+        loadPurchases(url, "none");
+    });
+});
+
+/* ============================================================
+   CUSTOMER MANAGEMENT
+   AJAX LIVE SEARCH — 200ms
+   FILTERS + PAGINATION + BROWSER HISTORY
+   ============================================================ */
+
+document.addEventListener("DOMContentLoaded", () => {
+    "use strict";
+
+    const form = document.getElementById(
+        "customer-filter-form"
+    );
+
+    const searchInput = document.getElementById(
+        "customer-search"
+    );
+
+    const statusSelect = document.getElementById(
+        "customer-status"
+    );
+
+    const typeSelect = document.getElementById(
+        "customer-type"
+    );
+
+    const resultsContainer = document.getElementById(
+        "customer-results"
+    );
+
+    const feedback = document.getElementById(
+        "customer-search-feedback"
+    );
+
+    if (
+        !form ||
+        !searchInput ||
+        !statusSelect ||
+        !typeSelect ||
+        !resultsContainer ||
+        !feedback
+    ) {
+        return;
+    }
+
+    const DELAY = 200;
+
+    let timer = null;
+    let controller = null;
+    let sequence = 0;
+
+    function showFeedback(message, error = false) {
+        feedback.textContent = message;
+        feedback.hidden = !message;
+
+        feedback.classList.toggle(
+            "text-danger",
+            error
+        );
+
+        feedback.classList.toggle(
+            "text-muted",
+            !error
+        );
+    }
+
+    function setLoading(loading) {
+        resultsContainer.setAttribute(
+            "aria-busy",
+            String(loading)
+        );
+
+        resultsContainer.style.opacity = loading
+            ? "0.6"
+            : "1";
+    }
+
+    function buildUrl(page = 1) {
+        const url = new URL(
+            form.action || window.location.href,
+            window.location.origin
+        );
+
+        url.searchParams.delete("q");
+        url.searchParams.delete("status");
+        url.searchParams.delete("type");
+        url.searchParams.delete("page");
+
+        const query = searchInput.value.trim();
+
+        if (query) {
+            url.searchParams.set("q", query);
+        }
+
+        if (statusSelect.value) {
+            url.searchParams.set(
+                "status",
+                statusSelect.value
+            );
+        }
+
+        if (typeSelect.value) {
+            url.searchParams.set(
+                "type",
+                typeSelect.value
+            );
+        }
+
+        if (page > 1) {
+            url.searchParams.set(
+                "page",
+                String(page)
+            );
+        }
+
+        return url;
+    }
+
+    function cancelPrevious() {
+        if (timer !== null) {
+            clearTimeout(timer);
+            timer = null;
+        }
+
+        sequence++;
+
+        if (controller) {
+            controller.abort();
+            controller = null;
+        }
+    }
+
+    async function loadCustomers(
+        url,
+        historyMode = "replace"
+    ) {
+        cancelPrevious();
+
+        const currentController = new AbortController();
+        controller = currentController;
+
+        const currentSequence = ++sequence;
+
+        setLoading(true);
+        showFeedback("Searching customers...");
+
+        try {
+            const response = await fetch(
+                url.toString(),
+                {
+                    method: "GET",
+                    headers: {
+                        "X-Requested-With": "XMLHttpRequest",
+                        "Accept": "application/json"
+                    },
+                    credentials: "same-origin",
+                    signal: currentController.signal
+                }
+            );
+
+            if (!response.ok) {
+                throw new Error(
+                    `Request failed: ${response.status}`
+                );
+            }
+
+            const contentType =
+                response.headers.get("content-type") || "";
+
+            if (!contentType.includes("application/json")) {
+                throw new Error(
+                    "Unexpected server response."
+                );
+            }
+
+            const data = await response.json();
+
+            if (currentSequence !== sequence) {
+                return;
+            }
+
+            if (typeof data.html !== "string") {
+                throw new Error(
+                    "Invalid customer search response."
+                );
+            }
+
+            resultsContainer.innerHTML = data.html;
+
+            if (historyMode === "push") {
+                window.history.pushState(
+                    null,
+                    "",
+                    url.toString()
+                );
+            } else if (historyMode === "replace") {
+                window.history.replaceState(
+                    null,
+                    "",
+                    url.toString()
+                );
+            }
+
+            showFeedback("");
+
+        } catch (error) {
+            if (
+                error.name === "AbortError" ||
+                currentSequence !== sequence
+            ) {
+                return;
+            }
+
+            console.error(
+                "Customer search failed:",
+                error
+            );
+
+            showFeedback(
+                "Unable to load customers. Please retry.",
+                true
+            );
+
+        } finally {
+            if (currentSequence === sequence) {
+                controller = null;
+                setLoading(false);
+            }
+        }
+    }
+
+    // 200ms debounce
+    searchInput.addEventListener("input", () => {
+        cancelPrevious();
+
+        setLoading(false);
+        showFeedback("");
+
+        timer = setTimeout(() => {
+            timer = null;
+            loadCustomers(buildUrl(1));
+        }, DELAY);
+    });
+
+    // Immediate filtering
+    statusSelect.addEventListener("change", () => {
+        loadCustomers(buildUrl(1));
+    });
+
+    typeSelect.addEventListener("change", () => {
+        loadCustomers(buildUrl(1));
+    });
+
+    // Search button / Enter
+    form.addEventListener("submit", (event) => {
+        event.preventDefault();
+        loadCustomers(buildUrl(1));
+    });
+
+    // AJAX pagination
+    resultsContainer.addEventListener("click", (event) => {
+        const link = event.target.closest(
+            ".customer-pagination a.page-link"
+        );
+
+        if (!link) {
+            return;
+        }
+
+        if (
+            event.button !== 0 ||
+            event.ctrlKey ||
+            event.metaKey ||
+            event.shiftKey ||
+            event.altKey
+        ) {
+            return;
+        }
+
+        event.preventDefault();
+
+        const url = new URL(
+            link.href,
+            window.location.href
+        );
+
+        loadCustomers(url, "push");
+    });
+
+    // Browser Back / Forward
+    window.addEventListener("popstate", () => {
+        const url = new URL(
+            window.location.href
+        );
+
+        searchInput.value =
+            url.searchParams.get("q") || "";
+
+        const status =
+            url.searchParams.get("status") || "";
+
+        statusSelect.value = (
+            status === "active" ||
+            status === "inactive"
+        ) ? status : "";
+
+        const type =
+            url.searchParams.get("type") || "";
+
+        const validType = Array.from(
+            typeSelect.options
+        ).some(option => option.value === type);
+
+        typeSelect.value = validType ? type : "";
+
+        loadCustomers(url, "none");
+    });
+});
+
+/* ============================================================
+   PHASE 8.2 — POS CUSTOMER SELECTION
+   ============================================================ */
+
+document.addEventListener("DOMContentLoaded", () => {
+    "use strict";
+
+    const picker = document.getElementById("posCustomerPicker");
+
+    if (!picker) return;
+
+    const search = document.getElementById("posCustomerSearch");
+    const results = document.getElementById("posCustomerResults");
+    const selected = document.getElementById("posSelectedCustomer");
+    const selectedId = document.getElementById("posSelectedCustomerId");
+    const clearButton = document.getElementById("posCustomerClear");
+
+    if (!search || !results || !selected || !selectedId || !clearButton) {
+        return;
+    }
+
+    const searchUrl = picker.dataset.searchUrl;
+
+    let timer = null;
+    let controller = null;
+    let requestId = 0;
+
+    function cancelPending() {
+        clearTimeout(timer);
+        requestId++;
+
+        if (controller) {
+            controller.abort();
+            controller = null;
+        }
+    }
+
+    function clearSelection(clearSearch = true) {
+        selectedId.value = "";
+        selected.textContent = "";
+        selected.hidden = true;
+        results.replaceChildren();
+
+        if (clearSearch) {
+            search.value = "";
+        }
+
+        picker.dispatchEvent(new CustomEvent(
+            "pos:customer-changed",
+            {
+                bubbles: true,
+                detail: { customer: null }
+            }
+        ));
+    }
+
+    function chooseCustomer(customer) {
+        cancelPending();
+
+        selectedId.value = String(customer.id);
+        search.value = customer.name;
+
+        results.replaceChildren();
+
+        selected.textContent =
+            `${customer.code} — ${customer.name}` +
+            (customer.phone ? ` | ${customer.phone}` : "");
+
+        selected.hidden = false;
+
+        picker.dispatchEvent(new CustomEvent(
+            "pos:customer-changed",
+            {
+                bubbles: true,
+                detail: { customer }
+            }
+        ));
+    }
+
+    function showMessage(message) {
+        const item = document.createElement("div");
+        item.className = "list-group-item text-muted small";
+        item.textContent = message;
+        results.replaceChildren(item);
+    }
+
+    async function findCustomers(query) {
+        cancelPending();
+
+        const currentId = ++requestId;
+        const currentController = new AbortController();
+        controller = currentController;
+
+        showMessage("Searching...");
+
+        try {
+            const url = new URL(searchUrl, window.location.origin);
+            url.searchParams.set("q", query);
+
+            const response = await fetch(url, {
+                method: "GET",
+                credentials: "same-origin",
+                headers: {
+                    "Accept": "application/json",
+                    "X-Requested-With": "XMLHttpRequest"
+                },
+                signal: currentController.signal
+            });
+
+            if (!response.ok) {
+                throw new Error("Customer search failed");
+            }
+
+            const data = await response.json();
+
+            if (currentId !== requestId) return;
+
+            results.replaceChildren();
+
+            if (!Array.isArray(data.results) || !data.results.length) {
+                showMessage("No matching customers found.");
+                return;
+            }
+
+            data.results.forEach(customer => {
+                const button = document.createElement("button");
+
+                button.type = "button";
+                button.className =
+                    "list-group-item list-group-item-action text-start";
+
+                const name = document.createElement("div");
+                name.className = "fw-semibold";
+                name.textContent = customer.name;
+
+                const details = document.createElement("small");
+                details.className = "text-muted d-block";
+
+                details.textContent = [
+                    customer.code,
+                    customer.phone,
+                    customer.customer_type
+                ].filter(Boolean).join(" | ");
+
+                button.append(name, details);
+
+                button.addEventListener("click", () => {
+                    chooseCustomer(customer);
+                });
+
+                results.appendChild(button);
+            });
+
+        } catch (error) {
+            if (error.name !== "AbortError" && currentId === requestId) {
+                showMessage("Unable to search customers.");
+                console.error(error);
+            }
+        } finally {
+            if (currentId === requestId) {
+                controller = null;
+            }
+        }
+    }
+
+    search.addEventListener("input", () => {
+        cancelPending();
+        clearSelection(false);
+
+        const query = search.value.trim();
+
+        if (query.length < 2) {
+            results.replaceChildren();
+            return;
+        }
+
+        timer = setTimeout(() => {
+            findCustomers(query);
+        }, 200);
+    });
+
+    clearButton.addEventListener("click", () => {
+        cancelPending();
+        clearSelection();
+        search.focus();
+    });
+});
+
+/* ============================================================
+   POS CUSTOMER DETAILS AUTO-FILL
+   ============================================================ */
+
+document.addEventListener("DOMContentLoaded", () => {
+    "use strict";
+
+    const picker = document.getElementById(
+        "posCustomerPicker"
+    );
+
+    const nameInput = document.getElementById(
+        "posCustomerName"
+    );
+
+    const phoneInput = document.getElementById(
+        "posCustomerPhone"
+    );
+
+    if (!picker || !nameInput || !phoneInput) {
+        return;
+    }
+
+    picker.addEventListener(
+        "pos:customer-changed",
+        (event) => {
+            const customer = event.detail?.customer;
+
+            if (customer) {
+                nameInput.value = customer.name || "";
+                phoneInput.value = customer.phone || "";
+
+                nameInput.readOnly = true;
+                phoneInput.readOnly = true;
+            } else {
+                nameInput.value = "";
+                phoneInput.value = "";
+
+                nameInput.readOnly = false;
+                phoneInput.readOnly = false;
+            }
+
+            nameInput.dispatchEvent(
+                new Event("input", { bubbles: true })
+            );
+
+            phoneInput.dispatchEvent(
+                new Event("input", { bubbles: true })
+            );
+        }
+    );
 });

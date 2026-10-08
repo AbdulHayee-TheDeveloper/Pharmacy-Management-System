@@ -1,0 +1,445 @@
+<div class="table-responsive">
+
+            <table class="table purchase-table">
+
+                <thead>
+
+                    <tr>
+
+                        <th>Purchase #</th>
+
+                        <th>Supplier</th>
+
+                        <th>Branch</th>
+
+                        <th>Purchase Date</th>
+
+                        <th>Amount</th>
+
+                        <th>Status</th>
+
+                        <th class="text-end">Actions</th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    {% for purchase in purchases %}
+
+                    <tr>
+
+                        <!-- PURCHASE NUMBER -->
+
+                        <td>
+
+                            <a
+
+                                href="{% url 'purchases:detail' purchase.pk %}"
+
+                                class="purchase-number"
+
+                            >
+
+                                {{ purchase.purchase_number|default:"Pending" }}
+
+                            </a>
+
+                            <div class="purchase-meta">
+
+                                Invoice:
+
+                                {{ purchase.supplier_invoice_number|default:"—" }}
+
+                            </div>
+
+                        </td>
+
+                        <!-- SUPPLIER -->
+
+                        <td>
+
+                            <div class="supplier-name">
+
+                                {{ purchase.supplier.name }}
+
+                            </div>
+
+                            <div class="purchase-meta">
+
+                                {{ purchase.supplier.supplier_code }}
+
+                            </div>
+
+                        </td>
+
+                        <!-- BRANCH -->
+
+                        <td>
+
+                            {{ purchase.branch.name }}
+
+                        </td>
+
+                        <!-- DATE -->
+
+                        <td>
+
+                            {{ purchase.purchase_date|date:"d M Y" }}
+
+                        </td>
+
+                        <!-- AMOUNT -->
+
+                        <td>
+
+                            <span class="amount-text">
+
+                                Rs. {{ purchase.total_amount|floatformat:2 }}
+
+                            </span>
+
+                        </td>
+
+                        <!-- STATUS -->
+
+                        <td>
+
+                            {% if purchase.status == "draft" %}
+
+                                <span class="status-pill status-draft">
+
+                                    <i class="fa-solid fa-circle fa-2xs"></i>
+
+                                    Draft
+
+                                </span>
+
+                            {% elif purchase.status == "ordered" %}
+
+                                <span class="status-pill status-ordered">
+
+                                    <i class="fa-solid fa-circle fa-2xs"></i>
+
+                                    Ordered
+
+                                </span>
+
+                            {% elif purchase.status == "partially_received" %}
+
+                                <span class="status-pill status-partially-received">
+
+                                    <i class="fa-solid fa-circle fa-2xs"></i>
+
+                                    Partially Received
+
+                                </span>
+
+                            {% elif purchase.status == "received" %}
+
+                                <span class="status-pill status-received">
+
+                                    <i class="fa-solid fa-circle fa-2xs"></i>
+
+                                    Received
+
+                                </span>
+
+                            {% elif purchase.status == "cancelled" %}
+
+                                <span class="status-pill status-cancelled">
+
+                                    <i class="fa-solid fa-circle fa-2xs"></i>
+
+                                    Cancelled
+
+                                </span>
+
+                            {% else %}
+
+                                <span class="status-pill status-draft">
+
+                                    {{ purchase.get_status_display }}
+
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+                        <!-- ACTIONS -->
+
+                        <td class="text-end">
+
+                            <div class="d-inline-flex gap-2">
+
+                                <a
+
+                                    href="{% url 'purchases:detail' purchase.pk %}"
+
+                                    class="action-btn"
+
+                                    title="View Purchase"
+
+                                    aria-label="View Purchase"
+
+                                >
+
+                                    <i class="fa-regular fa-eye"></i>
+
+                                </a>
+
+                                {% if perms.purchases.change_purchase %}
+
+                                    {% if purchase.status == "draft" %}
+
+                                    <a
+
+                                        href="{% url 'purchases:edit' purchase.pk %}"
+
+                                        class="action-btn"
+
+                                        title="Edit Draft Purchase"
+
+                                        aria-label="Edit Draft Purchase"
+
+                                    >
+
+                                        <i class="fa-solid fa-pen"></i>
+
+                                    </a>
+
+                                    {% endif %}
+
+                                {% endif %}
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+                    {% empty %}
+
+                    <tr>
+
+                        <td colspan="7">
+
+                            <div class="empty-state">
+
+                                <i class="fa-solid fa-cart-shopping d-block"></i>
+
+                                <h5 class="fw-semibold text-dark">
+
+                                    No purchase orders found
+
+                                </h5>
+
+                                {% if query or status %}
+
+                                <p class="mb-3">
+
+                                    Try changing your search or status filter.
+
+                                </p>
+
+                                <a
+
+                                    href="{% url 'purchases:list' %}"
+
+                                    class="btn btn-outline-secondary btn-sm purchase-clear-filters"
+
+                                >
+
+                                    Clear Filters
+
+                                </a>
+
+                                {% else %}
+
+                                <p class="mb-3">
+
+                                    No purchase orders have been created yet.
+
+                                </p>
+
+                                {% if perms.purchases.add_purchase %}
+
+                                <a
+
+                                    href="{% url 'purchases:create' %}"
+
+                                    class="btn btn-teal"
+
+                                >
+
+                                    <i class="fa-solid fa-plus me-1"></i>
+
+                                    Create First Purchase
+
+                                </a>
+
+                                {% endif %}
+
+                                {% endif %}
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+        <!-- ========================================
+
+             PAGINATION FOOTER
+
+             ======================================== -->
+
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 p-3 border-top">
+
+            <div class="text-muted small">
+
+                {% if page_obj.paginator.count %}
+
+                    Showing
+
+                    {{ page_obj.start_index }}–{{ page_obj.end_index }}
+
+                    of {{ page_obj.paginator.count }} purchase orders
+
+                {% else %}
+
+                    Showing 0 purchase orders
+
+                {% endif %}
+
+            </div>
+
+            {% if page_obj.paginator.num_pages > 1 %}
+
+            <nav aria-label="Purchase pagination">
+
+                <ul class="pagination pagination-sm mb-0 purchase-pagination">
+
+                    <!-- FIRST PAGE -->
+
+                    {% if page_obj.has_previous %}
+
+                    <li class="page-item">
+
+                        <a
+
+                            class="page-link"
+
+                            href="?q={{ query|urlencode }}&status={{ status|urlencode }}&page=1"
+
+                            aria-label="First page"
+
+                        >
+
+                            <i class="fa-solid fa-angles-left"></i>
+
+                        </a>
+
+                    </li>
+
+                    {% endif %}
+
+                    <!-- PREVIOUS PAGE -->
+
+                    {% if page_obj.has_previous %}
+
+                    <li class="page-item">
+
+                        <a
+
+                            class="page-link"
+
+                            href="?q={{ query|urlencode }}&status={{ status|urlencode }}&page={{ page_obj.previous_page_number }}"
+
+                        >
+
+                            Previous
+
+                        </a>
+
+                    </li>
+
+                    {% endif %}
+
+                    <!-- CURRENT PAGE -->
+
+                    <li class="page-item active">
+
+                        <span class="page-link">
+
+                            {{ page_obj.number }}
+
+                            / {{ page_obj.paginator.num_pages }}
+
+                        </span>
+
+                    </li>
+
+                    <!-- NEXT PAGE -->
+
+                    {% if page_obj.has_next %}
+
+                    <li class="page-item">
+
+                        <a
+
+                            class="page-link"
+
+                            href="?q={{ query|urlencode }}&status={{ status|urlencode }}&page={{ page_obj.next_page_number }}"
+
+                        >
+
+                            Next
+
+                        </a>
+
+                    </li>
+
+                    {% endif %}
+
+                    <!-- LAST PAGE -->
+
+                    {% if page_obj.has_next %}
+
+                    <li class="page-item">
+
+                        <a
+
+                            class="page-link"
+
+                            href="?q={{ query|urlencode }}&status={{ status|urlencode }}&page={{ page_obj.paginator.num_pages }}"
+
+                            aria-label="Last page"
+
+                        >
+
+                            <i class="fa-solid fa-angles-right"></i>
+
+                        </a>
+
+                    </li>
+
+                    {% endif %}
+
+                </ul>
+
+            </nav>
+
+            {% endif %}
+
+        </div>

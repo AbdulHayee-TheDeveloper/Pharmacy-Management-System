@@ -40,15 +40,12 @@
 
         <!-- Dashboard -->
 
-        <a
-            href="{% url 'dashboard:index' %}"
-            class="
+        <a href="{% url 'dashboard:index' %}" class="
                 nav-link
                 {% if request.resolver_match.app_name == 'dashboard' %}
                     active
                 {% endif %}
-            "
-        >
+            ">
             <i class="fa-solid fa-chart-line"></i>
             <span>Dashboard</span>
         </a>
@@ -58,20 +55,17 @@
 
         {% if perms.sales.add_sale %}
 
-            <a
-                href="{% url 'sales:pos' %}"
-                class="
+        <a href="{% url 'sales:pos' %}" class="
                     nav-link
                     {% if request.resolver_match.app_name == 'sales' %}
                         {% if request.resolver_match.url_name == 'pos' %}
                             active
                         {% endif %}
                     {% endif %}
-                "
-            >
-                <i class="fa-solid fa-cash-register"></i>
-                <span>Sales / POS</span>
-            </a>
+                ">
+            <i class="fa-solid fa-cash-register"></i>
+            <span>Sales / POS</span>
+        </a>
 
         {% endif %}
 
@@ -80,20 +74,17 @@
 
         {% if perms.sales.view_sale %}
 
-            <a
-                href="{% url 'sales:history' %}"
-                class="
+        <a href="{% url 'sales:history' %}" class="
                     nav-link
                     {% if request.resolver_match.app_name == 'sales' %}
                         {% if request.resolver_match.url_name == 'history' or request.resolver_match.url_name == 'detail' %}
                             active
                         {% endif %}
                     {% endif %}
-                "
-            >
-                <i class="fa-solid fa-clock-rotate-left"></i>
-                <span>Sale History</span>
-            </a>
+                ">
+            <i class="fa-solid fa-clock-rotate-left"></i>
+            <span>Sale History</span>
+        </a>
 
         {% endif %}
 
@@ -102,18 +93,15 @@
 
         {% if perms.medicines.view_medicine %}
 
-            <a
-                href="{% url 'medicines:list' %}"
-                class="
+        <a href="{% url 'medicines:list' %}" class="
                     nav-link
                     {% if request.resolver_match.app_name == 'medicines' %}
                         active
                     {% endif %}
-                "
-            >
-                <i class="fa-solid fa-pills"></i>
-                <span>Medicines</span>
-            </a>
+                ">
+            <i class="fa-solid fa-pills"></i>
+            <span>Medicines</span>
+        </a>
 
         {% endif %}
 
@@ -122,40 +110,65 @@
 
         {% if perms.inventory.view_inventorybatch %}
 
-            <a
-                href="{% url 'inventory:list' %}"
-                class="
+        <a href="{% url 'inventory:list' %}" class="
                     nav-link
                     {% if request.resolver_match.app_name == 'inventory' %}
                         active
                     {% endif %}
-                "
-            >
-                <i class="fa-solid fa-boxes-stacked"></i>
-                <span>Inventory</span>
-            </a>
+                ">
+            <i class="fa-solid fa-boxes-stacked"></i>
+            <span>Inventory</span>
+        </a>
 
         {% endif %}
 
 
-        <!-- Purchases -->
+
+        <!-- ================================================== -->
+        <!-- PURCHASES -->
+        <!-- ================================================== -->
 
         {% if perms.purchases.view_purchase %}
-            <!-- Purchases module will be connected here -->
+
+        <a href="{% url 'purchases:list' %}"
+            class="nav-link {% if request.resolver_match.app_name == 'purchases' %}active{% endif %}">
+
+            <i class="fa-solid fa-cart-shopping"></i>
+            <span>Purchases</span>
+
+        </a>
+
         {% endif %}
 
 
-        <!-- Suppliers -->
+        <!-- ================================================== -->
+        <!-- SUPPLIERS -->
+        <!-- ================================================== -->
 
         {% if perms.suppliers.view_supplier %}
-            <!-- Suppliers module will be connected here -->
+
+        <a href="{% url 'suppliers:list' %}"
+            class="nav-link {% if request.resolver_match.app_name == 'suppliers' %}active{% endif %}">
+
+            <i class="fa-solid fa-truck"></i>
+            <span>Suppliers</span>
+
+        </a>
+
         {% endif %}
+
+
+
 
 
         <!-- Customers -->
 
         {% if perms.customers.view_customer %}
-            <!-- Customers module will be connected here -->
+        <a href="{% url 'customers:list' %}"
+            class="nav-link {% if request.resolver_match.app_name == 'customers' %}active{% endif %}">
+            <i class="fa-solid fa-users me-2"></i>
+            Customers
+        </a>
         {% endif %}
 
 
@@ -171,7 +184,7 @@
         <!-- Reports -->
 
         {% if perms.reports.view_report %}
-            <!-- Reports module will be connected here -->
+        <!-- Reports module will be connected here -->
         {% endif %}
 
 
@@ -187,14 +200,14 @@
         <!-- Users, Roles & Branches -->
 
         {% if perms.accounts.view_user or perms.branches.view_branch %}
-            <!-- Users, Roles & Branches module will be connected here -->
+        <!-- Users, Roles & Branches module will be connected here -->
         {% endif %}
 
 
         <!-- Settings -->
 
         {% if perms.accounts.view_user %}
-            <!-- Settings module will be connected here -->
+        <!-- Settings module will be connected here -->
         {% endif %}
 
     </nav>

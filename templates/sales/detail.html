@@ -47,26 +47,19 @@
 
         <div class="d-flex gap-2">
 
-    <a
-        href="{% url 'sales:receipt' sale.pk %}"
-        class="btn btn-outline-primary"
-        target="_blank"
-    >
-        <i class="fa-solid fa-print me-2"></i>
-        Print Receipt
-    </a>
+            <a href="{% url 'sales:receipt' sale.pk %}" class="btn btn-outline-primary" target="_blank">
+                <i class="fa-solid fa-print me-2"></i>
+                Print Receipt
+            </a>
 
-    {% if perms.sales.add_sale %}
-        <a
-            href="{% url 'sales:pos' %}"
-            class="btn btn-primary"
-        >
-            <i class="fa-solid fa-cash-register me-2"></i>
-            New Sale
-        </a>
-    {% endif %}
+            {% if perms.sales.add_sale %}
+            <a href="{% url 'sales:pos' %}" class="btn btn-primary">
+                <i class="fa-solid fa-cash-register me-2"></i>
+                New Sale
+            </a>
+            {% endif %}
 
-</div>
+        </div>
     </div>
 
 
@@ -156,6 +149,86 @@
                 </div>
             </div>
 
+        </div>
+
+        <!-- ADDITIONAL PAYMENTS -->
+        <div class="card border-0 shadow-sm mt-3">
+
+            <div class="card-header bg-white py-3
+                d-flex justify-content-between align-items-center">
+
+                <h6 class="mb-0 fw-semibold">
+                    <i class="fa-solid fa-money-bill-transfer me-2"></i>
+                    Customer Payments
+                </h6>
+
+                {% if outstanding > 0 and sale.status == "completed" %}
+                {% if perms.sales.change_sale %}
+                <a href="{% url 'sales:receive_payment' sale.pk %}" class="btn btn-sm"
+                    style="background:#0f766e;color:white;">
+                    <i class="fa-solid fa-plus me-1"></i>
+                    Receive Payment
+                </a>
+                {% endif %}
+                {% endif %}
+
+            </div>
+
+            <div class="card-body">
+
+                <div class="d-flex justify-content-between mb-3">
+                    <span class="text-muted">Outstanding Balance</span>
+
+                    <strong class="{% if outstanding > 0 %}text-danger{% else %}text-success{% endif %}">
+                        Rs. {{ outstanding|floatformat:2 }}
+                    </strong>
+                </div>
+
+                <h6 class="fw-semibold mt-4 mb-3">
+                    Additional Payment History
+                </h6>
+
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle">
+                        <thead>
+                            <tr>
+                                <th>Payment No.</th>
+                                <th>Date</th>
+                                <th>Method</th>
+                                <th>Received By</th>
+                                <th class="text-end">Amount</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            {% for payment in additional_payments %}
+                            <tr>
+                                <td>{{ payment.payment_number }}</td>
+                                <td>
+                                    {{ payment.received_at|date:"d M Y, h:i A" }}
+                                </td>
+                                <td>
+                                    {{ payment.get_payment_method_display }}
+                                </td>
+                                <td>
+                                    {{ payment.received_by.username }}
+                                </td>
+                                <td class="text-end fw-semibold">
+                                    Rs. {{ payment.amount|floatformat:2 }}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-muted text-center py-4">
+                                    No additional payments recorded.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
         </div>
 
 

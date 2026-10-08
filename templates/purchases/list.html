@@ -1,0 +1,660 @@
+{% extends "base/base.html" %}
+
+{% block title %}Purchase Management | PharmaCare{% endblock %}
+
+{% block content %}
+
+<style>
+
+    .purchase-page {
+
+        color: #172033;
+
+    }
+
+    .purchase-page .page-subtitle {
+
+        color: #667085;
+
+        font-size: 14px;
+
+    }
+
+    .purchase-page .purchase-card {
+
+        background: #fff;
+
+        border: 1px solid #e7eaee;
+
+        border-radius: 12px;
+
+        padding: 20px;
+
+        height: 100%;
+
+    }
+
+    .purchase-page .stat-label {
+
+        color: #667085;
+
+        font-size: 13px;
+
+        font-weight: 500;
+
+    }
+
+    .purchase-page .stat-number {
+
+        font-size: 27px;
+
+        font-weight: 700;
+
+        margin-top: 8px;
+
+        line-height: 1.2;
+
+    }
+
+    .purchase-page .stat-icon {
+
+        width: 44px;
+
+        height: 44px;
+
+        display: flex;
+
+        align-items: center;
+
+        justify-content: center;
+
+        border-radius: 12px;
+
+        background: #ccfbf1;
+
+        color: #0f766e;
+
+        font-size: 19px;
+
+    }
+
+    .purchase-page .btn-teal {
+
+        background: #0f766e;
+
+        border: 1px solid #0f766e;
+
+        color: #fff;
+
+    }
+
+    .purchase-page .btn-teal:hover {
+
+        background: #115e59;
+
+        border-color: #115e59;
+
+        color: #fff;
+
+    }
+
+    .purchase-page .purchase-filter {
+
+        border: 1px solid #e7eaee;
+
+        border-radius: 8px;
+
+        padding: 9px 12px;
+
+        background: #fff;
+
+        min-height: 42px;
+
+        font-size: 14px;
+
+        width: 100%;
+
+    }
+
+    .purchase-page .purchase-filter:focus {
+
+        outline: none;
+
+        border-color: #0f766e;
+
+        box-shadow: 0 0 0 3px rgba(15, 118, 110, .10);
+
+    }
+
+    .purchase-page .purchase-table {
+
+        width: 100%;
+
+        margin-bottom: 0;
+
+    }
+
+    .purchase-page .purchase-table th {
+
+        background: #f8fafb;
+
+        color: #667085;
+
+        font-size: 12px;
+
+        font-weight: 600;
+
+        text-transform: uppercase;
+
+        letter-spacing: .04em;
+
+        padding: 15px 16px;
+
+        white-space: nowrap;
+
+    }
+
+    .purchase-page .purchase-table td {
+
+        padding: 16px;
+
+        vertical-align: middle;
+
+        font-size: 14px;
+
+        border-color: #eef0f3;
+
+    }
+
+    .purchase-page .purchase-number {
+
+        font-weight: 600;
+
+        color: #172033;
+
+        text-decoration: none;
+
+    }
+
+    .purchase-page .purchase-number:hover {
+
+        color: #0f766e;
+
+    }
+
+    .purchase-page .purchase-meta {
+
+        color: #667085;
+
+        font-size: 12px;
+
+    }
+
+    .purchase-page .supplier-name {
+
+        font-weight: 500;
+
+        color: #172033;
+
+    }
+
+    .purchase-page .status-pill {
+
+        display: inline-flex;
+
+        align-items: center;
+
+        gap: 6px;
+
+        padding: 6px 11px;
+
+        border-radius: 20px;
+
+        font-size: 12px;
+
+        font-weight: 600;
+
+        white-space: nowrap;
+
+    }
+
+    .purchase-page .status-draft {
+
+        background: #f2f4f7;
+
+        color: #475467;
+
+    }
+
+    .purchase-page .status-ordered {
+
+        background: #dbeafe;
+
+        color: #1d4ed8;
+
+    }
+
+    .purchase-page .status-partially-received {
+
+        background: #fef3c7;
+
+        color: #92400e;
+
+    }
+
+    .purchase-page .status-received {
+
+        background: #dcfce7;
+
+        color: #166534;
+
+    }
+
+    .purchase-page .status-cancelled {
+
+        background: #fee2e2;
+
+        color: #991b1b;
+
+    }
+
+    .purchase-page .action-btn {
+
+        display: inline-flex;
+
+        align-items: center;
+
+        justify-content: center;
+
+        width: 34px;
+
+        height: 34px;
+
+        border: 1px solid #e7eaee;
+
+        border-radius: 8px;
+
+        color: #667085;
+
+        text-decoration: none;
+
+        background: #fff;
+
+    }
+
+    .purchase-page .action-btn:hover {
+
+        background: #ccfbf1;
+
+        border-color: #0f766e;
+
+        color: #0f766e;
+
+    }
+
+    .purchase-page .pagination .page-link {
+
+        color: #0f766e;
+
+    }
+
+    .purchase-page .pagination .page-item.active .page-link {
+
+        background: #0f766e;
+
+        border-color: #0f766e;
+
+        color: #fff;
+
+    }
+
+    .purchase-page .empty-state {
+
+        padding: 60px 20px;
+
+        text-align: center;
+
+        color: #667085;
+
+    }
+
+    .purchase-page .empty-state > i {
+
+        font-size: 42px;
+
+        margin-bottom: 15px;
+
+        color: #98a2b3;
+
+    }
+
+    .purchase-page .amount-text {
+
+        font-weight: 600;
+
+        font-variant-numeric: tabular-nums;
+
+        white-space: nowrap;
+
+    }
+
+    @media (max-width: 768px) {
+
+        .purchase-page .stat-number {
+
+            font-size: 23px;
+
+        }
+
+        .purchase-page .purchase-card {
+
+            padding: 16px;
+
+        }
+
+    }
+
+</style>
+
+<div class="purchase-page">
+
+    <!-- ============================================
+
+         PAGE HEADER
+
+         ============================================ -->
+
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+
+        <div>
+
+            <h3 class="fw-bold mb-1">
+
+                Purchase Management
+
+            </h3>
+
+            <div class="page-subtitle">
+
+                Manage supplier purchase orders, deliveries and procurement records.
+
+            </div>
+
+        </div>
+
+        {% if perms.purchases.add_purchase %}
+
+        <a
+
+            href="{% url 'purchases:create' %}"
+
+            class="btn btn-teal px-3 py-2"
+
+        >
+
+            <i class="fa-solid fa-plus me-2"></i>
+
+            New Purchase
+
+        </a>
+
+        {% endif %}
+
+    </div>
+
+    <!-- ============================================
+
+         SUMMARY CARDS
+
+         ============================================ -->
+
+    <div class="row g-3 mb-4">
+
+        <!-- TOTAL PURCHASES -->
+
+        <div class="col-sm-6 col-xl-3">
+
+            <div class="purchase-card d-flex align-items-center justify-content-between">
+
+                <div>
+
+                    <div class="stat-label">Total Purchases</div>
+
+                    <div class="stat-number">
+
+                        {{ total_purchases }}
+
+                    </div>
+
+                </div>
+
+                <div class="stat-icon">
+
+                    <i class="fa-solid fa-cart-shopping"></i>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- DRAFT PURCHASES -->
+
+        <div class="col-sm-6 col-xl-3">
+
+            <div class="purchase-card d-flex align-items-center justify-content-between">
+
+                <div>
+
+                    <div class="stat-label">Draft Orders</div>
+
+                    <div class="stat-number">
+
+                        {{ draft_purchases }}
+
+                    </div>
+
+                </div>
+
+                <div class="stat-icon">
+
+                    <i class="fa-solid fa-file-pen"></i>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- ORDERED PURCHASES -->
+
+        <div class="col-sm-6 col-xl-3">
+
+            <div class="purchase-card d-flex align-items-center justify-content-between">
+
+                <div>
+
+                    <div class="stat-label">Ordered</div>
+
+                    <div class="stat-number">
+
+                        {{ ordered_purchases }}
+
+                    </div>
+
+                </div>
+
+                <div class="stat-icon">
+
+                    <i class="fa-solid fa-truck-fast"></i>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- RECEIVED PURCHASES -->
+
+        <div class="col-sm-6 col-xl-3">
+
+            <div class="purchase-card d-flex align-items-center justify-content-between">
+
+                <div>
+
+                    <div class="stat-label">Received</div>
+
+                    <div class="stat-number">
+
+                        {{ received_purchases }}
+
+                    </div>
+
+                </div>
+
+                <div class="stat-icon">
+
+                    <i class="fa-solid fa-boxes-stacked"></i>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- ============================================
+
+         PURCHASE RECORDS CARD
+
+         ============================================ -->
+
+    <div class="purchase-card p-0 overflow-hidden">
+
+        <!-- SEARCH AND STATUS FILTER -->
+
+        <div class="p-3 border-bottom">
+
+            <form
+
+                method="get"
+
+                id="purchase-filter-form"
+
+                class="row g-2 align-items-center"
+
+                role="search"
+
+            >
+
+                <!-- SEARCH -->
+
+                <div class="col-12 col-lg-7">
+
+                    <input
+
+                        type="search"
+
+                        id="purchase-search"
+
+                        name="q"
+
+                        value="{{ query }}"
+
+                        class="purchase-filter"
+
+                        placeholder="Search purchase number, supplier, invoice or branch..."
+
+                        autocomplete="off"
+
+                        aria-label="Search purchase orders"
+
+                    >
+
+                </div>
+
+                <!-- STATUS -->
+
+                <div class="col-8 col-lg-3">
+
+                    <select
+
+                        name="status"
+
+                        id="purchase-status"
+
+                        class="purchase-filter"
+
+                        aria-label="Filter purchase status"
+
+                    >
+
+                        <option value="">All Status</option>
+
+                        {% for status_value, status_label in status_choices %}
+
+                        <option
+
+                            value="{{ status_value }}"
+
+                            {% if status == status_value %}selected{% endif %}
+
+                        >
+
+                            {{ status_label }}
+
+                        </option>
+
+                        {% endfor %}
+
+                    </select>
+
+                </div>
+
+                <!-- SEARCH BUTTON -->
+
+                <div class="col-4 col-lg-2">
+
+                    <button
+
+                        type="submit"
+
+                        class="btn btn-teal w-100"
+
+                    >
+
+                        <i class="fa-solid fa-magnifying-glass me-1"></i>
+
+                        Search
+
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+        <!-- ========================================
+
+             PURCHASE TABLE
+
+             ======================================== -->
+
+        <!-- AJAX-rendered table and pagination; also works without JavaScript -->
+        <div id="purchase-search-feedback"
+             class="small px-3 pb-2 text-muted"
+             role="status"
+             aria-live="polite"
+             hidden></div>
+
+        <div id="purchase-results" aria-live="polite" aria-busy="false">
+            {% include "purchases/partials/list_results.html" %}
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

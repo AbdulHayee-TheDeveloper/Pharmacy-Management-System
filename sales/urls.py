@@ -54,4 +54,9 @@ urlpatterns = [
         views.sale_receipt,
         name="receipt",
     ),
+    path(
+    "history/<int:pk>/receive-payment/",
+    views.sale_receive_payment,
+    name="receive_payment",
+),
 ]

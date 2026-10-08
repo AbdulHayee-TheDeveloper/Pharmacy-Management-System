@@ -1,0 +1,370 @@
+
+{% extends "base/base.html" %}
+
+{% block title %}{{ page_title }} | PharmaCare{% endblock %}
+
+{% block content %}
+
+<style>
+    .supplier-form-page {
+        color: #172033;
+    }
+
+    .supplier-form-page .page-subtitle {
+        color: #667085;
+        font-size: 14px;
+    }
+
+    .supplier-form-page .form-card {
+        background: #fff;
+        border: 1px solid #e7eaee;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    .supplier-form-page .section-header {
+        padding: 18px 24px;
+        border-bottom: 1px solid #e7eaee;
+        background: #f9fafb;
+    }
+
+    .supplier-form-page .section-title {
+        font-size: 16px;
+        font-weight: 700;
+        margin: 0;
+    }
+
+    .supplier-form-page .section-description {
+        color: #667085;
+        font-size: 13px;
+        margin-top: 4px;
+    }
+
+    .supplier-form-page .section-body {
+        padding: 24px;
+    }
+
+    .supplier-form-page .form-label {
+        font-size: 13px;
+        font-weight: 600;
+        margin-bottom: 7px;
+    }
+
+    .supplier-form-page .form-control {
+        min-height: 43px;
+        border: 1px solid #e7eaee;
+        border-radius: 8px;
+        font-size: 14px;
+    }
+
+    .supplier-form-page textarea.form-control {
+        min-height: 100px;
+    }
+
+    .supplier-form-page .form-control:focus {
+        border-color: #0f766e;
+        box-shadow: 0 0 0 3px rgba(15, 118, 110, .1);
+    }
+
+    .supplier-form-page .form-control:disabled {
+        background: #f2f4f7;
+        color: #667085;
+    }
+
+    .supplier-form-page .form-check-input:checked {
+        background-color: #0f766e;
+        border-color: #0f766e;
+    }
+
+    .supplier-form-page .form-help {
+        font-size: 12px;
+        color: #667085;
+        margin-top: 5px;
+    }
+
+    .supplier-form-page .field-error {
+        font-size: 12px;
+        color: #dc2626;
+        margin-top: 5px;
+    }
+
+    .supplier-form-page .btn-teal {
+        background: #0f766e;
+        border-color: #0f766e;
+        color: #fff;
+    }
+
+    .supplier-form-page .btn-teal:hover {
+        background: #115e59;
+        border-color: #115e59;
+        color: #fff;
+    }
+
+    .supplier-form-page .form-actions {
+        padding: 20px 24px;
+        background: #f9fafb;
+        border-top: 1px solid #e7eaee;
+        display: flex;
+        justify-content: flex-end;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    @media (max-width: 576px) {
+        .supplier-form-page .section-body {
+            padding: 16px;
+        }
+
+        .supplier-form-page .form-actions {
+            padding: 16px;
+        }
+    }
+</style>
+
+<div class="supplier-form-page">
+
+    <!-- Page Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+        <div>
+            <h3 class="fw-bold mb-1">
+                {% if is_edit %}
+                    Edit Supplier
+                {% else %}
+                    Add New Supplier
+                {% endif %}
+            </h3>
+
+            <div class="page-subtitle">
+                {% if is_edit %}
+                    Update supplier information and account settings.
+                {% else %}
+                    Register a new pharmaceutical supplier or distributor.
+                {% endif %}
+            </div>
+        </div>
+
+        <a href="{% url 'suppliers:list' %}"
+           class="btn btn-outline-secondary">
+            <i class="fa-solid fa-arrow-left me-2"></i>
+            Back to Suppliers
+        </a>
+    </div>
+
+    <form method="post" novalidate>
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+        <div class="alert alert-danger">
+            {{ form.non_field_errors }}
+        </div>
+        {% endif %}
+
+        <div class="form-card mb-4">
+
+            <!-- Section 1 -->
+            <div class="section-header">
+                <h5 class="section-title">
+                    <i class="fa-solid fa-building me-2"></i>
+                    Supplier Information
+                </h5>
+                <div class="section-description">
+                    Basic details of the supplier and company.
+                </div>
+            </div>
+
+            <div class="section-body">
+                <div class="row g-3">
+
+                    <div class="col-md-6">
+                        <label class="form-label" for="{{ form.name.id_for_label }}">
+                            Supplier Name <span class="text-danger">*</span>
+                        </label>
+                        {{ form.name }}
+                        {% for error in form.name.errors %}
+                        <div class="field-error">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label" for="{{ form.company_name.id_for_label }}">
+                            Company Name
+                        </label>
+                        {{ form.company_name }}
+                        {% for error in form.company_name.errors %}
+                        <div class="field-error">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label" for="{{ form.contact_person.id_for_label }}">
+                            Contact Person
+                        </label>
+                        {{ form.contact_person }}
+                        {% for error in form.contact_person.errors %}
+                        <div class="field-error">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label" for="{{ form.ntn.id_for_label }}">
+                            NTN / Tax Number
+                        </label>
+                        {{ form.ntn }}
+                        {% for error in form.ntn.errors %}
+                        <div class="field-error">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Section 2 -->
+            <div class="section-header">
+                <h5 class="section-title">
+                    <i class="fa-solid fa-address-book me-2"></i>
+                    Contact Information
+                </h5>
+                <div class="section-description">
+                    Phone, email, and address information.
+                </div>
+            </div>
+
+            <div class="section-body">
+                <div class="row g-3">
+
+                    <div class="col-md-6">
+                        <label class="form-label" for="{{ form.phone.id_for_label }}">
+                            Phone Number <span class="text-danger">*</span>
+                        </label>
+                        {{ form.phone }}
+                        {% for error in form.phone.errors %}
+                        <div class="field-error">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label" for="{{ form.alternate_phone.id_for_label }}">
+                            Alternate Phone
+                        </label>
+                        {{ form.alternate_phone }}
+                        {% for error in form.alternate_phone.errors %}
+                        <div class="field-error">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label" for="{{ form.email.id_for_label }}">
+                            Email Address
+                        </label>
+                        {{ form.email }}
+                        {% for error in form.email.errors %}
+                        <div class="field-error">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label" for="{{ form.city.id_for_label }}">
+                            City
+                        </label>
+                        {{ form.city }}
+                        {% for error in form.city.errors %}
+                        <div class="field-error">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label" for="{{ form.address.id_for_label }}">
+                            Complete Address
+                        </label>
+                        {{ form.address }}
+                        {% for error in form.address.errors %}
+                        <div class="field-error">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Section 3 -->
+            <div class="section-header">
+                <h5 class="section-title">
+                    <i class="fa-solid fa-wallet me-2"></i>
+                    Account & Status
+                </h5>
+                <div class="section-description">
+                    Initial payable balance and supplier status.
+                </div>
+            </div>
+
+            <div class="section-body">
+                <div class="row g-3">
+
+                    <div class="col-md-6">
+                        <label class="form-label" for="{{ form.opening_balance.id_for_label }}">
+                            Opening Payable Balance (PKR)
+                        </label>
+                        {{ form.opening_balance }}
+                        {% for error in form.opening_balance.errors %}
+                        <div class="field-error">{{ error }}</div>
+                        {% endfor %}
+                        {% if form.opening_balance.help_text %}
+                        <div class="form-help">
+                            {{ form.opening_balance.help_text }}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="col-md-6 d-flex align-items-center">
+                        <div class="form-check form-switch mt-3">
+                            {{ form.is_active }}
+                            <label class="form-check-label fw-semibold ms-2"
+                                   for="{{ form.is_active.id_for_label }}">
+                                Active Supplier
+                            </label>
+                            <div class="form-help">
+                                Only active suppliers should be selectable
+                                for new purchases.
+                            </div>
+                        </div>
+                        {% for error in form.is_active.errors %}
+                        <div class="field-error">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label" for="{{ form.notes.id_for_label }}">
+                            Additional Notes
+                        </label>
+                        {{ form.notes }}
+                        {% for error in form.notes.errors %}
+                        <div class="field-error">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="form-actions">
+                <a href="{% url 'suppliers:list' %}"
+                   class="btn btn-outline-secondary px-4">
+                    Cancel
+                </a>
+
+                <button type="submit" class="btn btn-teal px-4">
+                    <i class="fa-solid fa-floppy-disk me-2"></i>
+                    {% if is_edit %}
+                        Save Changes
+                    {% else %}
+                        Create Supplier
+                    {% endif %}
+                </button>
+            </div>
+
+        </div>
+
+    </form>
+
+</div>
+
+{% endblock %}

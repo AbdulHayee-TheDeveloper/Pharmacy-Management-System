@@ -1,0 +1,640 @@
+{% extends "base/base.html" %}
+
+{% block title %}{{ customer.name }} | PharmaCare{% endblock %}
+
+{% block content %}
+<div class="customer-detail-page">
+
+    <style>
+        .customer-detail-page .detail-card {
+            background: #fff;
+            border: 1px solid #e7eaee;
+            border-radius: 12px;
+            padding: 22px;
+        }
+
+        .customer-detail-page .detail-label {
+            font-size: 12px;
+            color: #667085;
+            margin-bottom: 5px;
+        }
+
+        .customer-detail-page .detail-value {
+            font-weight: 500;
+            overflow-wrap: anywhere;
+        }
+
+        .customer-detail-page .customer-avatar {
+            width: 64px;
+            height: 64px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #ccfbf1;
+            color: #0f766e;
+            font-size: 27px;
+        }
+
+        .customer-detail-page .btn-teal {
+            background: #0f766e;
+            border-color: #0f766e;
+            color: white;
+        }
+    </style>
+
+    <div class="d-flex flex-wrap justify-content-between
+                align-items-center gap-3 mb-4">
+        <div>
+            <a href="{% url 'customers:list' %}" class="text-decoration-none small" style="color:#0f766e;">
+                <i class="fa-solid fa-arrow-left me-1"></i>
+                Customer Management
+            </a>
+            <h3 class="fw-bold mt-2 mb-1">Customer Details</h3>
+            <p class="text-muted mb-0">
+                View customer profile and contact information.
+            </p>
+        </div>
+
+        {% if perms.customers.change_customer %}
+        <a href="{% url 'customers:edit' customer.pk %}" class="btn btn-teal">
+            <i class="fa-solid fa-pen me-2"></i>
+            Edit Customer
+        </a>
+
+        {% endif %}
+        {% if perms.customers.change_customer and perms.sales.change_sale and perms.sales.view_sale %}
+        <a href="{% url 'customers:link_sale' customer.pk %}" class="btn btn-outline-primary">
+            <i class="fa-solid fa-link me-2"></i>
+            Link Historical Invoice
+        </a>
+        {% endif %}
+    </div>
+
+    <div class="detail-card mb-4">
+        <div class="d-flex align-items-center gap-3">
+            <div class="customer-avatar">
+                <i class="fa-solid fa-user"></i>
+            </div>
+
+            <div>
+                <h4 class="fw-bold mb-1">{{ customer.name }}</h4>
+                <div class="text-muted small">
+                    {{ customer.customer_code }}
+                </div>
+
+                <div class="mt-2">
+                    {% if customer.is_active %}
+                    <span class="badge bg-success-subtle text-success">
+                        Active
+                    </span>
+                    {% else %}
+                    <span class="badge bg-danger-subtle text-danger">
+                        Inactive
+                    </span>
+                    {% endif %}
+
+                    <span class="badge text-bg-light border ms-1">
+                        {{ customer.get_customer_type_display }}
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-xl-8">
+            <div class="detail-card h-100">
+                <h5 class="fw-semibold mb-4">
+                    <i class="fa-regular fa-address-card me-2" style="color:#0f766e;"></i>
+                    Contact Information
+                </h5>
+
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <div class="detail-label">Phone</div>
+                        <div class="detail-value">
+                            {{ customer.phone|default:"—" }}
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="detail-label">Alternate Phone</div>
+                        <div class="detail-value">
+                            {{ customer.alternate_phone|default:"—" }}
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="detail-label">Email</div>
+                        <div class="detail-value">
+                            {{ customer.email|default:"—" }}
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="detail-label">City</div>
+                        <div class="detail-value">
+                            {{ customer.city|default:"—" }}
+                        </div>
+                    </div>
+
+                    <div class="col-12">
+                        <div class="detail-label">Address</div>
+                        <div class="detail-value">
+                            {{ customer.address|default:"—"|linebreaksbr }}
+                        </div>
+                    </div>
+
+                    <div class="col-12">
+                        <div class="detail-label">Notes</div>
+                        <div class="detail-value">
+                            {{ customer.notes|default:"—"|linebreaksbr }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-4">
+            <div class="detail-card h-100">
+                <h5 class="fw-semibold mb-4">
+                    Account Information
+                </h5>
+
+                <div class="detail-label">Created</div>
+                <div class="detail-value mb-3">
+                    {{ customer.created_at|date:"d M Y, h:i A" }}
+                </div>
+
+                <div class="detail-label">Last Updated</div>
+                <div class="detail-value mb-4">
+                    {{ customer.updated_at|date:"d M Y, h:i A" }}
+                </div>
+
+                {% if perms.customers.change_customer %}
+                <form method="post" action="{% url 'customers:toggle_status' customer.pk %}">
+                    {% csrf_token %}
+
+                    {% if customer.is_active %}
+                    <button type="submit" class="btn btn-outline-danger w-100"
+                        onclick="return confirm('Deactivate this customer?')">
+                        Deactivate Customer
+                    </button>
+                    {% else %}
+                    <button type="submit" class="btn btn-outline-success w-100"
+                        onclick="return confirm('Activate this customer?')">
+                        Activate Customer
+                    </button>
+                    {% endif %}
+                </form>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ======================================================
+    CUSTOMER FINANCIAL OVERVIEW
+======================================================= -->
+
+{% if can_view_sales %}
+
+<div class="mt-4">
+
+    <!-- SECTION HEADER -->
+    <div class="d-flex justify-content-between
+                align-items-center flex-wrap gap-2 mb-3">
+
+        <div>
+            <h4 class="fw-bold mb-1">
+                Purchase History & Financial Overview
+            </h4>
+
+            <p class="text-muted mb-0">
+                Completed sales and outstanding balances
+                for this customer.
+            </p>
+        </div>
+
+    </div>
+
+    <!-- SUMMARY CARDS -->
+    <div class="row g-3 mb-4">
+
+        <div class="col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-3">
+                    <div class="d-flex justify-content-between">
+                        <span class="text-muted small">
+                            Total Purchases
+                        </span>
+                        <i class="fa-solid fa-receipt" style="color:#0f766e;"></i>
+                    </div>
+
+                    <h3 class="fw-bold mt-3 mb-0">
+                        {{ total_purchases }}
+                    </h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-3">
+                    <div class="d-flex justify-content-between">
+                        <span class="text-muted small">
+                            Total Spending
+                        </span>
+                        <i class="fa-solid fa-wallet" style="color:#0f766e;"></i>
+                    </div>
+
+                    <h4 class="fw-bold mt-3 mb-0">
+                        Rs. {{ total_spending|floatformat:2 }}
+                    </h4>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-3">
+                    <div class="d-flex justify-content-between">
+                        <span class="text-muted small">
+                            Total Collected
+                        </span>
+                        <i class="fa-solid fa-circle-check text-success"></i>
+                    </div>
+
+                    <h4 class="fw-bold mt-3 mb-0 text-success">
+                        Rs. {{ total_collected|floatformat:2 }}
+                    </h4>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-3">
+                    <div class="d-flex justify-content-between">
+                        <span class="text-muted small">
+                            Outstanding Balance
+                        </span>
+                        <i class="fa-solid fa-clock text-danger"></i>
+                    </div>
+
+                    <h4 class="fw-bold mt-3 mb-0
+                               {% if total_outstanding > 0 %}
+                               text-danger
+                               {% else %}
+                               text-success
+                               {% endif %}">
+                        Rs. {{ total_outstanding|floatformat:2 }}
+                    </h4>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- LAST PURCHASE -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body py-3">
+            <div class="d-flex flex-wrap
+                        justify-content-between gap-2">
+                <span class="text-muted">
+                    <i class="fa-regular fa-calendar me-2"></i>
+                    Last Purchase
+                </span>
+
+                <strong>
+                    {% if last_purchase %}
+                    {{ last_purchase|date:"d M Y, h:i A" }}
+                    {% else %}
+                    No purchases yet
+                    {% endif %}
+                </strong>
+            </div>
+        </div>
+    </div>
+
+    <!-- PURCHASE HISTORY TABLE -->
+    <div class="card border-0 shadow-sm">
+
+        <div class="card-header bg-white py-3">
+            <h5 class="fw-semibold mb-0">
+                <i class="fa-solid fa-clock-rotate-left me-2" style="color:#0f766e;"></i>
+                Customer Sales History
+            </h5>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table align-middle mb-0">
+
+                <thead class="table-light">
+                    <tr>
+                        <th>Invoice</th>
+                        <th>Date</th>
+                        <th>Branch</th>
+                        <th>Total</th>
+                        <th>Outstanding</th>
+                        <th>Payment Status</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for sale in sales %}
+                    <tr>
+
+                        <td>
+                            <a href="{% url 'sales:detail' sale.pk %}" class="fw-semibold text-decoration-none"
+                                style="color:#0f766e;">
+                                {{ sale.invoice_number }}
+                            </a>
+                        </td>
+
+                        <td>
+                            {{ sale.completed_at|date:"d M Y" }}
+                            <div class="small text-muted">
+                                {{ sale.completed_at|date:"h:i A" }}
+                            </div>
+                        </td>
+
+                        <td>
+                            {{ sale.branch.name }}
+                        </td>
+
+                        <td class="fw-semibold">
+                            Rs. {{ sale.total_amount|floatformat:2 }}
+                        </td>
+
+                        <td>
+                            <span
+                                class="{% if sale.outstanding_balance > 0 %}text-danger{% else %}text-success{% endif %} fw-semibold">
+                                Rs. {{ sale.outstanding_balance|floatformat:2 }}
+                            </span>
+                        </td>
+
+                        <td>
+                            {% if sale.payment_status == "paid" %}
+                            <span class="badge bg-success">
+                                Paid
+                            </span>
+                            {% elif sale.payment_status == "partial" %}
+                            <span class="badge bg-warning text-dark">
+                                Partially Paid
+                            </span>
+                            {% else %}
+                            <span class="badge bg-danger">
+                                Unpaid
+                            </span>
+                            {% endif %}
+                        </td>
+
+                        <td class="text-end text-nowrap">
+
+                            <a href="{% url 'sales:detail' sale.pk %}" class="btn btn-sm btn-light border"
+                                title="View Sale">
+                                <i class="fa-regular fa-eye"></i>
+                            </a>
+
+                            {% if sale.outstanding_balance > 0 %}
+                            {% if perms.sales.change_sale %}
+                            <a href="{% url 'sales:receive_payment' sale.pk %}" class="btn btn-sm btn-outline-success"
+                                title="Receive Payment">
+                                <i class="fa-solid fa-money-bill"></i>
+                            </a>
+                            {% endif %}
+                            {% endif %}
+
+                        </td>
+                    </tr>
+
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center py-5">
+
+                            <i class="fa-solid fa-basket-shopping
+                                      fa-2x text-muted mb-3"></i>
+
+                            <h6>No Purchase History</h6>
+
+                            <p class="text-muted small mb-0">
+                                Completed sales linked to this
+                                customer will appear here.
+                            </p>
+
+                        </td>
+                    </tr>
+                    {% endfor %}
+
+                </tbody>
+            </table>
+        </div>
+
+        <!-- PAGINATION -->
+        {% if page_obj.has_other_pages %}
+        <div class="card-footer bg-white py-3">
+            <div class="d-flex flex-wrap
+                        justify-content-between
+                        align-items-center gap-2">
+
+                <small class="text-muted">
+                    Showing
+                    {{ page_obj.start_index }}–
+                    {{ page_obj.end_index }}
+                    of {{ page_obj.paginator.count }} sales
+                </small>
+
+                <nav aria-label="Customer sales pages">
+                    <ul class="pagination pagination-sm mb-0">
+
+                        {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}">
+                                Previous
+                            </a>
+                        </li>
+                        {% endif %}
+
+                        <li class="page-item active">
+                            <span class="page-link" style="background:#0f766e;border-color:#0f766e;">
+                                {{ page_obj.number }}
+                            </span>
+                        </li>
+
+                        {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.next_page_number }}">
+                                Next
+                            </a>
+                        </li>
+                        {% endif %}
+
+                    </ul>
+                </nav>
+
+            </div>
+        </div>
+        {% endif %}
+
+    </div>
+
+</div>
+
+<!-- ======================================================
+     CUSTOMER ADDITIONAL PAYMENT HISTORY
+======================================================= -->
+
+<div class="card border-0 shadow-sm mt-4">
+
+    <div class="card-header bg-white py-3">
+        <div class="d-flex justify-content-between
+                    align-items-center flex-wrap gap-2">
+
+            <div>
+                <h5 class="fw-semibold mb-1">
+                    <i class="fa-solid fa-money-bill-transfer me-2"
+                       style="color:#0f766e;"></i>
+                    Payment Collection History
+                </h5>
+
+                <p class="small text-muted mb-0">
+                    Payments received after original checkout.
+                </p>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table align-middle mb-0">
+
+            <thead class="table-light">
+                <tr>
+                    <th>Payment #</th>
+                    <th>Invoice</th>
+                    <th>Payment Date</th>
+                    <th>Method</th>
+                    <th>Branch</th>
+                    <th>Received By</th>
+                    <th class="text-end">Amount</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                {% for payment in payments %}
+
+                <tr>
+                    <td class="fw-semibold">
+                        {{ payment.payment_number }}
+                    </td>
+
+                    <td>
+                        <a href="{% url 'sales:detail' payment.sale.pk %}"
+                           class="text-decoration-none"
+                           style="color:#0f766e;">
+                            {{ payment.sale.invoice_number }}
+                        </a>
+                    </td>
+
+                    <td>
+                        {{ payment.received_at|date:"d M Y, h:i A" }}
+                    </td>
+
+                    <td>
+                        {{ payment.get_payment_method_display }}
+                    </td>
+
+                    <td>
+                        {{ payment.sale.branch.name }}
+                    </td>
+
+                    <td>
+                        {{ payment.received_by.username }}
+                    </td>
+
+                    <td class="text-end fw-semibold text-success">
+                        Rs. {{ payment.amount|floatformat:2 }}
+                    </td>
+                </tr>
+
+                {% empty %}
+
+                <tr>
+                    <td colspan="7"
+                        class="text-center text-muted py-5">
+                        <i class="fa-solid fa-receipt
+                                  fa-2x mb-3"></i>
+
+                        <div>
+                            No additional payments recorded.
+                        </div>
+                    </td>
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+        </table>
+    </div>
+
+    {% if payment_page_obj.has_other_pages %}
+    <div class="card-footer bg-white">
+        <div class="d-flex flex-wrap justify-content-between
+                    align-items-center gap-2">
+
+            <small class="text-muted">
+                Payment page {{ payment_page_obj.number }}
+                of {{ payment_page_obj.paginator.num_pages }}
+            </small>
+
+            <div class="d-flex gap-2">
+
+                {% if payment_page_obj.has_previous %}
+                <a class="btn btn-sm btn-outline-secondary"
+                   href="?page={{ page_obj.number }}&payment_page={{ payment_page_obj.previous_page_number }}">
+                    Previous
+                </a>
+                {% endif %}
+
+                {% if payment_page_obj.has_next %}
+                <a class="btn btn-sm btn-outline-secondary"
+                   href="?page={{ page_obj.number }}&payment_page={{ payment_page_obj.next_page_number }}">
+                    Next
+                </a>
+                {% endif %}
+
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+
+<!-- AUDIT HISTORY -->
+{% if perms.customers.change_customer and perms.sales.change_sale and perms.sales.view_sale %}
+<div class="card border-0 shadow-sm mt-4">
+    <div class="card-header bg-white py-3">
+        <h6 class="fw-semibold mb-0">
+            <i class="fa-solid fa-shield-halved me-2"></i>
+            Historical Invoice Linking Audit
+        </h6>
+    </div>
+
+    <div class="card-body">
+        <p class="text-muted small mb-0">
+            Every historical invoice assignment is recorded
+            with the staff member, timestamp and reason.
+            Audit records are retained for accountability.
+        </p>
+    </div>
+</div>
+{% endif %}
+
+{% endif %}
+
+{% endblock %}

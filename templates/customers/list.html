@@ -1,0 +1,208 @@
+
+{% extends "base/base.html" %}
+
+{% block title %}Customer Management | PharmaCare{% endblock %}
+
+{% block content %}
+<div class="customer-page">
+
+    <style>
+        .customer-page .customer-card {
+            background: #fff;
+            border: 1px solid #e7eaee;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .customer-page .stat-card {
+            padding: 20px;
+            height: 100%;
+        }
+        .customer-page .stat-label {
+            color: #667085;
+            font-size: 13px;
+        }
+        .customer-page .stat-value {
+            font-size: 27px;
+            font-weight: 700;
+            margin-top: 8px;
+        }
+        .customer-page .stat-icon {
+            display: flex;
+            width: 44px;
+            height: 44px;
+            align-items: center;
+            justify-content: center;
+            background: #ccfbf1;
+            color: #0f766e;
+            border-radius: 12px;
+            font-size: 19px;
+        }
+        .customer-page .btn-teal {
+            background: #0f766e;
+            border-color: #0f766e;
+            color: white;
+        }
+        .customer-page .btn-teal:hover {
+            background: #115e59;
+            border-color: #115e59;
+            color: white;
+        }
+        .customer-page .form-control:focus,
+        .customer-page .form-select:focus {
+            border-color: #0f766e;
+            box-shadow: 0 0 0 .2rem rgba(15,118,110,.12);
+        }
+        .customer-page th {
+            color: #667085;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: .04em;
+            padding: 15px;
+            white-space: nowrap;
+        }
+        .customer-page td {
+            padding: 15px;
+        }
+    </style>
+
+    <div class="d-flex justify-content-between
+                align-items-center flex-wrap gap-3 mb-4">
+        <div>
+            <h3 class="fw-bold mb-1">Customer Management</h3>
+            <p class="text-muted mb-0">
+                Manage pharmacy customers and contact information.
+            </p>
+        </div>
+
+        {% if perms.customers.add_customer %}
+        <a href="{% url 'customers:create' %}"
+           class="btn btn-teal px-3 py-2">
+            <i class="fa-solid fa-plus me-2"></i>
+            Add Customer
+        </a>
+        {% endif %}
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-sm-6 col-xl-3">
+            <div class="customer-card stat-card d-flex
+                        justify-content-between align-items-center">
+                <div>
+                    <div class="stat-label">Total Customers</div>
+                    <div class="stat-value">{{ total_customers }}</div>
+                </div>
+                <div class="stat-icon">
+                    <i class="fa-solid fa-users"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-xl-3">
+            <div class="customer-card stat-card d-flex
+                        justify-content-between align-items-center">
+                <div>
+                    <div class="stat-label">Active Customers</div>
+                    <div class="stat-value">{{ active_customers }}</div>
+                </div>
+                <div class="stat-icon">
+                    <i class="fa-solid fa-user-check"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-xl-3">
+            <div class="customer-card stat-card d-flex
+                        justify-content-between align-items-center">
+                <div>
+                    <div class="stat-label">Inactive Customers</div>
+                    <div class="stat-value">{{ inactive_customers }}</div>
+                </div>
+                <div class="stat-icon">
+                    <i class="fa-solid fa-user-slash"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-xl-3">
+            <div class="customer-card stat-card d-flex
+                        justify-content-between align-items-center">
+                <div>
+                    <div class="stat-label">Wholesale Customers</div>
+                    <div class="stat-value">{{ wholesale_customers }}</div>
+                </div>
+                <div class="stat-icon">
+                    <i class="fa-solid fa-boxes-stacked"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="customer-card">
+
+        <div class="p-3 border-bottom">
+            <form method="get"
+                  id="customer-filter-form"
+                  class="row g-2">
+
+                <div class="col-12 col-lg-5">
+                    <input type="search"
+                           name="q"
+                           id="customer-search"
+                           value="{{ query }}"
+                           placeholder="Search name, code, phone, email or city..."
+                           autocomplete="off"
+                           class="form-control">
+                </div>
+
+                <div class="col-6 col-lg-2">
+                    <select name="status"
+                            id="customer-status"
+                            class="form-select">
+                        <option value="">All Status</option>
+                        <option value="active"
+                            {% if status == "active" %}selected{% endif %}>
+                            Active
+                        </option>
+                        <option value="inactive"
+                            {% if status == "inactive" %}selected{% endif %}>
+                            Inactive
+                        </option>
+                    </select>
+                </div>
+
+                <div class="col-6 col-lg-3">
+                    <select name="type"
+                            id="customer-type"
+                            class="form-select">
+                        <option value="">All Types</option>
+                        {% for value, label in type_choices %}
+                        <option value="{{ value }}"
+                            {% if customer_type == value %}selected{% endif %}>
+                            {{ label }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-12 col-lg-2">
+                    <button type="submit" class="btn btn-teal w-100">
+                        <i class="fa-solid fa-magnifying-glass me-1"></i>
+                        Search
+                    </button>
+                </div>
+            </form>
+
+            <div id="customer-search-feedback"
+                 class="small text-muted mt-2"
+                 role="status"
+                 aria-live="polite"
+                 hidden></div>
+        </div>
+
+        <div id="customer-results" aria-live="polite">
+            {% include "customers/partials/list_results.html" %}
+        </div>
+
+    </div>
+</div>
+{% endblock %}
