@@ -11,9 +11,9 @@
             <h1 class="h3 fw-bold mb-1">{{ page_title }}</h1>
             <p class="text-muted mb-0">
                 {% if medicine %}
-                    Update medicine information and configuration.
+                Update medicine information and configuration.
                 {% else %}
-                    Add a new medicine to your pharmacy.
+                Add a new medicine to your pharmacy.
                 {% endif %}
             </p>
         </div>
@@ -26,23 +26,19 @@
 
     <div class="dashboard-card">
 
-        <form
-            method="post"
-            enctype="multipart/form-data"
-            novalidate
-        >
+        <form method="post" enctype="multipart/form-data" novalidate>
             {% csrf_token %}
 
             {% if form.non_field_errors %}
-                <div class="alert alert-danger">
-                    <div class="fw-semibold mb-1">
-                        Please correct the following:
-                    </div>
-
-                    {% for error in form.non_field_errors %}
-                        <div>{{ error }}</div>
-                    {% endfor %}
+            <div class="alert alert-danger">
+                <div class="fw-semibold mb-1">
+                    Please correct the following:
                 </div>
+
+                {% for error in form.non_field_errors %}
+                <div>{{ error }}</div>
+                {% endfor %}
+            </div>
             {% endif %}
 
 
@@ -66,95 +62,80 @@
 
                     <!-- Brand Name -->
                     <div class="col-md-6">
-                        <label
-                            for="{{ form.name.id_for_label }}"
-                            class="form-label fw-semibold"
-                        >
+                        <label for="{{ form.name.id_for_label }}" class="form-label fw-semibold">
                             Brand Name <span class="text-danger">*</span>
                         </label>
 
                         {{ form.name }}
 
                         {% if form.name.errors %}
-                            <div class="text-danger small mt-1">
-                                {{ form.name.errors|striptags }}
-                            </div>
+                        <div class="text-danger small mt-1">
+                            {{ form.name.errors|striptags }}
+                        </div>
                         {% endif %}
                     </div>
 
 
                     <!-- Generic Name -->
                     <div class="col-md-6">
-                        <label
-                            for="{{ form.generic_name.id_for_label }}"
-                            class="form-label fw-semibold"
-                        >
+                        <label for="{{ form.generic_name.id_for_label }}" class="form-label fw-semibold">
                             Generic Name
                         </label>
 
                         {{ form.generic_name }}
 
                         {% if form.generic_name.errors %}
-                            <div class="text-danger small mt-1">
-                                {{ form.generic_name.errors|striptags }}
-                            </div>
+                        <div class="text-danger small mt-1">
+                            {{ form.generic_name.errors|striptags }}
+                        </div>
                         {% endif %}
                     </div>
 
 
                     <!-- Category -->
                     <div class="col-md-4">
-                        <label
-                            for="{{ form.category.id_for_label }}"
-                            class="form-label fw-semibold"
-                        >
+                        <label for="{{ form.category.id_for_label }}" class="form-label fw-semibold">
                             Category <span class="text-danger">*</span>
                         </label>
 
                         {{ form.category }}
 
                         {% if form.category.errors %}
-                            <div class="text-danger small mt-1">
-                                {{ form.category.errors|striptags }}
-                            </div>
+                        <div class="text-danger small mt-1">
+                            {{ form.category.errors|striptags }}
+                        </div>
                         {% endif %}
                     </div>
 
 
                     <!-- Manufacturer -->
                     <div class="col-md-4">
-                        <label
-                            for="{{ form.manufacturer.id_for_label }}"
-                            class="form-label fw-semibold"
-                        >
+                        <label for="{{ form.manufacturer.id_for_label }}" class="form-label fw-semibold">
                             Manufacturer
                         </label>
 
                         {{ form.manufacturer }}
 
                         {% if form.manufacturer.errors %}
-                            <div class="text-danger small mt-1">
-                                {{ form.manufacturer.errors|striptags }}
-                            </div>
+                        <div class="text-danger small mt-1">
+                            {{ form.manufacturer.errors|striptags }}
+                        </div>
                         {% endif %}
                     </div>
 
 
                     <!-- Country -->
                     <div class="col-md-4">
-                        <label
-                            for="{{ form.country_of_origin.id_for_label }}"
-                            class="form-label fw-semibold"
-                        >
+                        <label for="{{ form.country_of_origin.id_for_label }}" class="form-label fw-semibold">
                             Country of Origin
                         </label>
 
                         {{ form.country_of_origin }}
 
                         {% if form.country_of_origin.errors %}
-                            <div class="text-danger small mt-1">
-                                {{ form.country_of_origin.errors|striptags }}
-                            </div>
+                        <div class="text-danger small mt-1">
+                            {{ form.country_of_origin.errors|striptags }}
+                        </div>
                         {% endif %}
                     </div>
 
@@ -186,67 +167,55 @@
 
                     <!-- Dosage Form -->
                     <div class="col-md-4">
-                        <label
-                            for="{{ form.dosage_form.id_for_label }}"
-                            class="form-label fw-semibold"
-                        >
+                        <label for="{{ form.dosage_form.id_for_label }}" class="form-label fw-semibold">
                             Dosage Form <span class="text-danger">*</span>
                         </label>
 
                         {{ form.dosage_form }}
 
                         {% if form.dosage_form.errors %}
-                            <div class="text-danger small mt-1">
-                                {{ form.dosage_form.errors|striptags }}
-                            </div>
+                        <div class="text-danger small mt-1">
+                            {{ form.dosage_form.errors|striptags }}
+                        </div>
                         {% endif %}
                     </div>
 
 
                     <!-- Strength -->
                     <div class="col-md-4">
-                        <label
-                            for="{{ form.strength.id_for_label }}"
-                            class="form-label fw-semibold"
-                        >
+                        <label for="{{ form.strength.id_for_label }}" class="form-label fw-semibold">
                             Strength
                         </label>
 
                         {{ form.strength }}
 
                         {% if form.strength.errors %}
-                            <div class="text-danger small mt-1">
-                                {{ form.strength.errors|striptags }}
-                            </div>
+                        <div class="text-danger small mt-1">
+                            {{ form.strength.errors|striptags }}
+                        </div>
                         {% endif %}
                     </div>
 
 
                     <!-- Unit -->
                     <div class="col-md-4">
-                        <label
-                            for="{{ form.unit.id_for_label }}"
-                            class="form-label fw-semibold"
-                        >
+                        <label for="{{ form.unit.id_for_label }}" class="form-label fw-semibold">
                             Unit <span class="text-danger">*</span>
                         </label>
 
                         {{ form.unit }}
 
                         {% if form.unit.errors %}
-                            <div class="text-danger small mt-1">
-                                {{ form.unit.errors|striptags }}
-                            </div>
+                        <div class="text-danger small mt-1">
+                            {{ form.unit.errors|striptags }}
+                        </div>
                         {% endif %}
                     </div>
 
 
                     <!-- Pack Size -->
                     <div class="col-md-4">
-                        <label
-                            for="{{ form.pack_size.id_for_label }}"
-                            class="form-label fw-semibold"
-                        >
+                        <label for="{{ form.pack_size.id_for_label }}" class="form-label fw-semibold">
                             Pack Size <span class="text-danger">*</span>
                         </label>
 
@@ -257,9 +226,9 @@
                         </div>
 
                         {% if form.pack_size.errors %}
-                            <div class="text-danger small mt-1">
-                                {{ form.pack_size.errors|striptags }}
-                            </div>
+                        <div class="text-danger small mt-1">
+                            {{ form.pack_size.errors|striptags }}
+                        </div>
                         {% endif %}
                     </div>
 
@@ -290,10 +259,7 @@
                 <div class="row g-4">
 
                     <div class="col-md-6">
-                        <label
-                            for="{{ form.barcode.id_for_label }}"
-                            class="form-label fw-semibold"
-                        >
+                        <label for="{{ form.barcode.id_for_label }}" class="form-label fw-semibold">
                             Barcode
                         </label>
 
@@ -304,18 +270,15 @@
                         </div>
 
                         {% if form.barcode.errors %}
-                            <div class="text-danger small mt-1">
-                                {{ form.barcode.errors|striptags }}
-                            </div>
+                        <div class="text-danger small mt-1">
+                            {{ form.barcode.errors|striptags }}
+                        </div>
                         {% endif %}
                     </div>
 
 
                     <div class="col-md-6">
-                        <label
-                            for="{{ form.sku.id_for_label }}"
-                            class="form-label fw-semibold"
-                        >
+                        <label for="{{ form.sku.id_for_label }}" class="form-label fw-semibold">
                             SKU
                         </label>
 
@@ -326,9 +289,9 @@
                         </div>
 
                         {% if form.sku.errors %}
-                            <div class="text-danger small mt-1">
-                                {{ form.sku.errors|striptags }}
-                            </div>
+                        <div class="text-danger small mt-1">
+                            {{ form.sku.errors|striptags }}
+                        </div>
                         {% endif %}
                     </div>
 
@@ -360,10 +323,7 @@
 
                     <!-- Purchase Price -->
                     <div class="col-md-4">
-                        <label
-                            for="{{ form.purchase_price.id_for_label }}"
-                            class="form-label fw-semibold"
-                        >
+                        <label for="{{ form.purchase_price.id_for_label }}" class="form-label fw-semibold">
                             Default Purchase Price
                         </label>
 
@@ -373,19 +333,16 @@
                         </div>
 
                         {% if form.purchase_price.errors %}
-                            <div class="text-danger small mt-1">
-                                {{ form.purchase_price.errors|striptags }}
-                            </div>
+                        <div class="text-danger small mt-1">
+                            {{ form.purchase_price.errors|striptags }}
+                        </div>
                         {% endif %}
                     </div>
 
 
                     <!-- Selling Price -->
                     <div class="col-md-4">
-                        <label
-                            for="{{ form.selling_price.id_for_label }}"
-                            class="form-label fw-semibold"
-                        >
+                        <label for="{{ form.selling_price.id_for_label }}" class="form-label fw-semibold">
                             Default Selling Price
                         </label>
 
@@ -395,19 +352,16 @@
                         </div>
 
                         {% if form.selling_price.errors %}
-                            <div class="text-danger small mt-1">
-                                {{ form.selling_price.errors|striptags }}
-                            </div>
+                        <div class="text-danger small mt-1">
+                            {{ form.selling_price.errors|striptags }}
+                        </div>
                         {% endif %}
                     </div>
 
 
                     <!-- Tax -->
                     <div class="col-md-4">
-                        <label
-                            for="{{ form.tax_rate.id_for_label }}"
-                            class="form-label fw-semibold"
-                        >
+                        <label for="{{ form.tax_rate.id_for_label }}" class="form-label fw-semibold">
                             Tax Rate
                         </label>
 
@@ -417,19 +371,45 @@
                         </div>
 
                         {% if form.tax_rate.errors %}
-                            <div class="text-danger small mt-1">
-                                {{ form.tax_rate.errors|striptags }}
-                            </div>
+                        <div class="text-danger small mt-1">
+                            {{ form.tax_rate.errors|striptags }}
+                        </div>
                         {% endif %}
+                    </div>
+
+                    <!-- Pharmacy Default Tax -->
+                    <div class="col-12">
+                        <div class="border rounded-3 p-3">
+                            <div class="form-check">
+                                {{ form.use_pharmacy_default_tax }}
+
+                                <label class="form-check-label fw-semibold"
+                                    for="{{ form.use_pharmacy_default_tax.id_for_label }}">
+                                    Use Pharmacy Default Tax
+                                </label>
+                            </div>
+
+                            <div class="form-text ms-4">
+                                When enabled, this medicine will use the
+                                default tax percentage configured in
+                                Pharmacy Settings.
+
+                                When disabled, the medicine's own
+                                Tax Rate (%) will be used.
+                            </div>
+
+                            {% if form.use_pharmacy_default_tax.errors %}
+                            <div class="text-danger small mt-2">
+                                {{ form.use_pharmacy_default_tax.errors|striptags }}
+                            </div>
+                            {% endif %}
+                        </div>
                     </div>
 
 
                     <!-- Minimum Stock -->
                     <div class="col-md-6">
-                        <label
-                            for="{{ form.minimum_stock_level.id_for_label }}"
-                            class="form-label fw-semibold"
-                        >
+                        <label for="{{ form.minimum_stock_level.id_for_label }}" class="form-label fw-semibold">
                             Minimum Stock Level
                         </label>
 
@@ -440,19 +420,16 @@
                         </div>
 
                         {% if form.minimum_stock_level.errors %}
-                            <div class="text-danger small mt-1">
-                                {{ form.minimum_stock_level.errors|striptags }}
-                            </div>
+                        <div class="text-danger small mt-1">
+                            {{ form.minimum_stock_level.errors|striptags }}
+                        </div>
                         {% endif %}
                     </div>
 
 
                     <!-- Reorder -->
                     <div class="col-md-6">
-                        <label
-                            for="{{ form.reorder_level.id_for_label }}"
-                            class="form-label fw-semibold"
-                        >
+                        <label for="{{ form.reorder_level.id_for_label }}" class="form-label fw-semibold">
                             Reorder Level
                         </label>
 
@@ -463,9 +440,9 @@
                         </div>
 
                         {% if form.reorder_level.errors %}
-                            <div class="text-danger small mt-1">
-                                {{ form.reorder_level.errors|striptags }}
-                            </div>
+                        <div class="text-danger small mt-1">
+                            {{ form.reorder_level.errors|striptags }}
+                        </div>
                         {% endif %}
                     </div>
 
@@ -500,10 +477,8 @@
                             <div class="form-check">
                                 {{ form.prescription_required }}
 
-                                <label
-                                    class="form-check-label fw-semibold"
-                                    for="{{ form.prescription_required.id_for_label }}"
-                                >
+                                <label class="form-check-label fw-semibold"
+                                    for="{{ form.prescription_required.id_for_label }}">
                                     Prescription Required
                                 </label>
                             </div>
@@ -520,10 +495,8 @@
                             <div class="form-check">
                                 {{ form.controlled_medicine }}
 
-                                <label
-                                    class="form-check-label fw-semibold"
-                                    for="{{ form.controlled_medicine.id_for_label }}"
-                                >
+                                <label class="form-check-label fw-semibold"
+                                    for="{{ form.controlled_medicine.id_for_label }}">
                                     Controlled Medicine
                                 </label>
                             </div>
@@ -536,19 +509,16 @@
 
 
                     <div class="col-12">
-                        <label
-                            for="{{ form.storage_condition.id_for_label }}"
-                            class="form-label fw-semibold"
-                        >
+                        <label for="{{ form.storage_condition.id_for_label }}" class="form-label fw-semibold">
                             Storage Condition
                         </label>
 
                         {{ form.storage_condition }}
 
                         {% if form.storage_condition.errors %}
-                            <div class="text-danger small mt-1">
-                                {{ form.storage_condition.errors|striptags }}
-                            </div>
+                        <div class="text-danger small mt-1">
+                            {{ form.storage_condition.errors|striptags }}
+                        </div>
                         {% endif %}
                     </div>
 
@@ -575,28 +545,22 @@
                 <div class="row g-4">
 
                     <div class="col-md-8">
-                        <label
-                            for="{{ form.description.id_for_label }}"
-                            class="form-label fw-semibold"
-                        >
+                        <label for="{{ form.description.id_for_label }}" class="form-label fw-semibold">
                             Description
                         </label>
 
                         {{ form.description }}
 
                         {% if form.description.errors %}
-                            <div class="text-danger small mt-1">
-                                {{ form.description.errors|striptags }}
-                            </div>
+                        <div class="text-danger small mt-1">
+                            {{ form.description.errors|striptags }}
+                        </div>
                         {% endif %}
                     </div>
 
 
                     <div class="col-md-4">
-                        <label
-                            for="{{ form.image.id_for_label }}"
-                            class="form-label fw-semibold"
-                        >
+                        <label for="{{ form.image.id_for_label }}" class="form-label fw-semibold">
                             Medicine Image
                         </label>
 
@@ -607,20 +571,16 @@
                         </div>
 
                         {% if form.image.errors %}
-                            <div class="text-danger small mt-1">
-                                {{ form.image.errors|striptags }}
-                            </div>
+                        <div class="text-danger small mt-1">
+                            {{ form.image.errors|striptags }}
+                        </div>
                         {% endif %}
 
                         {% if medicine.image %}
-                            <div class="mt-3">
-                                <img
-                                    src="{{ medicine.image.url }}"
-                                    alt="{{ medicine.name }}"
-                                    class="img-thumbnail"
-                                    style="max-height: 120px;"
-                                >
-                            </div>
+                        <div class="mt-3">
+                            <img src="{{ medicine.image.url }}" alt="{{ medicine.name }}" class="img-thumbnail"
+                                style="max-height: 120px;">
+                        </div>
                         {% endif %}
                     </div>
 
@@ -630,10 +590,7 @@
                             <div class="form-check">
                                 {{ form.is_active }}
 
-                                <label
-                                    class="form-check-label fw-semibold"
-                                    for="{{ form.is_active.id_for_label }}"
-                                >
+                                <label class="form-check-label fw-semibold" for="{{ form.is_active.id_for_label }}">
                                     Medicine is Active
                                 </label>
                             </div>
@@ -656,17 +613,11 @@
 
             <div class="d-flex justify-content-end gap-2">
 
-                <a
-                    href="{% url 'medicines:list' %}"
-                    class="btn btn-light border"
-                >
+                <a href="{% url 'medicines:list' %}" class="btn btn-light border">
                     Cancel
                 </a>
 
-                <button
-                    type="submit"
-                    class="btn btn-primary"
-                >
+                <button type="submit" class="btn btn-primary">
                     <i class="fa-solid fa-check me-2"></i>
                     {{ submit_text }}
                 </button>

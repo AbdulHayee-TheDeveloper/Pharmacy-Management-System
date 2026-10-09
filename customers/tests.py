@@ -1,6 +1,7 @@
 
 from decimal import Decimal
-
+from django.contrib.auth.models import Permission
+from accounts.models import Role
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
@@ -53,6 +54,35 @@ class CustomerManagementTests(TestCase):
         # Assign Branch A so sales queries are branch-scoped.
         cls.admin.branch = cls.branch_a
         cls.admin.save(update_fields=["branch"])
+        
+        # Branch-scoped user for permission and isolation tests.
+        cls.manager_role = Role.objects.create(
+            name="Test Branch Manager",
+            is_active=True,
+        )
+
+        required_permissions = [
+            ("customers", "view_customer"),
+            ("customers", "change_customer"),
+            ("sales", "view_sale"),
+            ("sales", "change_sale"),
+        ]
+
+        for app_label, codename in required_permissions:
+            permission = Permission.objects.get(
+                content_type__app_label=app_label,
+                codename=codename,
+            )
+            cls.manager_role.permissions.add(permission)
+
+        cls.manager = User.objects.create_user(
+            username="test_branch_manager",
+            password="TestPassword123!",
+            role=cls.manager_role,
+            branch=cls.branch_a,
+            is_active=True,
+        )
+
 
         # ----------------------------------------------------
         # CUSTOMERS
@@ -297,7 +327,7 @@ class CustomerManagementTests(TestCase):
     # ========================================================
 
     def test_customer_list_financial_statistics(self):
-
+        self.client.force_login(self.manager)
         response = self.client.get(
             reverse("customers:list")
         )
@@ -324,7 +354,7 @@ class CustomerManagementTests(TestCase):
     # ========================================================
 
     def test_customer_detail_financial_summary(self):
-
+        self.client.force_login(self.manager)
         response = self.client.get(
             reverse(
                 "customers:detail",
@@ -493,7 +523,7 @@ class CustomerManagementTests(TestCase):
     # ========================================================
 
     def test_cross_branch_linking_rejected(self):
-
+        self.client.force_login(self.manager)
         other_branch_sale = Sale.objects.create(
             branch=self.branch_b,
             cashier=self.admin,
@@ -570,4 +600,23 @@ class CustomerManagementTests(TestCase):
 
         self.assertFalse(
             self.customer.is_active
+        )
+    
+    def test_superuser_can_view_all_branch_sales(self):
+        self.client.force_login(self.admin)
+
+        response = self.client.get(
+            reverse("customers:detail", args=[self.customer.pk])
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        self.assertEqual(
+            response.context["total_purchases"],
+            2,
+        )
+
+        self.assertEqual(
+            response.context["total_spending"],
+            Decimal("1500.00"),
         )

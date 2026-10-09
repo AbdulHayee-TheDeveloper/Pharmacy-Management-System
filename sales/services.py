@@ -3,7 +3,10 @@ from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 from customers.models import Customer
 from django.db import transaction
 from django.utils import timezone
-
+from core_settings.tax import (
+    get_default_tax_rate,
+    get_effective_tax_rate,
+)
 from inventory.models import InventoryBatch
 
 from .models import Sale, SaleItem
@@ -277,7 +280,7 @@ def checkout_sale(
 
     subtotal = Decimal("0.00")
     tax_amount = Decimal("0.00")
-
+    default_tax_rate = get_default_tax_rate()
     sale_item_data = []
 
     today = timezone.localdate()
@@ -398,11 +401,10 @@ def checkout_sale(
             * sale_quantity
         )
 
-        tax_rate = Decimal(
-            str(
-                medicine.tax_rate or 0
-            )
-        )
+        tax_rate = get_effective_tax_rate(
+        medicine,
+        default_rate=default_tax_rate,
+    )
 
         line_tax = money(
             line_subtotal

@@ -198,9 +198,15 @@ def customer_list(request):
             None,
         )
 
-        if user_branch is not None:
+        if request.user.is_superuser:
+            pass
+        elif request.user.branch_id:
             sales_filter &= Q(
-                sales__branch=user_branch
+                sales__branch_id=request.user.branch_id
+            )
+        else:
+            sales_filter &= Q(
+                sales__pk__isnull=True
             )
 
         money_field = DecimalField(
@@ -354,7 +360,7 @@ def customer_detail(request, pk):
         "can_view_sales": can_view_sales,
     }
 
-    # Don't expose financial data without permission.
+    
     if not can_view_sales:
         return render(
             request,
@@ -511,10 +517,14 @@ def customer_detail(request, pk):
             )
         )
 
-        if user_branch is not None:
+        if request.user.is_superuser:
+            pass
+        elif request.user.branch_id:
             link_audits = link_audits.filter(
-                sale__branch=user_branch
+                sale__branch_id=request.user.branch_id
             )
+        else:
+            link_audits = link_audits.none()
 
         link_audits = link_audits.order_by(
             "-linked_at",
@@ -541,12 +551,21 @@ def customer_detail(request, pk):
         "link_audits": link_audits,
         "can_view_link_audits": can_view_link_audits,
     })
+    if request.user.is_superuser:
+        pass
+    elif request.user.branch_id:
+        payments = payments.filter(
+            sale__branch_id=request.user.branch_id
+        )
+    else:
+        payments = payments.none()
 
     return render(
         request,
         "customers/detail.html",
         context,
     )
+
 
 
 # ============================================================

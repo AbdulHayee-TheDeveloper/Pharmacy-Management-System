@@ -63,6 +63,7 @@ class MedicineForm(forms.ModelForm):
             "description",
             "image",
             "is_active",
+            "use_pharmacy_default_tax",
         ]
 
         widgets = {
@@ -207,6 +208,9 @@ class MedicineForm(forms.ModelForm):
                 attrs={
                     "class": "form-check-input",
                 }
+            ),
+            "use_pharmacy_default_tax": forms.CheckboxInput(
+                attrs={"class": "form-check-input"}
             ),
         }
 

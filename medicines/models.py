@@ -164,6 +164,13 @@ class Medicine(models.Model):
             MaxValueValidator(100),
         ],
     )
+    use_pharmacy_default_tax = models.BooleanField(
+    default=False,
+    help_text=(
+        "When enabled, use the current pharmacy default "
+        "tax rate for new sales instead of medicine tax_rate."
+    ),
+)
 
     minimum_stock_level = models.PositiveIntegerField(
         default=10,

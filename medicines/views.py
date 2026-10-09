@@ -69,32 +69,47 @@ def medicine_list(request):
     )
 
 
+
 @login_required
 @role_permission_required("medicines.view_medicine")
 def medicine_detail(request, pk):
     medicine = get_object_or_404(
-        Medicine.objects.select_related(
-            "category"
-        ),
+        Medicine.objects.select_related("category"),
         pk=pk,
     )
 
     today = timezone.localdate()
 
-    # Only stock that is currently usable for sales.
+    # Get only active, unexpired batches with available stock.
     available_batches = medicine.inventory_batches.filter(
         is_active=True,
         quantity__gt=0,
         expiry_date__gte=today,
+        branch__is_active=True,
     )
+
+    # Super Admin / Owner can see stock from all branches.
+    if not request.user.is_superuser:
+
+        # Normal employees must have an assigned branch.
+        if request.user.branch_id is None:
+            messages.error(
+                request,
+                "No branch is assigned to your account. "
+                "Please contact the administrator.",
+            )
+            return redirect("medicines:list")
+
+        # Employees can only see stock from their own branch.
+        available_batches = available_batches.filter(
+            branch_id=request.user.branch_id
+        )
 
     stock_summary = available_batches.aggregate(
-        total_quantity=Sum("quantity"),
+        total_quantity=Sum("quantity")
     )
 
-    total_quantity = (
-        stock_summary["total_quantity"] or 0
-    )
+    total_quantity = stock_summary["total_quantity"] or 0
 
     pack_size = medicine.pack_size or 1
 
@@ -112,8 +127,6 @@ def medicine_detail(request, pk):
 
     context = {
         "medicine": medicine,
-
-        # Live inventory data
         "total_quantity": total_quantity,
         "full_packs": full_packs,
         "loose_units": loose_units,
@@ -126,6 +139,7 @@ def medicine_detail(request, pk):
         "medicines/detail.html",
         context,
     )
+
 
 
 @login_required

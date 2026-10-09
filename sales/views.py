@@ -7,6 +7,10 @@ from .payment_services import (
     get_sale_outstanding,
     receive_sale_payment,
 )
+from core_settings.tax import (
+    get_default_tax_rate,
+    get_effective_tax_rate,
+)
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db.models import Q
@@ -38,34 +42,39 @@ def get_pos_branch(user):
     return getattr(user, "branch", None)
 
 
+
 def get_sales_queryset_for_user(user):
     """
-    Base queryset for Sale History / Sale Detail.
+    Branch-safe sales queryset.
 
-    If the user has a branch assigned, only that branch's sales
-    are visible.
+    Superuser:
+        Can view all branches.
 
-    A permitted user without a branch can view all branches.
-    This is useful for administrators / head-office users without
-    hardcoding any role name.
+    Normal users:
+        Can only view assigned branch sales.
+
+    Users without a branch:
+        Cannot view any sales.
     """
-    queryset = (
-        Sale.objects
-        .select_related(
-            "branch",
-            "cashier",
-        )
-        .all()
+
+    queryset = Sale.objects.select_related(
+        "branch",
+        "cashier",
     )
 
-    branch = getattr(user, "branch", None)
+    if not user.is_authenticated or not user.is_active:
+        return queryset.none()
 
-    if branch:
-        queryset = queryset.filter(
-            branch=branch,
-        )
+    if user.is_superuser:
+        return queryset
 
-    return queryset
+    if user.branch_id is None:
+        return queryset.none()
+
+    return queryset.filter(
+        branch_id=user.branch_id
+    )
+
 
 
 # ================================================================
@@ -111,10 +120,11 @@ def product_search(request):
         "q",
         "",
     ).strip()
-
+    default_tax_rate = get_default_tax_rate()
     if len(query) < 2:
         return JsonResponse(
             {
+                
                 "results": [],
             }
         )
@@ -254,10 +264,16 @@ def product_search(request):
                 ),
 
                 "tax_rate": str(
-                    medicine.tax_rate
+                get_effective_tax_rate(
+                medicine,
+                default_rate=default_tax_rate,
+                    )
                 ),
-            }
-        )
+                "uses_pharmacy_default_tax": (
+                    medicine.use_pharmacy_default_tax
+                ),
+                    }
+                )
 
     return JsonResponse(
         {

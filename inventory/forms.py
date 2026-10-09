@@ -154,6 +154,40 @@ class InventoryEntryForm(forms.Form):
         ),
     )
 
+    tax_rate = forms.DecimalField(
+        required=False,
+        initial=0,
+        min_value=0,
+        max_value=100,
+        max_digits=5,
+        decimal_places=2,
+        label="Medicine Tax Rate (%)",
+        widget=forms.NumberInput(
+            attrs={
+                "class": "form-control",
+                "min": "0",
+                "max": "100",
+                "step": "0.01",
+                "placeholder": "0.00",
+            }
+        ),
+    )
+
+    use_pharmacy_default_tax = forms.BooleanField(
+        required=False,
+        initial=False,
+        label="Use Pharmacy Default Tax",
+        widget=forms.CheckboxInput(
+            attrs={
+                "class": "form-check-input",
+            }
+        ),
+        help_text=(
+            "Use the default tax percentage "
+            "configured in Pharmacy Settings."
+        ),
+    )
+
     barcode = forms.CharField(
         max_length=100,
         required=False,
@@ -347,7 +381,9 @@ class InventoryEntryForm(forms.Form):
 
         entry_type = cleaned_data.get("entry_type")
         medicine = cleaned_data.get("medicine")
-
+        if entry_type == "existing":
+            cleaned_data["tax_rate"] = None
+            cleaned_data["use_pharmacy_default_tax"] = False
         if entry_type == "new":
             required_fields = {
                 "name": "Brand Name",

@@ -173,734 +173,551 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // ============================================================
-// INVENTORY FORM — SEARCH FIRST WORKFLOW
-// ============================================================
+    // INVENTORY FORM — SEARCH FIRST WORKFLOW
+    // ============================================================
 
-const inventoryEntryTypeInput =
-    document.getElementById("id_entry_type");
+    const inventoryEntryTypeInput =
+        document.getElementById("id_entry_type");
 
-const newMedicineSection =
-    document.getElementById("newMedicineSection");
+    const newMedicineSection =
+        document.getElementById("newMedicineSection");
 
-const medicineSearchInput =
-    document.getElementById("medicineSearchInput");
+    const medicineSearchInput =
+        document.getElementById("medicineSearchInput");
 
-const medicineSearchResults =
-    document.getElementById("medicineSearchResults");
+    const medicineSearchResults =
+        document.getElementById("medicineSearchResults");
 
-const medicineIdInput =
-    document.getElementById("id_medicine");
+    const medicineIdInput =
+        document.getElementById("id_medicine");
 
-const selectedMedicine =
-    document.getElementById("selectedMedicine");
+    const selectedMedicine =
+        document.getElementById("selectedMedicine");
 
-const selectedMedicineName =
-    document.getElementById("selectedMedicineName");
+    const selectedMedicineName =
+        document.getElementById("selectedMedicineName");
 
-const selectedMedicineMeta =
-    document.getElementById("selectedMedicineMeta");
+    const selectedMedicineMeta =
+        document.getElementById("selectedMedicineMeta");
 
-const selectedMedicineIdentifiers =
-    document.getElementById(
-        "selectedMedicineIdentifiers"
-    );
+    const selectedMedicineIdentifiers =
+        document.getElementById(
+            "selectedMedicineIdentifiers"
+        );
 
-const selectedMedicinePackInfo =
-    document.getElementById(
-        "selectedMedicinePackInfo"
-    );
+    const selectedMedicinePackInfo =
+        document.getElementById(
+            "selectedMedicinePackInfo"
+        );
 
-const removeSelectedMedicine =
-    document.getElementById(
-        "removeSelectedMedicine"
-    );
+    const removeSelectedMedicine =
+        document.getElementById(
+            "removeSelectedMedicine"
+        );
 
-const clearMedicineSearch =
-    document.getElementById(
-        "clearMedicineSearch"
-    );
+    const clearMedicineSearch =
+        document.getElementById(
+            "clearMedicineSearch"
+        );
 
-const medicineNotFound =
-    document.getElementById(
-        "medicineNotFound"
-    );
+    const medicineNotFound =
+        document.getElementById(
+            "medicineNotFound"
+        );
 
-const createNewMedicineButton =
-    document.getElementById(
-        "createNewMedicineButton"
-    );
+    const createNewMedicineButton =
+        document.getElementById(
+            "createNewMedicineButton"
+        );
 
-const cancelNewMedicineButton =
-    document.getElementById(
-        "cancelNewMedicineButton"
-    );
+    const cancelNewMedicineButton =
+        document.getElementById(
+            "cancelNewMedicineButton"
+        );
 
-const inventoryPackSizeInput =
-    document.getElementById(
-        "id_pack_size"
-    );
+    const inventoryPackSizeInput =
+        document.getElementById(
+            "id_pack_size"
+        );
 
-const inventoryUnitInput =
-    document.getElementById(
-        "id_unit"
-    );
+    const inventoryUnitInput =
+        document.getElementById(
+            "id_unit"
+        );
 
-const inventoryLooseSaleInput =
-    document.getElementById(
-        "id_allow_loose_sale"
-    );
+    const inventoryLooseSaleInput =
+        document.getElementById(
+            "id_allow_loose_sale"
+        );
 
-const inventoryQuantityInput =
-    document.getElementById(
-        "id_quantity"
-    );
+    const inventoryQuantityInput =
+        document.getElementById(
+            "id_quantity"
+        );
 
-const inventorySellingPriceInput =
-    document.getElementById(
-        "id_selling_price"
-    );
+    const inventorySellingPriceInput =
+        document.getElementById(
+            "id_selling_price"
+        );
 
-const stockConversionPreview =
-    document.getElementById(
-        "stockConversionPreview"
-    );
+    const stockConversionPreview =
+        document.getElementById(
+            "stockConversionPreview"
+        );
 
-const loosePricePreview =
-    document.getElementById(
-        "loosePricePreview"
-    );
+    const loosePricePreview =
+        document.getElementById(
+            "loosePricePreview"
+        );
 
-let selectedInventoryMedicine = null;
-
-
-// ============================================================
-// INVENTORY HELPERS
-// ============================================================
-
-const setInventoryMode = (mode) => {
-
-    if (inventoryEntryTypeInput) {
-        inventoryEntryTypeInput.value =
-            mode || "";
-    }
-
-};
+    let selectedInventoryMedicine = null;
 
 
-const hideNewMedicineSection = () => {
+    // ============================================================
+    // INVENTORY HELPERS
+    // ============================================================
 
-    if (newMedicineSection) {
-        newMedicineSection.style.display =
-            "none";
-    }
+    const setInventoryMode = (mode) => {
 
-};
-
-
-const showNewMedicineSection = () => {
-
-    setInventoryMode("new");
-
-    if (medicineIdInput) {
-        medicineIdInput.value = "";
-    }
-
-    selectedInventoryMedicine = null;
-
-    if (selectedMedicine) {
-        selectedMedicine.style.display =
-            "none";
-    }
-
-    if (medicineNotFound) {
-        medicineNotFound.style.display =
-            "none";
-    }
-
-    if (medicineSearchResults) {
-        medicineSearchResults.style.display =
-            "none";
-    }
-
-    if (newMedicineSection) {
-        newMedicineSection.style.display =
-            "block";
-
-        newMedicineSection.scrollIntoView({
-            behavior: "smooth",
-            block: "start",
-        });
-    }
-
-    updateInventoryPreview();
-
-};
-
-
-const getInventoryPackInfo = () => {
-
-    if (selectedInventoryMedicine) {
-
-        return {
-            packSize: Math.max(
-                Number(
-                    selectedInventoryMedicine
-                        .pack_size || 1
-                ),
-                1
-            ),
-
-            unitLabel:
-                selectedInventoryMedicine
-                    .unit_label ||
-                "Unit",
-
-            allowLooseSale:
-                Boolean(
-                    selectedInventoryMedicine
-                        .allow_loose_sale
-                ),
-        };
-
-    }
-
-
-    const packSize = Math.max(
-        Number(
-            inventoryPackSizeInput?.value ||
-            1
-        ),
-        1
-    );
-
-
-    let unitLabel = "Unit";
-
-    if (inventoryUnitInput) {
-
-        const selectedOption =
-            inventoryUnitInput.options[
-                inventoryUnitInput.selectedIndex
-            ];
-
-        if (selectedOption?.text) {
-            unitLabel =
-                selectedOption.text;
+        if (inventoryEntryTypeInput) {
+            inventoryEntryTypeInput.value =
+                mode || "";
         }
-
-    }
-
-
-    return {
-        packSize,
-
-        unitLabel,
-
-        allowLooseSale:
-            Boolean(
-                inventoryLooseSaleInput
-                    ?.checked
-            ),
-    };
-
-};
-
-
-function updateInventoryPreview() {
-
-    const {
-        packSize,
-        unitLabel,
-        allowLooseSale,
-    } = getInventoryPackInfo();
-
-
-    const packsReceived = Math.max(
-        Number(
-            inventoryQuantityInput
-                ?.value || 0
-        ),
-        0
-    );
-
-
-    const sellingPrice = Math.max(
-        Number(
-            inventorySellingPriceInput
-                ?.value || 0
-        ),
-        0
-    );
-
-
-    if (stockConversionPreview) {
-
-        if (
-            packsReceived > 0 &&
-            packSize > 0
-        ) {
-
-            const totalUnits =
-                packsReceived *
-                packSize;
-
-            const normalizedUnit =
-                String(unitLabel)
-                    .toLowerCase();
-
-            stockConversionPreview.textContent =
-                `${packsReceived} pack` +
-                `${packsReceived !== 1 ? "s" : ""}` +
-                ` × ${packSize} ${normalizedUnit}` +
-                `${packSize !== 1 ? "s" : ""}` +
-                ` = ${totalUnits} ${normalizedUnit}` +
-                `${totalUnits !== 1 ? "s" : ""}` +
-                ` in stock`;
-
-            stockConversionPreview.style.display =
-                "block";
-
-        } else {
-
-            stockConversionPreview.textContent =
-                "";
-
-            stockConversionPreview.style.display =
-                "none";
-
-        }
-
-    }
-
-
-    if (loosePricePreview) {
-
-        if (
-            allowLooseSale &&
-            packSize > 1 &&
-            sellingPrice > 0
-        ) {
-
-            const loosePrice =
-                sellingPrice /
-                packSize;
-
-            loosePricePreview.textContent =
-                `Approx. ${String(
-                    unitLabel
-                ).toLowerCase()} price: ` +
-                `Rs. ${formatMoney(
-                    loosePrice
-                )}`;
-
-            loosePricePreview.style.display =
-                "block";
-
-        } else {
-
-            loosePricePreview.textContent =
-                "";
-
-            loosePricePreview.style.display =
-                "none";
-
-        }
-
-    }
-
-}
-
-
-// ============================================================
-// INVENTORY LIVE PREVIEW EVENTS
-// ============================================================
-
-if (inventoryQuantityInput) {
-
-    inventoryQuantityInput.addEventListener(
-        "input",
-        updateInventoryPreview
-    );
-
-}
-
-if (inventoryPackSizeInput) {
-
-    inventoryPackSizeInput.addEventListener(
-        "input",
-        updateInventoryPreview
-    );
-
-}
-
-if (inventoryUnitInput) {
-
-    inventoryUnitInput.addEventListener(
-        "change",
-        updateInventoryPreview
-    );
-
-}
-
-if (inventoryLooseSaleInput) {
-
-    inventoryLooseSaleInput.addEventListener(
-        "change",
-        updateInventoryPreview
-    );
-
-}
-
-if (inventorySellingPriceInput) {
-
-    inventorySellingPriceInput.addEventListener(
-        "input",
-        updateInventoryPreview
-    );
-
-}
-
-
-// ============================================================
-// INVENTORY MEDICINE SEARCH
-// ============================================================
-
-if (
-    medicineSearchInput &&
-    medicineSearchResults &&
-    medicineIdInput
-) {
-
-    let inventorySearchTimer = null;
-    let inventorySearchController = null;
-
-
-    const hideSearchResults = () => {
-
-        medicineSearchResults.innerHTML =
-            "";
-
-        medicineSearchResults.style.display =
-            "none";
 
     };
 
 
-    const hideNotFound = () => {
+    const hideNewMedicineSection = () => {
+
+        if (newMedicineSection) {
+            newMedicineSection.style.display =
+                "none";
+        }
+
+    };
+
+
+    const showNewMedicineSection = () => {
+
+        setInventoryMode("new");
+
+        if (medicineIdInput) {
+            medicineIdInput.value = "";
+        }
+
+        selectedInventoryMedicine = null;
+
+        if (selectedMedicine) {
+            selectedMedicine.style.display =
+                "none";
+        }
 
         if (medicineNotFound) {
             medicineNotFound.style.display =
                 "none";
         }
 
-    };
-
-
-    const showSearchMessage = (
-        message
-    ) => {
-
-        medicineSearchResults.innerHTML =
-            "";
-
-        const messageElement =
-            document.createElement(
-                "div"
-            );
-
-        messageElement.className =
-            "p-3 text-muted small";
-
-        messageElement.textContent =
-            message;
-
-        medicineSearchResults.appendChild(
-            messageElement
-        );
-
-        medicineSearchResults.style.display =
-            "block";
-
-    };
-
-
-    const clearMedicineSelection = () => {
-
-        medicineIdInput.value = "";
-
-        selectedInventoryMedicine =
-            null;
-
-        setInventoryMode("");
-
-        if (selectedMedicine) {
-            selectedMedicine.style.display =
+        if (medicineSearchResults) {
+            medicineSearchResults.style.display =
                 "none";
         }
 
-        if (selectedMedicineName) {
-            selectedMedicineName.textContent =
-                "";
+        if (newMedicineSection) {
+            newMedicineSection.style.display =
+                "block";
+
+            newMedicineSection.scrollIntoView({
+                behavior: "smooth",
+                block: "start",
+            });
         }
-
-        if (selectedMedicineMeta) {
-            selectedMedicineMeta.textContent =
-                "";
-        }
-
-        if (
-            selectedMedicineIdentifiers
-        ) {
-            selectedMedicineIdentifiers.textContent =
-                "";
-        }
-
-        if (
-            selectedMedicinePackInfo
-        ) {
-            selectedMedicinePackInfo.textContent =
-                "";
-        }
-
-        medicineSearchInput.value = "";
-
-        medicineSearchInput.disabled =
-            false;
-
-        if (clearMedicineSearch) {
-            clearMedicineSearch.style.display =
-                "none";
-        }
-
-        hideSearchResults();
-        hideNotFound();
-        hideNewMedicineSection();
 
         updateInventoryPreview();
 
     };
 
 
-    const selectMedicine = (
-        medicine
-    ) => {
+    const getInventoryPackInfo = () => {
 
-        setInventoryMode(
-            "existing"
-        );
+        if (selectedInventoryMedicine) {
 
-        medicineIdInput.value =
-            medicine.id;
-
-        selectedInventoryMedicine =
-            medicine;
-
-        hideNewMedicineSection();
-        hideNotFound();
-
-
-        const medicineTitle =
-            `${medicine.name}` +
-            `${medicine.strength
-                ? ` ${medicine.strength}`
-                : ""
-            }`;
-
-
-        if (selectedMedicineName) {
-
-            selectedMedicineName.textContent =
-                medicineTitle;
-
-        }
-
-
-        if (selectedMedicineMeta) {
-
-            const meta = [];
-
-            if (medicine.generic_name) {
-                meta.push(
-                    medicine.generic_name
-                );
-            }
-
-            if (medicine.dosage_form) {
-                meta.push(
-                    medicine.dosage_form
-                );
-            }
-
-            if (medicine.category) {
-                meta.push(
-                    medicine.category
-                );
-            }
-
-            selectedMedicineMeta.textContent =
-                meta.join(" • ");
-
-        }
-
-
-        if (
-            selectedMedicineIdentifiers
-        ) {
-
-            const identifiers = [];
-
-            if (medicine.sku) {
-                identifiers.push(
-                    `SKU: ${medicine.sku}`
-                );
-            }
-
-            if (medicine.barcode) {
-                identifiers.push(
-                    `Barcode: ${medicine.barcode}`
-                );
-            }
-
-            selectedMedicineIdentifiers.textContent =
-                identifiers.join(" • ");
-
-        }
-
-
-        if (
-            selectedMedicinePackInfo
-        ) {
-
-            const packSize =
-                Math.max(
+            return {
+                packSize: Math.max(
                     Number(
-                        medicine.pack_size ||
-                        1
+                        selectedInventoryMedicine
+                            .pack_size || 1
                     ),
                     1
-                );
+                ),
 
-            const unitLabel =
-                medicine.unit_label ||
-                "Unit";
+                unitLabel:
+                    selectedInventoryMedicine
+                        .unit_label ||
+                    "Unit",
 
-            const looseSaleText =
-                medicine.allow_loose_sale
-                    ? "Loose sale allowed"
-                    : "Full-pack sale only";
-
-            selectedMedicinePackInfo.textContent =
-                `Pack: ${packSize} ` +
-                `${unitLabel}` +
-                `${packSize !== 1 ? "s" : ""}` +
-                ` • ${looseSaleText}`;
-
-            selectedMedicinePackInfo.className =
-                medicine.allow_loose_sale
-                    ? "small mt-2 text-success"
-                    : "small mt-2 text-muted";
+                allowLooseSale:
+                    Boolean(
+                        selectedInventoryMedicine
+                            .allow_loose_sale
+                    ),
+            };
 
         }
 
 
-        if (selectedMedicine) {
+        const packSize = Math.max(
+            Number(
+                inventoryPackSizeInput?.value ||
+                1
+            ),
+            1
+        );
 
-            selectedMedicine.style.display =
-                "block";
+
+        let unitLabel = "Unit";
+
+        if (inventoryUnitInput) {
+
+            const selectedOption =
+                inventoryUnitInput.options[
+                inventoryUnitInput.selectedIndex
+                ];
+
+            if (selectedOption?.text) {
+                unitLabel =
+                    selectedOption.text;
+            }
 
         }
 
 
-        medicineSearchInput.value =
-            medicineTitle;
+        return {
+            packSize,
 
-        medicineSearchInput.disabled =
-            true;
+            unitLabel,
 
-
-        if (clearMedicineSearch) {
-
-            clearMedicineSearch.style.display =
-                "block";
-
-        }
-
-
-        hideSearchResults();
-
-        updateInventoryPreview();
+            allowLooseSale:
+                Boolean(
+                    inventoryLooseSaleInput
+                        ?.checked
+                ),
+        };
 
     };
 
 
-    const renderMedicineResults = (
-        results
-    ) => {
+    function updateInventoryPreview() {
 
-        medicineSearchResults.innerHTML =
-            "";
+        const {
+            packSize,
+            unitLabel,
+            allowLooseSale,
+        } = getInventoryPackInfo();
 
-        hideNotFound();
+
+        const packsReceived = Math.max(
+            Number(
+                inventoryQuantityInput
+                    ?.value || 0
+            ),
+            0
+        );
 
 
-        if (!results.length) {
+        const sellingPrice = Math.max(
+            Number(
+                inventorySellingPriceInput
+                    ?.value || 0
+            ),
+            0
+        );
 
-            hideSearchResults();
+
+        if (stockConversionPreview) {
+
+            if (
+                packsReceived > 0 &&
+                packSize > 0
+            ) {
+
+                const totalUnits =
+                    packsReceived *
+                    packSize;
+
+                const normalizedUnit =
+                    String(unitLabel)
+                        .toLowerCase();
+
+                stockConversionPreview.textContent =
+                    `${packsReceived} pack` +
+                    `${packsReceived !== 1 ? "s" : ""}` +
+                    ` × ${packSize} ${normalizedUnit}` +
+                    `${packSize !== 1 ? "s" : ""}` +
+                    ` = ${totalUnits} ${normalizedUnit}` +
+                    `${totalUnits !== 1 ? "s" : ""}` +
+                    ` in stock`;
+
+                stockConversionPreview.style.display =
+                    "block";
+
+            } else {
+
+                stockConversionPreview.textContent =
+                    "";
+
+                stockConversionPreview.style.display =
+                    "none";
+
+            }
+
+        }
+
+
+        if (loosePricePreview) {
+
+            if (
+                allowLooseSale &&
+                packSize > 1 &&
+                sellingPrice > 0
+            ) {
+
+                const loosePrice =
+                    sellingPrice /
+                    packSize;
+
+                loosePricePreview.textContent =
+                    `Approx. ${String(
+                        unitLabel
+                    ).toLowerCase()} price: ` +
+                    `Rs. ${formatMoney(
+                        loosePrice
+                    )}`;
+
+                loosePricePreview.style.display =
+                    "block";
+
+            } else {
+
+                loosePricePreview.textContent =
+                    "";
+
+                loosePricePreview.style.display =
+                    "none";
+
+            }
+
+        }
+
+    }
+
+
+    // ============================================================
+    // INVENTORY LIVE PREVIEW EVENTS
+    // ============================================================
+
+    if (inventoryQuantityInput) {
+
+        inventoryQuantityInput.addEventListener(
+            "input",
+            updateInventoryPreview
+        );
+
+    }
+
+    if (inventoryPackSizeInput) {
+
+        inventoryPackSizeInput.addEventListener(
+            "input",
+            updateInventoryPreview
+        );
+
+    }
+
+    if (inventoryUnitInput) {
+
+        inventoryUnitInput.addEventListener(
+            "change",
+            updateInventoryPreview
+        );
+
+    }
+
+    if (inventoryLooseSaleInput) {
+
+        inventoryLooseSaleInput.addEventListener(
+            "change",
+            updateInventoryPreview
+        );
+
+    }
+
+    if (inventorySellingPriceInput) {
+
+        inventorySellingPriceInput.addEventListener(
+            "input",
+            updateInventoryPreview
+        );
+
+    }
+
+
+    // ============================================================
+    // INVENTORY MEDICINE SEARCH
+    // ============================================================
+
+    if (
+        medicineSearchInput &&
+        medicineSearchResults &&
+        medicineIdInput
+    ) {
+
+        let inventorySearchTimer = null;
+        let inventorySearchController = null;
+
+
+        const hideSearchResults = () => {
+
+            medicineSearchResults.innerHTML =
+                "";
+
+            medicineSearchResults.style.display =
+                "none";
+
+        };
+
+
+        const hideNotFound = () => {
 
             if (medicineNotFound) {
                 medicineNotFound.style.display =
-                    "block";
+                    "none";
             }
 
-            return;
-
-        }
+        };
 
 
-        results.forEach(
-            (medicine) => {
+        const showSearchMessage = (
+            message
+        ) => {
 
-                const button =
-                    document.createElement(
-                        "button"
-                    );
+            medicineSearchResults.innerHTML =
+                "";
 
-                button.type =
-                    "button";
+            const messageElement =
+                document.createElement(
+                    "div"
+                );
 
-                button.className =
-                    "w-100 border-0 bg-white text-start p-3";
+            messageElement.className =
+                "p-3 text-muted small";
 
-                button.style.borderBottom =
-                    "1px solid #e7eaee";
+            messageElement.textContent =
+                message;
 
+            medicineSearchResults.appendChild(
+                messageElement
+            );
 
-                const title =
-                    document.createElement(
-                        "div"
-                    );
+            medicineSearchResults.style.display =
+                "block";
 
-                title.className =
-                    "fw-semibold";
-
-                title.textContent =
-                    `${medicine.name}` +
-                    `${medicine.strength
-                        ? ` ${medicine.strength}`
-                        : ""
-                    }`;
+        };
 
 
-                const metaElement =
-                    document.createElement(
-                        "div"
-                    );
+        const clearMedicineSelection = () => {
 
-                metaElement.className =
-                    "small text-muted mt-1";
+            medicineIdInput.value = "";
+
+            selectedInventoryMedicine =
+                null;
+
+            setInventoryMode("");
+
+            if (selectedMedicine) {
+                selectedMedicine.style.display =
+                    "none";
+            }
+
+            if (selectedMedicineName) {
+                selectedMedicineName.textContent =
+                    "";
+            }
+
+            if (selectedMedicineMeta) {
+                selectedMedicineMeta.textContent =
+                    "";
+            }
+
+            if (
+                selectedMedicineIdentifiers
+            ) {
+                selectedMedicineIdentifiers.textContent =
+                    "";
+            }
+
+            if (
+                selectedMedicinePackInfo
+            ) {
+                selectedMedicinePackInfo.textContent =
+                    "";
+            }
+
+            medicineSearchInput.value = "";
+
+            medicineSearchInput.disabled =
+                false;
+
+            if (clearMedicineSearch) {
+                clearMedicineSearch.style.display =
+                    "none";
+            }
+
+            hideSearchResults();
+            hideNotFound();
+            hideNewMedicineSection();
+
+            updateInventoryPreview();
+
+        };
+
+
+        const selectMedicine = (
+            medicine
+        ) => {
+
+            setInventoryMode(
+                "existing"
+            );
+
+            medicineIdInput.value =
+                medicine.id;
+
+            selectedInventoryMedicine =
+                medicine;
+
+            hideNewMedicineSection();
+            hideNotFound();
+
+
+            const medicineTitle =
+                `${medicine.name}` +
+                `${medicine.strength
+                    ? ` ${medicine.strength}`
+                    : ""
+                }`;
+
+
+            if (selectedMedicineName) {
+
+                selectedMedicineName.textContent =
+                    medicineTitle;
+
+            }
+
+
+            if (selectedMedicineMeta) {
 
                 const meta = [];
-
 
                 if (medicine.generic_name) {
                     meta.push(
@@ -920,8 +737,41 @@ if (
                     );
                 }
 
+                selectedMedicineMeta.textContent =
+                    meta.join(" • ");
 
-                const resultPackSize =
+            }
+
+
+            if (
+                selectedMedicineIdentifiers
+            ) {
+
+                const identifiers = [];
+
+                if (medicine.sku) {
+                    identifiers.push(
+                        `SKU: ${medicine.sku}`
+                    );
+                }
+
+                if (medicine.barcode) {
+                    identifiers.push(
+                        `Barcode: ${medicine.barcode}`
+                    );
+                }
+
+                selectedMedicineIdentifiers.textContent =
+                    identifiers.join(" • ");
+
+            }
+
+
+            if (
+                selectedMedicinePackInfo
+            ) {
+
+                const packSize =
                     Math.max(
                         Number(
                             medicine.pack_size ||
@@ -930,316 +780,538 @@ if (
                         1
                     );
 
+                const unitLabel =
+                    medicine.unit_label ||
+                    "Unit";
 
-                if (medicine.unit_label) {
-
-                    meta.push(
-                        `${resultPackSize} ` +
-                        `${medicine.unit_label}` +
-                        `${resultPackSize !== 1
-                            ? "s"
-                            : ""
-                        }/pack`
-                    );
-
-                }
-
-
-                if (
+                const looseSaleText =
                     medicine.allow_loose_sale
-                ) {
+                        ? "Loose sale allowed"
+                        : "Full-pack sale only";
 
-                    meta.push(
-                        "Loose sale"
-                    );
+                selectedMedicinePackInfo.textContent =
+                    `Pack: ${packSize} ` +
+                    `${unitLabel}` +
+                    `${packSize !== 1 ? "s" : ""}` +
+                    ` • ${looseSaleText}`;
 
-                }
-
-
-                metaElement.textContent =
-                    meta.join(" • ");
-
-
-                button.appendChild(
-                    title
-                );
-
-                button.appendChild(
-                    metaElement
-                );
-
-
-                const identifiers = [];
-
-
-                if (medicine.sku) {
-
-                    identifiers.push(
-                        `SKU: ${medicine.sku}`
-                    );
-
-                }
-
-
-                if (medicine.barcode) {
-
-                    identifiers.push(
-                        `Barcode: ${medicine.barcode}`
-                    );
-
-                }
-
-
-                if (identifiers.length) {
-
-                    const identifierElement =
-                        document.createElement(
-                            "div"
-                        );
-
-                    identifierElement.className =
-                        "small text-muted mt-1";
-
-                    identifierElement.textContent =
-                        identifiers.join(" • ");
-
-                    button.appendChild(
-                        identifierElement
-                    );
-
-                }
-
-
-                button.addEventListener(
-                    "click",
-                    () => {
-
-                        selectMedicine(
-                            medicine
-                        );
-
-                    }
-                );
-
-
-                medicineSearchResults.appendChild(
-                    button
-                );
-
-            }
-        );
-
-
-        medicineSearchResults.style.display =
-            "block";
-
-    };
-
-
-    const searchMedicines =
-        async (query) => {
-
-            if (
-                inventorySearchController
-            ) {
-
-                inventorySearchController.abort();
+                selectedMedicinePackInfo.className =
+                    medicine.allow_loose_sale
+                        ? "small mt-2 text-success"
+                        : "small mt-2 text-muted";
 
             }
 
 
-            if (
-                !query ||
-                query.length < 2
-            ) {
+            if (selectedMedicine) {
+
+                selectedMedicine.style.display =
+                    "block";
+
+            }
+
+
+            medicineSearchInput.value =
+                medicineTitle;
+
+            medicineSearchInput.disabled =
+                true;
+
+
+            if (clearMedicineSearch) {
+
+                clearMedicineSearch.style.display =
+                    "block";
+
+            }
+
+
+            hideSearchResults();
+
+            updateInventoryPreview();
+
+        };
+
+
+        const renderMedicineResults = (
+            results
+        ) => {
+
+            medicineSearchResults.innerHTML =
+                "";
+
+            hideNotFound();
+
+
+            if (!results.length) {
 
                 hideSearchResults();
-                hideNotFound();
+
+                if (medicineNotFound) {
+                    medicineNotFound.style.display =
+                        "block";
+                }
 
                 return;
 
             }
 
 
-            inventorySearchController =
-                new AbortController();
+            results.forEach(
+                (medicine) => {
+
+                    const button =
+                        document.createElement(
+                            "button"
+                        );
+
+                    button.type =
+                        "button";
+
+                    button.className =
+                        "w-100 border-0 bg-white text-start p-3";
+
+                    button.style.borderBottom =
+                        "1px solid #e7eaee";
 
 
-            showSearchMessage(
-                "Searching medicines..."
-            );
+                    const title =
+                        document.createElement(
+                            "div"
+                        );
+
+                    title.className =
+                        "fw-semibold";
+
+                    title.textContent =
+                        `${medicine.name}` +
+                        `${medicine.strength
+                            ? ` ${medicine.strength}`
+                            : ""
+                        }`;
 
 
-            try {
+                    const metaElement =
+                        document.createElement(
+                            "div"
+                        );
 
-                const searchUrl =
-                    `/inventory/search-medicines/` +
-                    `?q=${encodeURIComponent(
-                        query
-                    )}`;
+                    metaElement.className =
+                        "small text-muted mt-1";
+
+                    const meta = [];
 
 
-                const response =
-                    await fetch(
-                        searchUrl,
-                        {
-                            method:
-                                "GET",
+                    if (medicine.generic_name) {
+                        meta.push(
+                            medicine.generic_name
+                        );
+                    }
 
-                            headers: {
-                                "X-Requested-With":
-                                    "XMLHttpRequest",
-                            },
+                    if (medicine.dosage_form) {
+                        meta.push(
+                            medicine.dosage_form
+                        );
+                    }
 
-                            credentials:
-                                "same-origin",
+                    if (medicine.category) {
+                        meta.push(
+                            medicine.category
+                        );
+                    }
 
-                            signal:
-                                inventorySearchController
-                                    .signal,
+
+                    const resultPackSize =
+                        Math.max(
+                            Number(
+                                medicine.pack_size ||
+                                1
+                            ),
+                            1
+                        );
+
+
+                    if (medicine.unit_label) {
+
+                        meta.push(
+                            `${resultPackSize} ` +
+                            `${medicine.unit_label}` +
+                            `${resultPackSize !== 1
+                                ? "s"
+                                : ""
+                            }/pack`
+                        );
+
+                    }
+
+
+                    if (
+                        medicine.allow_loose_sale
+                    ) {
+
+                        meta.push(
+                            "Loose sale"
+                        );
+
+                    }
+
+
+                    metaElement.textContent =
+                        meta.join(" • ");
+
+
+                    button.appendChild(
+                        title
+                    );
+
+                    button.appendChild(
+                        metaElement
+                    );
+
+
+                    const identifiers = [];
+
+
+                    if (medicine.sku) {
+
+                        identifiers.push(
+                            `SKU: ${medicine.sku}`
+                        );
+
+                    }
+
+
+                    if (medicine.barcode) {
+
+                        identifiers.push(
+                            `Barcode: ${medicine.barcode}`
+                        );
+
+                    }
+
+
+                    if (identifiers.length) {
+
+                        const identifierElement =
+                            document.createElement(
+                                "div"
+                            );
+
+                        identifierElement.className =
+                            "small text-muted mt-1";
+
+                        identifierElement.textContent =
+                            identifiers.join(" • ");
+
+                        button.appendChild(
+                            identifierElement
+                        );
+
+                    }
+
+
+                    button.addEventListener(
+                        "click",
+                        () => {
+
+                            selectMedicine(
+                                medicine
+                            );
+
                         }
                     );
 
 
-                if (!response.ok) {
-
-                    throw new Error(
-                        "Medicine search failed."
+                    medicineSearchResults.appendChild(
+                        button
                     );
 
                 }
+            );
 
 
-                const data =
-                    await response.json();
-
-
-                renderMedicineResults(
-                    data.results || []
-                );
-
-
-            } catch (error) {
-
-                if (
-                    error.name ===
-                    "AbortError"
-                ) {
-                    return;
-                }
-
-
-                showSearchMessage(
-                    "Unable to search medicines. Please try again."
-                );
-
-            }
+            medicineSearchResults.style.display =
+                "block";
 
         };
 
 
-    medicineSearchInput.addEventListener(
-        "input",
-        () => {
+        const searchMedicines =
+            async (query) => {
 
-            const query =
-                medicineSearchInput
-                    .value
-                    .trim();
+                if (
+                    inventorySearchController
+                ) {
 
+                    inventorySearchController.abort();
 
-            clearTimeout(
-                inventorySearchTimer
-            );
+                }
 
 
-            setInventoryMode("");
+                if (
+                    !query ||
+                    query.length < 2
+                ) {
 
-            medicineIdInput.value =
-                "";
+                    hideSearchResults();
+                    hideNotFound();
 
-            selectedInventoryMedicine =
-                null;
+                    return;
 
-            hideNewMedicineSection();
-
-
-            if (medicineNotFound) {
-                medicineNotFound.style.display =
-                    "none";
-            }
+                }
 
 
-            if (clearMedicineSearch) {
-
-                clearMedicineSearch.style.display =
-                    query
-                        ? "block"
-                        : "none";
-
-            }
+                inventorySearchController =
+                    new AbortController();
 
 
-            inventorySearchTimer =
-                setTimeout(
-                    () => {
-
-                        searchMedicines(
-                            query
-                        );
-
-                    },
-                    200
+                showSearchMessage(
+                    "Searching medicines..."
                 );
 
-        }
-    );
+
+                try {
+
+                    const searchUrl =
+                        `/inventory/search-medicines/` +
+                        `?q=${encodeURIComponent(
+                            query
+                        )}`;
 
 
-    if (
-        createNewMedicineButton
-    ) {
+                    const response =
+                        await fetch(
+                            searchUrl,
+                            {
+                                method:
+                                    "GET",
 
-        createNewMedicineButton.addEventListener(
-            "click",
+                                headers: {
+                                    "X-Requested-With":
+                                        "XMLHttpRequest",
+                                },
+
+                                credentials:
+                                    "same-origin",
+
+                                signal:
+                                    inventorySearchController
+                                        .signal,
+                            }
+                        );
+
+
+                    if (!response.ok) {
+
+                        throw new Error(
+                            "Medicine search failed."
+                        );
+
+                    }
+
+
+                    const data =
+                        await response.json();
+
+
+                    renderMedicineResults(
+                        data.results || []
+                    );
+
+
+                } catch (error) {
+
+                    if (
+                        error.name ===
+                        "AbortError"
+                    ) {
+                        return;
+                    }
+
+
+                    showSearchMessage(
+                        "Unable to search medicines. Please try again."
+                    );
+
+                }
+
+            };
+
+
+        medicineSearchInput.addEventListener(
+            "input",
             () => {
 
-                showNewMedicineSection();
+                const query =
+                    medicineSearchInput
+                        .value
+                        .trim();
+
+
+                clearTimeout(
+                    inventorySearchTimer
+                );
+
+
+                setInventoryMode("");
+
+                medicineIdInput.value =
+                    "";
+
+                selectedInventoryMedicine =
+                    null;
+
+                hideNewMedicineSection();
+
+
+                if (medicineNotFound) {
+                    medicineNotFound.style.display =
+                        "none";
+                }
+
+
+                if (clearMedicineSearch) {
+
+                    clearMedicineSearch.style.display =
+                        query
+                            ? "block"
+                            : "none";
+
+                }
+
+
+                inventorySearchTimer =
+                    setTimeout(
+                        () => {
+
+                            searchMedicines(
+                                query
+                            );
+
+                        },
+                        200
+                    );
 
             }
         );
 
-    }
+
+        if (
+            createNewMedicineButton
+        ) {
+
+            createNewMedicineButton.addEventListener(
+                "click",
+                () => {
+
+                    showNewMedicineSection();
+
+                }
+            );
+
+        }
 
 
-    if (
-        cancelNewMedicineButton
-    ) {
+        if (
+            cancelNewMedicineButton
+        ) {
 
-        cancelNewMedicineButton.addEventListener(
+            cancelNewMedicineButton.addEventListener(
+                "click",
+                () => {
+
+                    setInventoryMode("");
+
+                    hideNewMedicineSection();
+
+                    medicineSearchInput.disabled =
+                        false;
+
+                    medicineSearchInput.focus();
+
+                    if (
+                        medicineSearchInput.value
+                            .trim()
+                            .length >= 2
+                    ) {
+
+                        searchMedicines(
+                            medicineSearchInput
+                                .value
+                                .trim()
+                        );
+
+                    }
+
+                }
+            );
+
+        }
+
+
+        if (
+            removeSelectedMedicine
+        ) {
+
+            removeSelectedMedicine.addEventListener(
+                "click",
+                () => {
+
+                    clearMedicineSelection();
+
+                    medicineSearchInput.focus();
+
+                }
+            );
+
+        }
+
+
+        if (
+            clearMedicineSearch
+        ) {
+
+            clearMedicineSearch.addEventListener(
+                "click",
+                () => {
+
+                    clearMedicineSelection();
+
+                    medicineSearchInput.focus();
+
+                }
+            );
+
+        }
+
+
+        document.addEventListener(
             "click",
-            () => {
+            (event) => {
 
-                setInventoryMode("");
+                const clickedResults =
+                    medicineSearchResults.contains(
+                        event.target
+                    );
 
-                hideNewMedicineSection();
+                const clickedSearch =
+                    medicineSearchInput.contains(
+                        event.target
+                    );
 
-                medicineSearchInput.disabled =
-                    false;
-
-                medicineSearchInput.focus();
+                const clickedClear =
+                    clearMedicineSearch &&
+                    clearMedicineSearch.contains(
+                        event.target
+                    );
 
                 if (
-                    medicineSearchInput.value
-                        .trim()
-                        .length >= 2
+                    !clickedResults &&
+                    !clickedSearch &&
+                    !clickedClear
                 ) {
 
-                    searchMedicines(
-                        medicineSearchInput
-                            .value
-                            .trim()
-                    );
+                    hideSearchResults();
 
                 }
 
@@ -1249,98 +1321,26 @@ if (
     }
 
 
-    if (
-        removeSelectedMedicine
-    ) {
-
-        removeSelectedMedicine.addEventListener(
-            "click",
-            () => {
-
-                clearMedicineSelection();
-
-                medicineSearchInput.focus();
-
-            }
-        );
-
-    }
-
+    // ============================================================
+    // RESTORE INVENTORY FORM AFTER SERVER VALIDATION ERROR
+    // ============================================================
 
     if (
-        clearMedicineSearch
+        inventoryEntryTypeInput?.value ===
+        "new"
     ) {
 
-        clearMedicineSearch.addEventListener(
-            "click",
-            () => {
+        if (newMedicineSection) {
 
-                clearMedicineSelection();
-
-                medicineSearchInput.focus();
-
-            }
-        );
-
-    }
-
-
-    document.addEventListener(
-        "click",
-        (event) => {
-
-            const clickedResults =
-                medicineSearchResults.contains(
-                    event.target
-                );
-
-            const clickedSearch =
-                medicineSearchInput.contains(
-                    event.target
-                );
-
-            const clickedClear =
-                clearMedicineSearch &&
-                clearMedicineSearch.contains(
-                    event.target
-                );
-
-            if (
-                !clickedResults &&
-                !clickedSearch &&
-                !clickedClear
-            ) {
-
-                hideSearchResults();
-
-            }
+            newMedicineSection.style.display =
+                "block";
 
         }
-    );
-
-}
-
-
-// ============================================================
-// RESTORE INVENTORY FORM AFTER SERVER VALIDATION ERROR
-// ============================================================
-
-if (
-    inventoryEntryTypeInput?.value ===
-    "new"
-) {
-
-    if (newMedicineSection) {
-
-        newMedicineSection.style.display =
-            "block";
 
     }
 
-}
 
-
-updateInventoryPreview();
+    updateInventoryPreview();
 
     // ============================================================
     // SALES / POS
@@ -1793,63 +1793,51 @@ updateInventoryPreview();
     // POS TOTALS
     // ============================================================
 
+
     const calculateCartTotals = () => {
-        let subtotal = 0;
-        let tax = 0;
+        let subtotalCents = 0;
+        let taxCents = 0;
 
         cart.forEach((item) => {
-            const price =
-                getItemPrice(
-                    item
-                );
+            const price = getItemPrice(item);
 
-            const lineSubtotal =
-                price *
-                item.cart_quantity;
+            const lineSubtotal = toMoney(
+                price * item.cart_quantity
+            );
 
-            const lineTax =
-                lineSubtotal *
-                item.tax_rate /
-                100;
+            const rate = Number(item.tax_rate || 0);
 
-            subtotal +=
-                lineSubtotal;
+            // Match backend ROUND_HALF_UP for
+            // non-negative monetary amounts.
+            const lineTax = toMoney(
+                lineSubtotal * rate / 100
+            );
 
-            tax +=
-                lineTax;
+            subtotalCents += Math.round(
+                lineSubtotal * 100
+            );
+
+            taxCents += Math.round(
+                lineTax * 100
+            );
         });
 
-        subtotal =
-            toMoney(
-                subtotal
-            );
+        const subtotal = subtotalCents / 100;
+        const tax = taxCents / 100;
 
-        tax =
-            toMoney(
-                tax
-            );
+        const discount = toMoney(
+            Math.max(
+                Number(posDiscount?.value || 0),
+                0
+            )
+        );
 
-        const discount =
-            toMoney(
-                Math.max(
-                    Number(
-                        posDiscount
-                            ?.value ||
-                        0
-                    ),
-                    0
-                )
-            );
-
-        const total =
-            toMoney(
-                Math.max(
-                    subtotal +
-                    tax -
-                    discount,
-                    0
-                )
-            );
+        const total = toMoney(
+            Math.max(
+                subtotal + tax - discount,
+                0
+            )
+        );
 
         return {
             subtotal,
@@ -1858,6 +1846,7 @@ updateInventoryPreview();
             total,
         };
     };
+
 
     const renderPosTotals = () => {
         const totals =
@@ -2055,20 +2044,19 @@ updateInventoryPreview();
 
             const looseOption =
                 item.allow_loose_sale &&
-                item.pack_size > 1
+                    item.pack_size > 1
                     ? `
                         <option
                             value="unit"
-                            ${
-                                item.sale_type ===
-                                "unit"
-                                    ? "selected"
-                                    : ""
-                            }
+                            ${item.sale_type ===
+                        "unit"
+                        ? "selected"
+                        : ""
+                    }
                         >
                             ${escapeHtml(
-                                item.unit_label
-                            )}
+                        item.unit_label
+                    )}
                         </option>
                     `
                     : "";
@@ -2081,33 +2069,32 @@ updateInventoryPreview();
                         <div class="fw-semibold">
                             ${escapeHtml(item.name)}
 
-                            ${
-                                item.strength
-                                    ? `
+                            ${item.strength
+                    ? `
                                         <span class="text-muted">
                                             ${escapeHtml(
-                                                item.strength
-                                            )}
+                        item.strength
+                    )}
                                         </span>
                                     `
-                                    : ""
-                            }
+                    : ""
+                }
                         </div>
 
                         <div class="small text-muted mt-1">
                             Batch:
                             ${escapeHtml(
-                                item.batch_number
-                            )}
+                    item.batch_number
+                )}
                         </div>
 
                         <div class="small text-muted">
                             Stock:
                             ${escapeHtml(
-                                getStockDisplay(
-                                    item
-                                )
-                            )}
+                    getStockDisplay(
+                        item
+                    )
+                )}
                         </div>
 
                     </div>
@@ -2123,8 +2110,8 @@ updateInventoryPreview();
                             pos-remove-item
                         "
                         data-key="${escapeHtml(
-                            item.key
-                        )}"
+                    item.key
+                )}"
                         aria-label="Remove item"
                     >
                         <i class="fa-solid fa-xmark"></i>
@@ -2147,17 +2134,16 @@ updateInventoryPreview();
                                 pos-sale-type
                             "
                             data-key="${escapeHtml(
-                                item.key
-                            )}"
+                    item.key
+                )}"
                         >
                             <option
                                 value="pack"
-                                ${
-                                    item.sale_type ===
-                                    "pack"
-                                        ? "selected"
-                                        : ""
-                                }
+                                ${item.sale_type ===
+                    "pack"
+                    ? "selected"
+                    : ""
+                }
                             >
                                 Pack
                             </option>
@@ -2181,11 +2167,11 @@ updateInventoryPreview();
                             "
                         >
                             Rs. ${formatMoney(
-                                unitPrice
-                            )}
+                    unitPrice
+                )}
                             / ${escapeHtml(
-                                saleLabel
-                            )}
+                    saleLabel
+                )}
                         </div>
 
                     </div>
@@ -2210,8 +2196,8 @@ updateInventoryPreview();
                             pos-quantity-minus
                         "
                         data-key="${escapeHtml(
-                            item.key
-                        )}"
+                    item.key
+                )}"
                     >
                         <i class="fa-solid fa-minus"></i>
                     </button>
@@ -2225,8 +2211,8 @@ updateInventoryPreview();
                             pos-quantity-input
                         "
                         data-key="${escapeHtml(
-                            item.key
-                        )}"
+                    item.key
+                )}"
                         min="1"
                         max="${maximumQuantity}"
                         value="${item.cart_quantity}"
@@ -2242,8 +2228,8 @@ updateInventoryPreview();
                             pos-quantity-plus
                         "
                         data-key="${escapeHtml(
-                            item.key
-                        )}"
+                    item.key
+                )}"
                     >
                         <i class="fa-solid fa-plus"></i>
                     </button>
@@ -2253,18 +2239,18 @@ updateInventoryPreview();
                         <div class="fw-semibold">
                             Rs.
                             ${formatMoney(
-                                lineSubtotal
-                            )}
+                    lineSubtotal
+                )}
                         </div>
 
                         <div class="small text-muted">
                             ${item.cart_quantity}
                             ${escapeHtml(
-                                saleLabel
-                            )}${item.cart_quantity !== 1
-                                ? "s"
-                                : ""
-                            }
+                    saleLabel
+                )}${item.cart_quantity !== 1
+                    ? "s"
+                    : ""
+                }
                         </div>
 
                     </div>
@@ -2565,30 +2551,29 @@ updateInventoryPreview();
                             <div class="fw-semibold">
 
                                 ${escapeHtml(
-                                    product.name
-                                )}
+                    product.name
+                )}
 
-                                ${
-                                    product.strength
-                                        ? `
+                                ${product.strength
+                        ? `
                                             <span class="text-muted">
                                                 ${escapeHtml(
-                                                    product.strength
-                                                )}
+                            product.strength
+                        )}
                                             </span>
                                         `
-                                        : ""
-                                }
+                        : ""
+                    }
 
                             </div>
 
                             <div class="small text-muted mt-1">
 
                                 ${escapeHtml(
-                                    product.generic_name ||
-                                    product.category ||
-                                    ""
-                                )}
+                        product.generic_name ||
+                        product.category ||
+                        ""
+                    )}
 
                             </div>
 
@@ -2596,13 +2581,13 @@ updateInventoryPreview();
 
                                 Batch:
                                 ${escapeHtml(
-                                    product.batch_number
-                                )}
+                        product.batch_number
+                    )}
 
                                 · Exp:
                                 ${escapeHtml(
-                                    product.expiry_date
-                                )}
+                        product.expiry_date
+                    )}
 
                             </div>
 
@@ -2614,10 +2599,10 @@ updateInventoryPreview();
 
                                 <strong>
                                     ${escapeHtml(
-                                        getStockDisplay(
-                                            product
-                                        )
-                                    )}
+                        getStockDisplay(
+                            product
+                        )
+                    )}
                                 </strong>
 
                             </div>
@@ -2628,11 +2613,10 @@ updateInventoryPreview();
 
                     <div class="row g-2 mt-2">
 
-                        <div class="${
-                            canSellLoose
-                                ? "col-md-6"
-                                : "col-12"
-                        }">
+                        <div class="${canSellLoose
+                        ? "col-md-6"
+                        : "col-12"
+                    }">
 
                             <button
                                 type="button"
@@ -2642,11 +2626,10 @@ updateInventoryPreview();
                                     w-100
                                     pos-add-pack
                                 "
-                                ${
-                                    !canSellPack
-                                        ? "disabled"
-                                        : ""
-                                }
+                                ${!canSellPack
+                        ? "disabled"
+                        : ""
+                    }
                             >
 
                                 <div class="fw-semibold">
@@ -2656,17 +2639,16 @@ updateInventoryPreview();
                                 <div class="small">
                                     Rs.
                                     ${formatMoney(
-                                        product.pack_price
-                                    )}
+                        product.pack_price
+                    )}
                                 </div>
 
                             </button>
 
                         </div>
 
-                        ${
-                            canSellLoose
-                                ? `
+                        ${canSellLoose
+                        ? `
                                     <div class="col-md-6">
 
                                         <button
@@ -2682,30 +2664,29 @@ updateInventoryPreview();
                                             <div class="fw-semibold">
                                                 Add
                                                 ${escapeHtml(
-                                                    product.unit_label
-                                                )}
+                            product.unit_label
+                        )}
                                             </div>
 
                                             <div class="small">
                                                 Rs.
                                                 ${formatMoney(
-                                                    product.unit_price
-                                                )}
+                            product.unit_price
+                        )}
                                             </div>
 
                                         </button>
 
                                     </div>
                                 `
-                                : ""
-                        }
+                        : ""
+                    }
 
                     </div>
 
-                    ${
-                        !canSellPack &&
+                    ${!canSellPack &&
                         canSellLoose
-                            ? `
+                        ? `
                                 <div
                                     class="
                                         small
@@ -2717,7 +2698,7 @@ updateInventoryPreview();
                                     Loose units can still be sold.
                                 </div>
                             `
-                            : ""
+                        : ""
                     }
                 `;
 
@@ -2892,8 +2873,8 @@ updateInventoryPreview();
                 posSearchResults.innerHTML = `
                     <div class="alert alert-danger mb-0">
                         ${escapeHtml(
-                            error.message
-                        )}
+                    error.message
+                )}
                     </div>
                 `;
             }
@@ -3266,7 +3247,7 @@ updateInventoryPreview();
                                     item.sale_type,
                             })
                         ),
-                            
+
                     payment_method:
                         posPaymentMethod
                             ?.value ||
@@ -3294,7 +3275,7 @@ updateInventoryPreview();
                             .trim() ||
                         "",
                     customer_id:
-    document.getElementById("posSelectedCustomerId")?.value || null,
+                        document.getElementById("posSelectedCustomerId")?.value || null,
                 };
 
                 try {
