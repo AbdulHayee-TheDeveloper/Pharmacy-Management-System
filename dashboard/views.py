@@ -7,6 +7,9 @@ from django.shortcuts import render
 from django.utils import timezone
 
 from inventory.models import InventoryBatch
+from core_settings.operational import (
+    get_operational_settings, low_stock_batches, expiring_soon_batches,
+)
 from medicines.models import Medicine
 from sales.models import Sale
 
@@ -65,7 +68,7 @@ def dashboard(request):
     today = timezone.localdate()
     yesterday = today - timedelta(days=1)
 
-    expiring_until = today + timedelta(days=30)
+    options = get_operational_settings()
 
     # ============================================================
     # PERMISSIONS
@@ -121,6 +124,8 @@ def dashboard(request):
         "low_stock_count": 0,
         "out_of_stock_count": 0,
         "expiring_soon_count": 0,
+        "expiry_alert_days": options["expiry_alert_days"],
+        "low_stock_threshold": options["low_stock_threshold"],
         "expired_count": 0,
 
         "low_stock_batches": [],
@@ -292,20 +297,11 @@ def dashboard(request):
         # Low Stock
         # --------------------------------------------------------
 
-        low_stock_queryset = (
-            inventory_queryset.filter(
-                is_active=True,
-                quantity__gt=0,
-                expiry_date__gte=today,
-                quantity__lte=F(
-                    "medicine__minimum_stock_level"
-                ),
-            )
-            .order_by(
-                "quantity",
-                "expiry_date",
-            )
-        )
+        low_stock_queryset = low_stock_batches(
+            inventory_queryset,
+            options["low_stock_threshold"],
+            today=today,
+        ).order_by("quantity", "expiry_date")
 
         low_stock_count = (
             low_stock_queryset.count()
@@ -333,17 +329,11 @@ def dashboard(request):
         # Expiring Soon
         # --------------------------------------------------------
 
-        expiring_queryset = (
-            inventory_queryset.filter(
-                is_active=True,
-                quantity__gt=0,
-                expiry_date__gte=today,
-                expiry_date__lte=expiring_until,
-            )
-            .order_by(
-                "expiry_date"
-            )
-        )
+        expiring_queryset = expiring_soon_batches(
+            inventory_queryset,
+            options["expiry_alert_days"],
+            today=today,
+        ).order_by("expiry_date")
 
         expiring_soon_count = (
             expiring_queryset.count()

@@ -4,6 +4,9 @@ from django.conf import settings
 from django.core.validators import MinValueValidator
 from django.db import models
 from django.utils import timezone
+from core_settings.operational import (
+    get_operational_settings, effective_low_stock_threshold,
+)
 
 
 MONEY_PLACES = Decimal("0.01")
@@ -188,12 +191,15 @@ class InventoryBatch(models.Model):
 
     @property
     def is_low_stock(self):
-        return (
-            self.quantity > 0
-            and self.quantity
-            <= self.medicine.minimum_stock_level
-        )
-
+        # List/dashboard querysets annotate this once in SQL, avoiding N+1 queries.
+        threshold = getattr(self, "effective_low_stock_threshold", None)
+        if threshold is None:
+            options = get_operational_settings()
+            threshold = effective_low_stock_threshold(
+                self.medicine.minimum_stock_level,
+                options["low_stock_threshold"],
+            )
+        return 0 < self.quantity <= threshold
 
 
 class StockAdjustment(models.Model):
