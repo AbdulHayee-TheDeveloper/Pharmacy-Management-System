@@ -1,38 +1,35 @@
 
-# reports/pdf_reports.py
 
-from io import BytesIO
 from datetime import date, datetime
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
+from io import BytesIO
 from xml.sax.saxutils import escape
 
 from django.utils import timezone
-
 from reportlab.lib import colors
-from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT
+from reportlab.lib.enums import TA_RIGHT
 from reportlab.lib.pagesizes import A4, landscape
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.units import mm
 from reportlab.platypus import (
-    SimpleDocTemplate,
+    Image,
+    LongTable,
     Paragraph,
+    SimpleDocTemplate,
     Spacer,
     Table,
-    LongTable,
     TableStyle,
-    KeepTogether,
 )
 
 from .services import (
-    build_sales_report,
-    build_purchase_report,
     build_inventory_report,
     build_profit_report,
-    get_sales_queryset,
-    get_purchase_queryset,
+    build_purchase_report,
+    build_sales_report,
     get_inventory_report_queryset,
+    get_purchase_queryset,
+    get_sales_queryset,
 )
-
 
 TEAL = colors.HexColor("#0F766E")
 DARK = colors.HexColor("#163536")
@@ -40,25 +37,24 @@ LIGHT = colors.HexColor("#E8F5F2")
 BORDER = colors.HexColor("#DCE7E5")
 MUTED = colors.HexColor("#667784")
 WHITE = colors.white
-
 ZERO = Decimal("0.00")
 
 
 def clean(value):
-    """Convert untrusted database values into safe PDF text."""
+    """Escape external text before embedding in a ReportLab Paragraph."""
     if value is None or value == "":
         return "—"
-
-    return escape(str(value))
+    return escape(str(value)).replace("\n", "<br/>")
 
 
 def amount(value):
     try:
-        value = Decimal(str(value or 0))
-    except (ValueError, TypeError, ArithmeticError):
-        value = ZERO
-
-    return f"Rs. {value:,.2f}"
+        result = Decimal(str(value if value is not None else 0))
+        if not result.is_finite():
+            result = ZERO
+    except (ValueError, TypeError, InvalidOperation):
+        result = ZERO
+    return f"Rs. {result:,.2f}"
 
 
 def quantity(value):
@@ -71,79 +67,44 @@ def quantity(value):
 def date_label(value):
     if not value:
         return "—"
-
     if isinstance(value, datetime):
         if timezone.is_aware(value):
             value = timezone.localtime(value)
         return value.strftime("%d %b %Y %I:%M %p")
-
     if isinstance(value, date):
         return value.strftime("%d %b %Y")
-
     return str(value)
 
 
 def styles():
     return {
-        "title": ParagraphStyle(
-            "PdfTitle",
-            fontName="Helvetica-Bold",
-            fontSize=19,
-            leading=24,
-            textColor=DARK,
-            spaceAfter=5,
-        ),
         "subtitle": ParagraphStyle(
-            "PdfSubtitle",
-            fontName="Helvetica",
-            fontSize=9,
-            leading=13,
-            textColor=MUTED,
+            "PdfSubtitle", fontName="Helvetica", fontSize=9,
+            leading=13, textColor=MUTED,
         ),
         "section": ParagraphStyle(
-            "PdfSection",
-            fontName="Helvetica-Bold",
-            fontSize=11,
-            leading=15,
-            textColor=DARK,
+            "PdfSection", fontName="Helvetica-Bold", fontSize=11,
+            leading=15, textColor=DARK,
         ),
         "normal": ParagraphStyle(
-            "PdfNormal",
-            fontName="Helvetica",
-            fontSize=8,
-            leading=11,
-            textColor=DARK,
-            wordWrap="CJK",
+            "PdfNormal", fontName="Helvetica", fontSize=8,
+            leading=11, textColor=DARK, wordWrap="CJK",
         ),
         "small": ParagraphStyle(
-            "PdfSmall",
-            fontName="Helvetica",
-            fontSize=7,
-            leading=10,
-            textColor=DARK,
-            wordWrap="CJK",
+            "PdfSmall", fontName="Helvetica", fontSize=7,
+            leading=10, textColor=DARK, wordWrap="CJK",
         ),
         "header": ParagraphStyle(
-            "PdfTableHeader",
-            fontName="Helvetica-Bold",
-            fontSize=7,
-            leading=10,
-            textColor=WHITE,
-            wordWrap="CJK",
+            "PdfTableHeader", fontName="Helvetica-Bold", fontSize=7,
+            leading=10, textColor=WHITE, wordWrap="CJK",
         ),
         "metric": ParagraphStyle(
-            "PdfMetric",
-            fontName="Helvetica-Bold",
-            fontSize=11,
-            leading=15,
-            textColor=TEAL,
+            "PdfMetric", fontName="Helvetica-Bold", fontSize=11,
+            leading=15, textColor=TEAL, wordWrap="CJK",
         ),
         "label": ParagraphStyle(
-            "PdfMetricLabel",
-            fontName="Helvetica",
-            fontSize=7,
-            leading=10,
-            textColor=MUTED,
+            "PdfMetricLabel", fontName="Helvetica", fontSize=7,
+            leading=10, textColor=MUTED,
         ),
     }
 
@@ -152,89 +113,101 @@ def paragraph(value, style):
     return Paragraph(clean(value), style)
 
 
+def get_pdf_branding(pharmacy_profile=None):
+    """Return actual pharmacy data, or safe defaults if no profile exists."""
+    defaults = {
+        "name": "PharmaCare",
+        "tagline": "Pharmacy Management System",
+        "phone": "",
+        "email": "",
+        "address": "",
+        "registration_number": "",
+        "receipt_footer": "",
+    }
+    if pharmacy_profile is None:
+        return defaults
+    return {
+        key: (getattr(pharmacy_profile, key, None) or default)
+        for key, default in defaults.items()
+    }
+
+
+def make_pdf_logo(pharmacy_profile):
+    """Return a ReportLab logo, or None when no valid image is available."""
+    if pharmacy_profile is None or not getattr(pharmacy_profile, "logo", None):
+        return None
+    try:
+        field_file = pharmacy_profile.logo
+        # Storage-backed FieldFile instances support open()/read()/close().
+        field_file.open("rb")
+        try:
+            image_bytes = BytesIO(field_file.read())
+        finally:
+            field_file.close()
+        image_bytes.seek(0)
+        return Image(
+            image_bytes,
+            width=20 * mm,
+            height=20 * mm,
+            kind="proportional",
+            hAlign="LEFT",
+        )
+    except (OSError, ValueError, TypeError, AttributeError):
+        # Branding must not prevent delivery of the financial report.
+        return None
+
+
+def make_branded_footer(brand_name):
+    """Page callback with a brand-aware footer and page number."""
+    def draw_footer(canvas, doc):
+        canvas.saveState()
+        try:
+            width, _ = doc.pagesize
+            canvas.setStrokeColor(BORDER)
+            canvas.line(15 * mm, 16 * mm, width - 15 * mm, 16 * mm)
+            canvas.setFont("Helvetica", 8)
+            canvas.setFillColor(MUTED)
+            label = f"Generated by {brand_name or 'PharmaCare'}"
+            max_width = width - 55 * mm
+            # A long business name must not collide with the page number.
+            while len(label) > 15 and canvas.stringWidth(
+                label, "Helvetica", 8
+            ) > max_width:
+                label = label[:-2] + "…"
+            canvas.drawString(15 * mm, 11 * mm, label)
+            canvas.drawRightString(width - 15 * mm, 11 * mm, f"Page {doc.page}")
+        finally:
+            canvas.restoreState()
+    return draw_footer
+
+
 def pdf_footer(canvas, doc):
-    canvas.saveState()
-
-    width, _ = doc.pagesize
-
-    canvas.setStrokeColor(BORDER)
-    canvas.line(
-        15 * mm,
-        16 * mm,
-        width - 15 * mm,
-        16 * mm,
-    )
-
-    canvas.setFont("Helvetica", 8)
-    canvas.setFillColor(MUTED)
-
-    canvas.drawString(
-        15 * mm,
-        11 * mm,
-        "Generated by PharmaCare Pharmacy Management System",
-    )
-
-    canvas.drawRightString(
-        width - 15 * mm,
-        11 * mm,
-        f"Page {doc.page}",
-    )
-
-    canvas.restoreState()
+    """Compatibility wrapper for any older code importing pdf_footer."""
+    make_branded_footer("PharmaCare")(canvas, doc)
 
 
 def build_summary_cards(summary, available_width, st):
     if not summary:
         return []
 
-    cards = []
-
-    for label, value in summary:
-        cards.append([
-            Paragraph(clean(label), st["label"]),
-            Paragraph(clean(value), st["metric"]),
-        ])
-
-    # Two columns, with each cell containing a label and value.
+    cards = [
+        [paragraph(label, st["label"]), paragraph(value, st["metric"])]
+        for label, value in summary
+    ]
     rows = []
-
     for index in range(0, len(cards), 2):
         left = cards[index]
-        right = (
-            cards[index + 1]
-            if index + 1 < len(cards)
-            else [
-                Paragraph("", st["label"]),
-                Paragraph("", st["metric"]),
-            ]
-        )
-
-        left_content = [
-            left[0],
-            Spacer(1, 4),
-            left[1],
-        ]
-
-        right_content = [
-            right[0],
-            Spacer(1, 4),
-            right[1],
-        ]
-
+        right = cards[index + 1] if index + 1 < len(cards) else None
         rows.append([
-            left_content,
-            right_content,
+            [left[0], Spacer(1, 4), left[1]],
+            [right[0], Spacer(1, 4), right[1]] if right else "",
         ])
 
     table = Table(
         rows,
-        colWidths=[
-            available_width / 2,
-            available_width / 2,
-        ],
+        colWidths=[available_width / 2, available_width / 2],
         hAlign="LEFT",
     )
-
     table.setStyle(TableStyle([
         ("BACKGROUND", (0, 0), (-1, -1), LIGHT),
         ("BOX", (0, 0), (-1, -1), 0.5, BORDER),
@@ -245,58 +218,34 @@ def build_summary_cards(summary, available_width, st):
         ("TOPPADDING", (0, 0), (-1, -1), 10),
         ("BOTTOMPADDING", (0, 0), (-1, -1), 10),
     ]))
-
-    return [
-        table,
-        Spacer(1, 14),
-    ]
+    return [table, Spacer(1, 14)]
 
 
 def build_data_table(headers, rows, available_width, st):
-    """
-    LongTable repeats headings on new pages.
-
-    All database-provided text is escaped before
-    passing to ReportLab Paragraph.
-    """
-
-    column_count = len(headers)
-    column_width = available_width / column_count
-
-    header_row = [
-        paragraph(header, st["header"])
-        for header in headers
-    ]
-
-    table_data = [header_row]
-
+    """Repeat headers whenever the long report table splits across pages."""
+    if not headers:
+        raise ValueError("Report table requires at least one column.")
+    table_data = [[paragraph(header, st["header"]) for header in headers]]
     for row in rows:
-        table_data.append([
-            paragraph(value, st["small"])
-            for value in row
-        ])
-
+        if len(row) != len(headers):
+            raise ValueError("Report data row has an incorrect column count.")
+        table_data.append([paragraph(value, st["small"]) for value in row])
     if len(table_data) == 1:
         table_data.append([
-            paragraph(
-                "No records found." if i == 0 else "",
-                st["small"],
-            )
-            for i in range(column_count)
+            paragraph("No records found." if i == 0 else "", st["small"])
+            for i in range(len(headers))
         ])
 
     table = LongTable(
         table_data,
-        colWidths=[column_width] * column_count,
+        colWidths=[available_width / len(headers)] * len(headers),
         repeatRows=1,
         hAlign="LEFT",
     )
-
     table.setStyle(TableStyle([
         ("BACKGROUND", (0, 0), (-1, 0), TEAL),
         ("ROWBACKGROUNDS", (0, 1), (-1, -1), [
-            WHITE,
-            colors.HexColor("#F5FAF9"),
+            WHITE, colors.HexColor("#F5FAF9"),
         ]),
         ("BOTTOMPADDING", (0, 0), (-1, 0), 9),
         ("TOPPADDING", (0, 0), (-1, 0), 9),
@@ -307,22 +256,13 @@ def build_data_table(headers, rows, available_width, st):
         ("VALIGN", (0, 0), (-1, -1), "TOP"),
         ("LINEBELOW", (0, -1), (-1, -1), 0.5, BORDER),
     ]))
-
     return table
 
 
 def report_definition(report_type, filters):
-    """
-    Build summary and row data.
-
-    Reuses existing report services and queryset
-    security rules.
-    """
-
+    """Prepare scoped data and KPI cards; preserve prior financial semantics."""
     if report_type == "sales":
-        report = build_sales_report(filters)
-        totals = report["summary"]
-
+        totals = build_sales_report(filters)["summary"]
         summary = [
             ("Sales Revenue", amount(totals.get("revenue"))),
             ("Collected", amount(totals.get("collected"))),
@@ -331,27 +271,16 @@ def report_definition(report_type, filters):
             ("Average Sale", amount(totals.get("average_sale"))),
             ("Discounts", amount(totals.get("discounts"))),
         ]
-
         headers = [
-            "Invoice",
-            "Date",
-            "Customer",
-            "Branch",
-            "Total",
-            "Collected",
-            "Outstanding",
+            "Invoice", "Date", "Customer", "Branch",
+            "Total", "Collected", "Outstanding",
         ]
-
         queryset = (
             get_sales_queryset(filters)
             .order_by("completed_at", "pk")
             .values(
-                "invoice_number",
-                "completed_at",
-                "customer_name",
-                "branch__name",
-                "total_amount",
-                "paid_amount",
+                "invoice_number", "completed_at", "customer_name",
+                "branch__name", "total_amount", "paid_amount",
                 "change_amount",
             )
         )
@@ -361,69 +290,44 @@ def report_definition(report_type, filters):
                 total = Decimal(sale["total_amount"] or 0)
                 paid = Decimal(sale["paid_amount"] or 0)
                 change = Decimal(sale["change_amount"] or 0)
-
-                collected = max(
-                    ZERO,
-                    min(total, paid - change),
-                )
-
+                collected = max(ZERO, min(total, paid - change))
                 yield [
                     sale["invoice_number"],
                     date_label(sale["completed_at"]),
                     sale["customer_name"] or "Walk-in",
                     sale["branch__name"],
-                    amount(total),
-                    amount(collected),
+                    amount(total), amount(collected),
                     amount(max(ZERO, total - collected)),
                 ]
 
         return {
-            "title": "Sales Report",
-            "summary": summary,
-            "headers": headers,
-            "rows": rows(),
+            "title": "Sales Report", "summary": summary,
+            "headers": headers, "rows": rows(),
             "note": (
-                "Collections and outstanding amounts reflect "
-                "current invoice balances, not cash received "
-                "only during the selected report period."
+                "Collections and outstanding amounts reflect current invoice "
+                "balances, not cash received only during the selected report period."
             ),
         }
 
     if report_type == "purchases":
-        report = build_purchase_report(filters)
-        totals = report["summary"]
-
+        totals = build_purchase_report(filters)["summary"]
         summary = [
             ("Purchase Orders", quantity(totals.get("order_count"))),
             ("Ordered Value", amount(totals.get("ordered_value"))),
             ("Stock Receipts", quantity(totals.get("receipt_count"))),
             ("Received Cost", amount(totals.get("gross_received_cost"))),
-            (
-                "Received Packs",
-                quantity(totals.get("total_received_packs")),
-            ),
+            ("Received Packs", quantity(totals.get("total_received_packs"))),
             ("Discounts", amount(totals.get("discounts"))),
         ]
-
         headers = [
-            "Purchase #",
-            "Date",
-            "Supplier",
-            "Branch",
-            "Status",
-            "Ordered Value",
+            "Purchase #", "Date", "Supplier", "Branch", "Status", "Ordered Value",
         ]
-
         queryset = (
             get_purchase_queryset(filters)
             .order_by("purchase_date", "pk")
             .values(
-                "purchase_number",
-                "purchase_date",
-                "supplier__name",
-                "branch__name",
-                "status",
-                "total_amount",
+                "purchase_number", "purchase_date", "supplier__name",
+                "branch__name", "status", "total_amount",
             )
         )
 
@@ -439,74 +343,36 @@ def report_definition(report_type, filters):
                 ]
 
         return {
-            "title": "Purchase Report",
-            "summary": summary,
-            "headers": headers,
-            "rows": rows(),
+            "title": "Purchase Report", "summary": summary,
+            "headers": headers, "rows": rows(),
             "note": (
-                "Purchase order values and stock receipt "
-                "costs represent different business events."
+                "Purchase order values and stock receipt costs represent "
+                "different business events."
             ),
         }
 
     if report_type == "inventory":
-        report = build_inventory_report(filters)
-        totals = report["summary"]
-
+        totals = build_inventory_report(filters)["summary"]
         summary = [
             ("Total Batches", quantity(totals.get("batch_count"))),
             ("Stock Units", quantity(totals.get("units_in_stock"))),
-            (
-                "Estimated Cost Value",
-                amount(totals.get("estimated_cost_value")),
-            ),
-            (
-                "Estimated Retail Value",
-                amount(totals.get("estimated_retail_value")),
-            ),
-            (
-                "Expired Batches",
-                quantity(totals.get("expired_batches")),
-            ),
-            (
-                "Expiring in 30 Days",
-                quantity(totals.get("expiring_30_days")),
-            ),
+            ("Estimated Cost Value", amount(totals.get("estimated_cost_value"))),
+            ("Estimated Retail Value", amount(totals.get("estimated_retail_value"))),
+            ("Expired Batches", quantity(totals.get("expired_batches"))),
+            ("Expiring in 30 Days", quantity(totals.get("expiring_30_days"))),
         ]
-
         headers = [
-            "Medicine",
-            "Batch",
-            "Branch",
-            "Expiry",
-            "Units",
-            "Cost Value",
-            "Retail Value",
+            "Medicine", "Batch", "Branch", "Expiry",
+            "Units", "Cost Value", "Retail Value",
         ]
-
         queryset = get_inventory_report_queryset(filters)
 
         def rows():
             for batch in queryset.iterator(chunk_size=500):
-                pack_size = max(
-                    int(batch.medicine.pack_size or 1),
-                    1,
-                )
-
+                pack_size = max(int(batch.medicine.pack_size or 1), 1)
                 unit_count = Decimal(batch.quantity)
-
-                cost_value = (
-                    unit_count
-                    * batch.purchase_price
-                    / Decimal(pack_size)
-                )
-
-                retail_value = (
-                    unit_count
-                    * batch.selling_price
-                    / Decimal(pack_size)
-                )
-
+                cost_value = unit_count * batch.purchase_price / Decimal(pack_size)
+                retail_value = unit_count * batch.selling_price / Decimal(pack_size)
                 yield [
                     batch.medicine.name,
                     batch.batch_number,
@@ -518,53 +384,24 @@ def report_definition(report_type, filters):
                 ]
 
         return {
-            "title": "Inventory Report",
-            "summary": summary,
-            "headers": headers,
-            "rows": rows(),
+            "title": "Inventory Report", "summary": summary,
+            "headers": headers, "rows": rows(),
             "note": (
-                "Inventory is a current stock snapshot. "
-                "Valuation is estimated using stored batch "
-                "prices and includes all scoped batches."
+                "Inventory is a current stock snapshot. Valuation is estimated "
+                "using stored batch prices and includes all scoped batches."
             ),
         }
 
     if report_type == "profit":
-        report = build_profit_report(filters)
-        totals = report["summary"]
-
+        totals = build_profit_report(filters)["summary"]
         summary = [
-            (
-                "Revenue Including Tax",
-                amount(totals.get("revenue_including_tax")),
-            ),
-            (
-                "Net Sales Excluding Tax",
-                amount(totals.get("net_sales_excluding_tax")),
-            ),
-            (
-                "Estimated COGS",
-                amount(totals.get("estimated_cogs")),
-            ),
-            (
-                "Estimated Gross Profit",
-                amount(totals.get("estimated_gross_profit")),
-            ),
-            (
-                "Estimated Margin",
-                f"{totals.get('estimated_margin_percent', 0)}%",
-            ),
-            (
-                "Completed Sales",
-                quantity(totals.get("sale_count")),
-            ),
+            ("Revenue Including Tax", amount(totals.get("revenue_including_tax"))),
+            ("Net Sales Excluding Tax", amount(totals.get("net_sales_excluding_tax"))),
+            ("Estimated COGS", amount(totals.get("estimated_cogs"))),
+            ("Estimated Gross Profit", amount(totals.get("estimated_gross_profit"))),
+            ("Estimated Margin", f"{totals.get('estimated_margin_percent', 0)}%"),
+            ("Completed Sales", quantity(totals.get("sale_count"))),
         ]
-
-        headers = [
-            "Financial Metric",
-            "Estimated Value",
-        ]
-
         rows = [
             ["Revenue Including Tax", summary[0][1]],
             ["Net Sales Excluding Tax", summary[1][1]],
@@ -572,17 +409,14 @@ def report_definition(report_type, filters):
             ["Estimated Gross Profit", summary[3][1]],
             ["Estimated Gross Margin", summary[4][1]],
         ]
-
         return {
-            "title": "Estimated Profit Report",
-            "summary": summary,
-            "headers": headers,
+            "title": "Estimated Profit Report", "summary": summary,
+            "headers": ["Financial Metric", "Estimated Value"],
             "rows": rows,
             "note": (
-                "IMPORTANT: Profit values are estimates. "
-                "SaleItem does not store immutable historical "
-                "purchase cost snapshots. Current batch prices "
-                "may differ from costs at the time of sale. "
+                "IMPORTANT: Profit values are estimates. SaleItem does not "
+                "store immutable historical purchase cost snapshots. Current "
+                "batch prices may differ from costs at the time of sale. "
                 "This is not an audited profit statement."
             ),
         }
@@ -591,28 +425,16 @@ def report_definition(report_type, filters):
 
 
 def generate_report_pdf(
-    *,
-    report_type,
-    filters,
-    generated_by,
-    branch_label,
+    *, report_type, filters, generated_by, branch_label, pharmacy_profile=None
 ):
-    """
-    Returns fully generated PDF bytes.
-
-    Suitable for Django HttpResponse.
-    """
-
+    """Generate PDF bytes for one of the four existing report types."""
     definition = report_definition(report_type, filters)
+    branding = get_pdf_branding(pharmacy_profile)
+    brand_name = branding["name"]
+    logo = make_pdf_logo(pharmacy_profile)
 
     output = BytesIO()
-
-    page_size = (
-        A4
-        if report_type == "profit"
-        else landscape(A4)
-    )
-
+    page_size = A4 if report_type == "profit" else landscape(A4)
     doc = SimpleDocTemplate(
         output,
         pagesize=page_size,
@@ -620,153 +442,118 @@ def generate_report_pdf(
         leftMargin=15 * mm,
         topMargin=17 * mm,
         bottomMargin=22 * mm,
-        title=f"PharmaCare - {definition['title']}",
-        author="PharmaCare Pharmacy Management System",
+        title=f"{brand_name} - {definition['title']}",
+        author=brand_name,
     )
-
     st = styles()
     available_width = doc.width
-
     story = []
 
     # --------------------------------------------------------
-    # BRAND HEADER
+    # Dynamic pharmacy brand header (on the report's first page).
     # --------------------------------------------------------
+    brand_content = []
+    if logo is not None:
+        brand_content.extend([logo, Spacer(1, 5)])
+    brand_content.append(Paragraph(
+        clean(brand_name),
+        ParagraphStyle(
+            "DynamicBrand", fontName="Helvetica-Bold",
+            fontSize=18, leading=23, textColor=TEAL, wordWrap="CJK",
+        ),
+    ))
+    if branding["tagline"]:
+        brand_content.append(paragraph(branding["tagline"], st["subtitle"]))
 
-    brand = Table(
-        [[
-            Paragraph(
-                "<b>PharmaCare</b>",
-                ParagraphStyle(
-                    "Brand",
-                    fontName="Helvetica-Bold",
-                    fontSize=21,
-                    leading=26,
-                    textColor=TEAL,
-                ),
-            ),
-            Paragraph(
-                clean(definition["title"]),
-                ParagraphStyle(
-                    "ReportTitleRight",
-                    fontName="Helvetica-Bold",
-                    fontSize=15,
-                    leading=20,
-                    alignment=TA_RIGHT,
-                    textColor=DARK,
-                ),
-            ),
-        ]],
-        colWidths=[
-            available_width * 0.5,
-            available_width * 0.5,
-        ],
+    report_heading = Paragraph(
+        clean(definition["title"]),
+        ParagraphStyle(
+            "DynamicReportTitle", fontName="Helvetica-Bold",
+            fontSize=15, leading=19, alignment=TA_RIGHT,
+            textColor=DARK, wordWrap="CJK",
+        ),
     )
-
-    brand.setStyle(TableStyle([
-        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+    brand_table = Table(
+        [[brand_content, report_heading]],
+        colWidths=[available_width * 0.58, available_width * 0.42],
+    )
+    brand_table.setStyle(TableStyle([
+        ("VALIGN", (0, 0), (-1, -1), "TOP"),
         ("LEFTPADDING", (0, 0), (-1, -1), 0),
         ("RIGHTPADDING", (0, 0), (-1, -1), 0),
-        ("LINEBELOW", (0, 0), (-1, -1), 1.4, TEAL),
-        ("BOTTOMPADDING", (0, 0), (-1, -1), 9),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 10),
+        ("LINEBELOW", (0, 0), (-1, -1), 1.3, TEAL),
     ]))
+    story.extend([brand_table, Spacer(1, 12)])
 
-    story.append(brand)
-    story.append(Spacer(1, 12))
+    contact_parts = []
+    if branding["phone"]:
+        contact_parts.append(f"Phone: {branding['phone']}")
+    if branding["email"]:
+        contact_parts.append(f"Email: {branding['email']}")
+    if branding["registration_number"]:
+        contact_parts.append(f"Registration: {branding['registration_number']}")
+    if contact_parts:
+        story.extend([
+            paragraph(" | ".join(contact_parts), st["small"]),
+            Spacer(1, 5),
+        ])
+    if branding["address"]:
+        story.extend([
+            paragraph(branding["address"], st["small"]),
+            Spacer(1, 10),
+        ])
 
-    generated_at = timezone.localtime(
-        timezone.now()
-    ).strftime("%d %b %Y %I:%M %p")
-
+    # --------------------------------------------------------
+    # Report period, branch, operator and generation time.
+    # --------------------------------------------------------
     period = (
-        f"{date_label(filters.date_from)} - "
-        f"{date_label(filters.date_to)}"
+        f"{date_label(filters.date_from)} - {date_label(filters.date_to)}"
+        if report_type != "inventory" else "Current inventory snapshot"
     )
-
-    if report_type == "inventory":
-        period = "Current inventory snapshot"
-
+    generated_at = timezone.localtime(timezone.now()).strftime(
+        "%d %b %Y %I:%M %p"
+    )
     metadata = [
         ["Branch", branch_label],
         ["Report Period", period],
         ["Generated By", generated_by],
         ["Generated At", generated_at],
     ]
-
-    metadata_rows = [
-        [
-            paragraph(label, st["small"]),
-            paragraph(value, st["normal"]),
-        ]
-        for label, value in metadata
-    ]
-
     metadata_table = Table(
-        metadata_rows,
-        colWidths=[
-            34 * mm,
-            available_width - 34 * mm,
-        ],
+        [[paragraph(label, st["small"]), paragraph(value, st["normal"])]
+         for label, value in metadata],
+        colWidths=[34 * mm, available_width - 34 * mm],
         hAlign="LEFT",
     )
-
     metadata_table.setStyle(TableStyle([
         ("VALIGN", (0, 0), (-1, -1), "TOP"),
         ("LEFTPADDING", (0, 0), (-1, -1), 0),
         ("RIGHTPADDING", (0, 0), (-1, -1), 8),
         ("BOTTOMPADDING", (0, 0), (-1, -1), 5),
     ]))
+    story.extend([metadata_table, Spacer(1, 13)])
 
-    story.append(metadata_table)
-    story.append(Spacer(1, 13))
+    story.extend([
+        Paragraph("Report Summary", st["section"]),
+        Spacer(1, 8),
+    ])
+    story.extend(build_summary_cards(definition["summary"], available_width, st))
 
-    # --------------------------------------------------------
-    # SUMMARY
-    # --------------------------------------------------------
-
-    story.append(
-        Paragraph("Report Summary", st["section"])
-    )
-    story.append(Spacer(1, 8))
-
-    story.extend(
-        build_summary_cards(
-            definition["summary"],
-            available_width,
-            st,
-        )
-    )
-
-    # --------------------------------------------------------
-    # RECORDS
-    # --------------------------------------------------------
-
-    story.append(
-        Paragraph("Detailed Records", st["section"])
-    )
-    story.append(Spacer(1, 8))
-
-    story.append(
+    story.extend([
+        Paragraph("Detailed Records", st["section"]),
+        Spacer(1, 8),
         build_data_table(
-            definition["headers"],
-            definition["rows"],
-            available_width,
-            st,
-        )
-    )
+            definition["headers"], definition["rows"], available_width, st,
+        ),
+        Spacer(1, 14),
+        paragraph(definition["note"], st["normal"]),
+    ])
 
-    story.append(Spacer(1, 14))
-    story.append(
-        Paragraph(
-            clean(definition["note"]),
-            st["normal"],
-        )
-    )
-
+    footer_callback = make_branded_footer(brand_name)
     doc.build(
         story,
-        onFirstPage=pdf_footer,
-        onLaterPages=pdf_footer,
+        onFirstPage=footer_callback,
+        onLaterPages=footer_callback,
     )
-
     return output.getvalue()

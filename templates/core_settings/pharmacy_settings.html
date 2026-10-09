@@ -1,0 +1,582 @@
+
+{% extends "base/base.html" %}
+{% load static %}
+
+{% block title %}
+Pharmacy Settings | PharmaCare
+{% endblock %}
+
+{% block content %}
+
+<style>
+    .settings-page {
+        max-width: 1300px;
+        margin: 0 auto;
+    }
+
+    .settings-eyebrow {
+        color: #0f766e;
+        font-size: 11px;
+        letter-spacing: 1.3px;
+        font-weight: 700;
+    }
+
+    .settings-card {
+        background: #fff;
+        border: 1px solid #e5e9ed;
+        border-radius: 14px;
+        box-shadow: 0 3px 12px rgba(0, 0, 0, 0.025);
+        overflow: hidden;
+    }
+
+    .settings-card-header {
+        padding: 18px 22px;
+        border-bottom: 1px solid #edf0f2;
+    }
+
+    .settings-card-body {
+        padding: 22px;
+    }
+
+    .settings-section-title {
+        font-size: 16px;
+        font-weight: 700;
+        color: #1b293a;
+        margin-bottom: 4px;
+    }
+
+    .settings-section-subtitle {
+        font-size: 13px;
+        color: #718096;
+        margin: 0;
+    }
+
+    .settings-label {
+        font-size: 13px;
+        font-weight: 600;
+        color: #334155;
+        margin-bottom: 7px;
+    }
+
+    .settings-help {
+        font-size: 12px;
+        color: #64748b;
+        margin-top: 5px;
+    }
+
+    .settings-preview-logo {
+        width: 90px;
+        height: 90px;
+        object-fit: contain;
+        border-radius: 12px;
+        background: #eef8f6;
+        border: 1px solid #d4ebe6;
+        padding: 8px;
+    }
+
+    .settings-logo-placeholder {
+        width: 90px;
+        height: 90px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
+        background: #e5f5f2;
+        color: #0f766e;
+        font-size: 32px;
+    }
+
+    .settings-primary-btn {
+        background: #0f766e;
+        color: #fff;
+        border: 1px solid #0f766e;
+        font-weight: 600;
+        padding: 10px 20px;
+    }
+
+    .settings-primary-btn:hover {
+        background: #115e59;
+        border-color: #115e59;
+        color: #fff;
+    }
+
+    .settings-page .form-control:focus,
+    .settings-page .form-select:focus {
+        border-color: #0f766e;
+        box-shadow: 0 0 0 .2rem rgba(15, 118, 110, .12);
+    }
+
+    .settings-info-box {
+        background: #effaf8;
+        border: 1px solid #d2ebe5;
+        border-radius: 12px;
+        padding: 15px;
+        color: #176359;
+        font-size: 13px;
+    }
+
+    .settings-error {
+        color: #dc3545;
+        font-size: 12px;
+        margin-top: 5px;
+    }
+
+    @media (max-width: 767px) {
+        .settings-card-body {
+            padding: 16px;
+        }
+    }
+</style>
+
+<div class="container-fluid py-4 settings-page">
+
+    <!-- HEADER -->
+
+    <div class="d-flex flex-wrap justify-content-between
+                align-items-start gap-3 mb-4">
+
+        <div>
+            <div class="settings-eyebrow mb-1">
+                ADMINISTRATION
+            </div>
+
+            <h2 class="fw-bold mb-1">
+                Pharmacy Settings
+            </h2>
+
+            <p class="text-muted mb-0">
+                Manage your business identity, contact information
+                and operational defaults.
+            </p>
+        </div>
+
+        <div>
+            <span class="badge bg-light text-secondary border p-2">
+                <i class="fa-solid fa-shield-halved me-1"></i>
+                Restricted Settings
+            </span>
+        </div>
+
+    </div>
+
+    <!-- VALIDATION ERRORS -->
+
+    {% if form.non_field_errors %}
+    <div class="alert alert-danger" role="alert">
+        {{ form.non_field_errors }}
+    </div>
+    {% endif %}
+
+    <!-- FORM -->
+
+    <form method="post"
+          enctype="multipart/form-data"
+          id="pharmacySettingsForm">
+
+        {% csrf_token %}
+
+        <div class="row g-4">
+
+            <!-- MAIN COLUMN -->
+
+            <div class="col-xl-8">
+
+                <!-- BUSINESS IDENTITY -->
+
+                <div class="settings-card mb-4">
+
+                    <div class="settings-card-header">
+                        <h5 class="settings-section-title">
+                            <i class="fa-solid fa-store me-2"
+                               style="color:#0f766e;"></i>
+                            Business Identity
+                        </h5>
+
+                        <p class="settings-section-subtitle">
+                            Main pharmacy name and contact information.
+                        </p>
+                    </div>
+
+                    <div class="settings-card-body">
+
+                        <div class="row g-3">
+
+                            <div class="col-md-8">
+                                <label class="settings-label"
+                                       for="{{ form.name.id_for_label }}">
+                                    Pharmacy Name
+                                    <span class="text-danger">*</span>
+                                </label>
+
+                                {{ form.name }}
+
+                                {% for error in form.name.errors %}
+                                <div class="settings-error">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="settings-label"
+                                       for="{{ form.registration_number.id_for_label }}">
+                                    License / Registration
+                                </label>
+
+                                {{ form.registration_number }}
+
+                                {% for error in form.registration_number.errors %}
+                                <div class="settings-error">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+
+                            <div class="col-12">
+                                <label class="settings-label"
+                                       for="{{ form.tagline.id_for_label }}">
+                                    Tagline
+                                </label>
+
+                                {{ form.tagline }}
+
+                                {% for error in form.tagline.errors %}
+                                <div class="settings-error">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="settings-label"
+                                       for="{{ form.phone.id_for_label }}">
+                                    Phone Number
+                                </label>
+
+                                {{ form.phone }}
+
+                                {% for error in form.phone.errors %}
+                                <div class="settings-error">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="settings-label"
+                                       for="{{ form.email.id_for_label }}">
+                                    Business Email
+                                </label>
+
+                                {{ form.email }}
+
+                                {% for error in form.email.errors %}
+                                <div class="settings-error">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+
+                            <div class="col-12">
+                                <label class="settings-label"
+                                       for="{{ form.address.id_for_label }}">
+                                    Business Address
+                                </label>
+
+                                {{ form.address }}
+
+                                {% for error in form.address.errors %}
+                                <div class="settings-error">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- BUSINESS DEFAULTS -->
+
+                <div class="settings-card mb-4">
+
+                    <div class="settings-card-header">
+                        <h5 class="settings-section-title">
+                            <i class="fa-solid fa-sliders me-2"
+                               style="color:#0f766e;"></i>
+                            Business Defaults
+                        </h5>
+
+                        <p class="settings-section-subtitle">
+                            Default values for pharmacy operations.
+                        </p>
+                    </div>
+
+                    <div class="settings-card-body">
+
+                        <div class="row g-3">
+
+                            <div class="col-md-6">
+                                <label class="settings-label"
+                                       for="{{ form.currency_code.id_for_label }}">
+                                    Currency
+                                </label>
+
+                                {{ form.currency_code }}
+
+                                {% for error in form.currency_code.errors %}
+                                <div class="settings-error">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="settings-label"
+                                       for="{{ form.default_tax_percentage.id_for_label }}">
+                                    Default Tax (%)
+                                </label>
+
+                                {{ form.default_tax_percentage }}
+
+                                <div class="settings-help">
+                                    Range: 0–100%. Default for future
+                                    integration with checkout forms.
+                                </div>
+
+                                {% for error in form.default_tax_percentage.errors %}
+                                <div class="settings-error">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="settings-label"
+                                       for="{{ form.low_stock_threshold.id_for_label }}">
+                                    Low Stock Threshold
+                                </label>
+
+                                {{ form.low_stock_threshold }}
+
+                                <div class="settings-help">
+                                    Quantity measured in individual units.
+                                </div>
+
+                                {% for error in form.low_stock_threshold.errors %}
+                                <div class="settings-error">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="settings-label"
+                                       for="{{ form.expiry_alert_days.id_for_label }}">
+                                    Expiry Alert Days
+                                </label>
+
+                                {{ form.expiry_alert_days }}
+
+                                <div class="settings-help">
+                                    Show expiry warning this many days
+                                    before expiry.
+                                </div>
+
+                                {% for error in form.expiry_alert_days.errors %}
+                                <div class="settings-error">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+
+                            <div class="col-12">
+                                <label class="settings-label"
+                                       for="{{ form.receipt_footer.id_for_label }}">
+                                    Receipt Footer Message
+                                </label>
+
+                                {{ form.receipt_footer }}
+
+                                <div class="settings-help">
+                                    Saved for integration with sales
+                                    receipt and PDF templates.
+                                </div>
+
+                                {% for error in form.receipt_footer.errors %}
+                                <div class="settings-error">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- RIGHT COLUMN -->
+
+            <div class="col-xl-4">
+
+                <!-- LOGO -->
+
+                <div class="settings-card mb-4">
+
+                    <div class="settings-card-header">
+                        <h5 class="settings-section-title">
+                            <i class="fa-solid fa-image me-2"
+                               style="color:#0f766e;"></i>
+                            Pharmacy Logo
+                        </h5>
+
+                        <p class="settings-section-subtitle">
+                            JPG, PNG or WebP, maximum 2 MB.
+                        </p>
+                    </div>
+
+                    <div class="settings-card-body">
+
+                        <div class="d-flex align-items-center gap-3 mb-3">
+
+                            {% if profile.logo %}
+
+                            <img src="{{ profile.logo.url }}"
+                                 alt="Current pharmacy logo"
+                                 class="settings-preview-logo"
+                                 id="pharmacyLogoPreview">
+
+                            {% else %}
+
+                            <div class="settings-logo-placeholder"
+                                 id="pharmacyLogoPlaceholder">
+                                <i class="fa-solid fa-prescription-bottle-medical"></i>
+                            </div>
+
+                            <img src=""
+                                 alt="New pharmacy logo preview"
+                                 class="settings-preview-logo d-none"
+                                 id="pharmacyLogoPreview">
+
+                            {% endif %}
+
+                            <div>
+                                <div class="fw-semibold">
+                                    {{ profile.name }}
+                                </div>
+
+                                <small class="text-muted">
+                                    Business Logo
+                                </small>
+                            </div>
+
+                        </div>
+
+                        {{ form.logo }}
+
+                        {% for error in form.logo.errors %}
+                        <div class="settings-error">{{ error }}</div>
+                        {% endfor %}
+
+                        <div class="settings-help mt-2">
+                            Logo preview will appear after selecting
+                            a valid image.
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- SETTINGS INFORMATION -->
+
+                <div class="settings-info-box mb-4">
+
+                    <div class="fw-semibold mb-2">
+                        <i class="fa-solid fa-circle-info me-1"></i>
+                        Settings Information
+                    </div>
+
+                    <p class="mb-2">
+                        These values are stored in the database
+                        and can be updated without changing
+                        Python source code.
+                    </p>
+
+                    <p class="mb-0">
+                        Automatic application to POS, inventory,
+                        receipt and PDF templates will be
+                        connected in the next phase.
+                    </p>
+
+                </div>
+
+                <!-- SAVE ACTION -->
+
+                <div class="settings-card">
+
+                    <div class="settings-card-body">
+
+                        <button type="submit"
+                                class="btn settings-primary-btn w-100"
+                                id="savePharmacySettings">
+
+                            <i class="fa-solid fa-floppy-disk me-2"></i>
+                            Save Settings
+
+                        </button>
+
+                        <div class="settings-help text-center mt-3">
+                            Only authorized users can modify
+                            business settings.
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </form>
+
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const input = document.getElementById("id_logo");
+
+    const preview = document.getElementById(
+        "pharmacyLogoPreview"
+    );
+
+    const placeholder = document.getElementById(
+        "pharmacyLogoPlaceholder"
+    );
+
+    if (!input || !preview) {
+        return;
+    }
+
+    let currentObjectUrl = null;
+
+    input.addEventListener("change", function () {
+
+        const file = input.files && input.files[0];
+
+        if (currentObjectUrl) {
+            URL.revokeObjectURL(currentObjectUrl);
+            currentObjectUrl = null;
+        }
+
+        if (!file) {
+            return;
+        }
+
+        if (
+            !file.type.startsWith("image/") ||
+            file.size > 2 * 1024 * 1024
+        ) {
+            alert(
+                "Please select an image smaller than 2 MB."
+            );
+
+            input.value = "";
+            return;
+        }
+
+        currentObjectUrl = URL.createObjectURL(file);
+
+        preview.src = currentObjectUrl;
+        preview.classList.remove("d-none");
+
+        if (placeholder) {
+            placeholder.classList.add("d-none");
+        }
+    });
+
+});
+</script>
+
+{% endblock %}

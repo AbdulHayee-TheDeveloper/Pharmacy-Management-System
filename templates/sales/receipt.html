@@ -7,17 +7,13 @@
 
     <meta charset="UTF-8">
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>
         {{ sale.invoice_number }} | Receipt
     </title>
 
     <style>
-
         * {
             box-sizing: border-box;
         }
@@ -250,7 +246,6 @@
             }
 
         }
-
     </style>
 
 </head>
@@ -267,25 +262,46 @@
             <!-- HEADER -->
             <!-- ================================================= -->
 
-            <div class="receipt-header">
 
-                <div class="brand-icon">
-                    Rx
-                </div>
+            <div class="receipt-header text-center">
 
-                <div class="brand-name">
-                    PharmaCare
-                </div>
+                {% if pharmacy.logo_url %}
 
-                <div class="brand-subtitle">
-                    PHARMACY MANAGEMENT
-                </div>
+                <img src="{{ pharmacy.logo_url }}" alt="{{ pharmacy.name }}" style="
+                max-width:75px;
+                max-height:60px;
+                object-fit:contain;
+                display:block;
+                margin:0 auto 8px;
+            ">
 
-                <div class="branch-name">
-                    {{ sale.branch.name }}
-                </div>
+                {% endif %}
+
+                <h2>
+                    {{ pharmacy.name|default:"PharmaCare" }}
+                </h2>
+
+                {% if pharmacy.tagline %}
+                <p>{{ pharmacy.tagline }}</p>
+                {% endif %}
+
+                {% if pharmacy.address %}
+                <p>{{ pharmacy.address|linebreaksbr }}</p>
+                {% endif %}
+
+                {% if pharmacy.phone %}
+                <p>Phone: {{ pharmacy.phone }}</p>
+                {% endif %}
+
+                {% if pharmacy.registration_number %}
+                <p>
+                    License/Registration:
+                    {{ pharmacy.registration_number }}
+                </p>
+                {% endif %}
 
             </div>
+
 
 
             <div class="divider"></div>
@@ -338,9 +354,9 @@
                     <span class="meta-value">
 
                         {% if sale.cashier.get_full_name %}
-                            {{ sale.cashier.get_full_name }}
+                        {{ sale.cashier.get_full_name }}
                         {% else %}
-                            {{ sale.cashier.username }}
+                        {{ sale.cashier.username }}
                         {% endif %}
 
                     </span>
@@ -355,9 +371,9 @@
                     <span class="meta-value">
 
                         {% if sale.customer_name %}
-                            {{ sale.customer_name }}
+                        {{ sale.customer_name }}
                         {% else %}
-                            Walk-in
+                        Walk-in
                         {% endif %}
 
                     </span>
@@ -366,15 +382,15 @@
 
                 {% if sale.customer_phone %}
 
-                    <div class="meta-row">
-                        <span class="meta-label">
-                            Phone
-                        </span>
+                <div class="meta-row">
+                    <span class="meta-label">
+                        Phone
+                    </span>
 
-                        <span class="meta-value">
-                            {{ sale.customer_phone }}
-                        </span>
-                    </div>
+                    <span class="meta-value">
+                        {{ sale.customer_phone }}
+                    </span>
+                </div>
 
                 {% endif %}
 
@@ -406,78 +422,78 @@
 
             {% for item in sale_items %}
 
-                <div class="receipt-item">
+            <div class="receipt-item">
 
-                    <div class="item-name">
-                        {{ item.medicine_name }}
+                <div class="item-name">
+                    {{ item.medicine_name }}
 
-                        {% if item.medicine.strength %}
-                            {{ item.medicine.strength }}
-                        {% endif %}
-                    </div>
+                    {% if item.medicine.strength %}
+                    {{ item.medicine.strength }}
+                    {% endif %}
+                </div>
 
 
-                    <div class="item-meta">
+                <div class="item-meta">
 
-                        Batch:
-                        {{ item.batch_number }}
+                    Batch:
+                    {{ item.batch_number }}
 
-                        &nbsp;•&nbsp;
+                    &nbsp;•&nbsp;
+
+                    {% if item.sale_type == "pack" %}
+
+                    Pack
+
+                    {% if item.pack_size > 1 %}
+                    of {{ item.pack_size }}
+                    {{ item.unit_label|lower }}s
+                    {% endif %}
+
+                    {% else %}
+
+                    {{ item.unit_label }}
+
+                    {% endif %}
+
+                </div>
+
+
+                <div class="item-price-row">
+
+                    <span>
+
+                        {{ item.quantity }}
 
                         {% if item.sale_type == "pack" %}
 
-                            Pack
-
-                            {% if item.pack_size > 1 %}
-                                of {{ item.pack_size }}
-                                {{ item.unit_label|lower }}s
-                            {% endif %}
+                        pack{% if item.quantity != 1 %}s{% endif %}
 
                         {% else %}
 
-                            {{ item.unit_label }}
+                        {{ item.unit_label|lower }}{% if item.quantity != 1 %}s{% endif %}
 
                         {% endif %}
 
-                    </div>
+                        × Rs.
+                        {{ item.unit_price|floatformat:2 }}
+
+                    </span>
 
 
-                    <div class="item-price-row">
-
-                        <span>
-
-                            {{ item.quantity }}
-
-                            {% if item.sale_type == "pack" %}
-
-                                pack{% if item.quantity != 1 %}s{% endif %}
-
-                            {% else %}
-
-                                {{ item.unit_label|lower }}{% if item.quantity != 1 %}s{% endif %}
-
-                            {% endif %}
-
-                            × Rs.
-                            {{ item.unit_price|floatformat:2 }}
-
-                        </span>
-
-
-                        <span class="total">
-                            Rs.
-                            {{ item.line_total|floatformat:2 }}
-                        </span>
-
-                    </div>
+                    <span class="total">
+                        Rs.
+                        {{ item.line_total|floatformat:2 }}
+                    </span>
 
                 </div>
+
+            </div>
 
             {% empty %}
 
-                <div style="text-align: center; color: #667085; padding: 20px 0;">
-                    No items found.
-                </div>
+            <div style="text-align: center; color: #667085; padding: 20px 0;">
+                No items found.
+            </div>
 
             {% endfor %}
 
@@ -587,21 +603,21 @@
 
                 {% if sale.payment_status == "paid" %}
 
-                    <span class="status-badge status-paid">
-                        {{ sale.get_payment_status_display }}
-                    </span>
+                <span class="status-badge status-paid">
+                    {{ sale.get_payment_status_display }}
+                </span>
 
                 {% elif sale.payment_status == "partial" %}
 
-                    <span class="status-badge status-partial">
-                        {{ sale.get_payment_status_display }}
-                    </span>
+                <span class="status-badge status-partial">
+                    {{ sale.get_payment_status_display }}
+                </span>
 
                 {% else %}
 
-                    <span class="status-badge status-unpaid">
-                        {{ sale.get_payment_status_display }}
-                    </span>
+                <span class="status-badge status-unpaid">
+                    {{ sale.get_payment_status_display }}
+                </span>
 
                 {% endif %}
 
@@ -614,20 +630,18 @@
 
             {% if sale.notes %}
 
-                <div class="divider"></div>
+            <div class="divider"></div>
 
-                <div
-                    style="
+            <div style="
                         font-size: 12px;
                         color: #667085;
-                    "
-                >
-                    <strong style="color: #172033;">
-                        Notes:
-                    </strong>
+                    ">
+                <strong style="color: #172033;">
+                    Notes:
+                </strong>
 
-                    {{ sale.notes|linebreaksbr }}
-                </div>
+                {{ sale.notes|linebreaksbr }}
+            </div>
 
             {% endif %}
 
@@ -636,15 +650,11 @@
             <!-- FOOTER -->
             <!-- ================================================= -->
 
-            <div class="receipt-footer">
+            <div class="receipt-footer text-center">
 
-                <div class="footer-title">
-                    Thank you for your purchase!
-                </div>
-
-                <div>
-                    Please keep this receipt for your records.
-                </div>
+                <p>
+                    {{ pharmacy.receipt_footer|default:"Thank you for shopping with us!" }}
+                </p>
 
             </div>
 
@@ -660,18 +670,11 @@
 
     <div class="actions">
 
-        <a
-            href="{% url 'sales:detail' sale.pk %}"
-            class="btn btn-back"
-        >
+        <a href="{% url 'sales:detail' sale.pk %}" class="btn btn-back">
             Back
         </a>
 
-        <button
-            type="button"
-            class="btn btn-print"
-            onclick="window.print()"
-        >
+        <button type="button" class="btn btn-print" onclick="window.print()">
             Print Receipt
         </button>
 

@@ -4,23 +4,35 @@
     <!-- BRAND -->
     <!-- ====================================================== -->
 
-    <div class="sidebar-brand">
 
-        <div class="brand-icon">
+    <div class="d-flex align-items-center gap-2">
+
+        {% if pharmacy.logo_url %}
+
+        <img src="{{ pharmacy.logo_url }}" alt="{{ pharmacy.name }} logo" class="pharmacy-brand-logo">
+
+        {% else %}
+
+        <div class="pharmacy-brand-fallback">
             <i class="fa-solid fa-prescription-bottle-medical"></i>
         </div>
 
-        <div>
-            <div class="brand-name">
-                PharmaCare
+        {% endif %}
+
+        <div class="overflow-hidden">
+
+            <div class="fw-bold text-truncate">
+                {{ pharmacy.name|default:"PharmaCare" }}
             </div>
 
-            <div class="brand-subtitle">
-                PHARMACY MANAGEMENT
-            </div>
+            <small class="text-muted d-block text-truncate">
+                {{ pharmacy.tagline|default:"Pharmacy Management System" }}
+            </small>
+
         </div>
 
     </div>
+
 
 
     <!-- ====================================================== -->
@@ -190,22 +202,15 @@
         <!-- ADMINISTRATION -->
         <!-- ================================================== -->
 
-        <div class="nav-section-title mt-4">
-            ADMINISTRATION
-        </div>
+        {% if user.is_superuser or perms.core_settings.change_pharmacyprofile %}
 
+        <a href="{% url 'core_settings:pharmacy_settings' %}" class="nav-link">
 
-        <!-- Users, Roles & Branches -->
+            <i class="fa-solid fa-gear me-2"></i>
+            Pharmacy Settings
 
-        {% if perms.accounts.view_user or perms.branches.view_branch %}
-        <!-- Users, Roles & Branches module will be connected here -->
-        {% endif %}
+        </a>
 
-
-        <!-- Settings -->
-
-        {% if perms.accounts.view_user %}
-        <!-- Settings module will be connected here -->
         {% endif %}
 
     </nav>

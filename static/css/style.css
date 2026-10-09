@@ -28,7 +28,29 @@ body {
 a {
     text-decoration: none;
 }
+.pharmacy-brand-logo,
+.pharmacy-brand-fallback {
+    width: 42px;
+    height: 42px;
+    flex: 0 0 42px;
+    border-radius: 11px;
+}
 
+.pharmacy-brand-logo {
+    object-fit: contain;
+    background: #ffffff;
+    border: 1px solid #dce8e5;
+    padding: 4px;
+}
+
+.pharmacy-brand-fallback {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #e8f5f2;
+    color: #0f766e;
+    font-size: 19px;
+}
 /* ================================
    APP LAYOUT
 ================================ */
