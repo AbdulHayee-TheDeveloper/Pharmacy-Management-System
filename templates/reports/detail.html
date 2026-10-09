@@ -1,0 +1,231 @@
+{% extends "base/base.html" %}
+{% load static %}
+
+{% block title %}
+{{ report_config.title }} | PharmaCare
+{% endblock %}
+
+{% block content %}
+
+<link rel="stylesheet" href="{% static 'css/reports.css' %}">
+
+<div class="container-fluid py-4 reports-page" id="reportDetailPage"
+    data-rows-url="{% if report_type == 'sales' %}{% url 'reports:sales_rows' %}{% elif report_type == 'purchases' %}{% url 'reports:purchases_rows' %}{% elif report_type == 'inventory' %}{% url 'reports:inventory_rows' %}{% endif %}"
+    data-report-type="{{ report_type }}"
+    data-api-url="{% if report_type == 'sales' %}{% url 'reports:sales' %}{% elif report_type == 'purchases' %}{% url 'reports:purchases' %}{% elif report_type == 'inventory' %}{% url 'reports:inventory' %}{% else %}{% url 'reports:profit' %}{% endif %}"
+    data-export-url="{% if report_type == 'sales' %}{% url 'reports:export_sales' %}{% elif report_type == 'purchases' %}{% url 'reports:export_purchases' %}{% elif report_type == 'inventory' %}{% url 'reports:export_inventory' %}{% endif %}">
+
+    <!-- HEADER -->
+    <div class="d-flex flex-wrap justify-content-between
+                align-items-start gap-3 mb-4">
+
+        <div>
+            <a href="{% url 'reports:dashboard' %}" class="text-decoration-none small" style="color:#0f766e;">
+                <i class="fa-solid fa-arrow-left me-1"></i>
+                Back to Analytics
+            </a>
+
+            <h2 class="fw-bold mt-2 mb-1">
+                <i class="fa-solid {{ report_config.icon }} me-2" style="color:#0f766e;"></i>
+                {{ report_config.title }}
+            </h2>
+
+            <p class="text-muted mb-0">
+                {{ report_config.description }}
+            </p>
+        </div>
+
+        <div class="d-flex gap-2">
+            <button type="button" class="btn btn-outline-secondary" id="detailRefresh">
+                <i class="fa-solid fa-rotate me-1"></i>
+                Refresh
+            </button>
+
+
+
+            <!-- PRIMARY PDF EXPORT -->
+
+            <a href="{% url 'reports:export_pdf' report_type %}" class="btn reports-primary-btn" id="detailExportPdf">
+
+                <i class="fa-solid fa-file-pdf me-1"></i>
+                Export PDF
+
+            </a>
+
+            <!-- SECONDARY CSV EXPORT -->
+
+            {% if report_config.export_name %}
+
+            <a href="#" class="btn btn-outline-secondary" id="detailExport">
+
+                <i class="fa-solid fa-file-csv me-1"></i>
+                Export CSV
+
+            </a>
+
+            {% endif %}
+
+
+        </div>
+    </div>
+
+    <!-- FILTERS -->
+    <div class="card reports-card mb-4">
+        <div class="card-body">
+            <form id="detailReportFilters" class="row g-3 align-items-end">
+
+                {% if report_type != "inventory" %}
+
+                <div class="col-sm-6 col-lg-3">
+                    <label class="form-label reports-label">
+                        From Date
+                    </label>
+                    <input type="date" id="detailDateFrom" name="date_from" class="form-control" required>
+                </div>
+
+                <div class="col-sm-6 col-lg-3">
+                    <label class="form-label reports-label">
+                        To Date
+                    </label>
+                    <input type="date" id="detailDateTo" name="date_to" class="form-control" required>
+                </div>
+
+                {% endif %}
+
+                {% if can_filter_branches %}
+                <div class="col-sm-6 col-lg-3">
+                    <label class="form-label reports-label">
+                        Branch
+                    </label>
+
+                    <select id="detailBranch" name="branch" class="form-select">
+                        <option value="">All Branches</option>
+
+                        {% for branch in branches %}
+                        <option value="{{ branch.pk }}">
+                            {{ branch.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                {% endif %}
+
+                <div class="col-sm-6 col-lg-3">
+                    <button type="submit" class="btn reports-primary-btn w-100">
+                        <i class="fa-solid fa-filter me-1"></i>
+                        Apply Filters
+                    </button>
+                </div>
+
+            </form>
+
+            {% if report_type == "inventory" %}
+            <small class="text-muted d-block mt-3">
+                Inventory values are based on current
+                stock, regardless of date selection.
+            </small>
+            {% endif %}
+        </div>
+    </div>
+
+    <div id="detailLoading" class="reports-loading mb-3" role="status">
+        <span class="spinner-border spinner-border-sm me-2"></span>
+        Loading report data...
+    </div>
+
+    <div id="detailError" class="alert alert-danger d-none" role="alert"></div>
+
+    <div id="detailReportContent" class="d-none">
+
+        <!-- SUMMARY -->
+        <div class="row g-3 mb-4" id="detailKpiContainer"></div>
+
+        {% if report_type == "profit" %}
+        <div class="alert alert-warning" id="profitWarning">
+            <strong>
+                <i class="fa-solid fa-triangle-exclamation me-1"></i>
+                Estimated Values
+            </strong>
+            <p id="profitWarningText" class="mb-0 mt-2"></p>
+        </div>
+        {% endif %}
+
+        <!-- MAIN RECORDS TABLE -->
+        <div class="card reports-card mb-4">
+            <div class="card-header reports-header">
+                <div>
+                    <h5 class="fw-semibold mb-1" id="detailMainTitle">
+                        Report Data
+                    </h5>
+                    <small class="text-muted" id="detailMainSubtitle"></small>
+                </div>
+            </div>
+
+            <div class="card-body">
+                <div class="d-flex flex-wrap gap-2
+                            justify-content-between mb-3">
+                    <input type="search" id="detailTableSearch" class="form-control" style="max-width:320px;"
+                        maxlength="100" placeholder="Search all records..." autocomplete="off">
+
+                    <span class="small text-muted align-self-center" id="detailRowCount"></span>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover
+                                  align-middle reports-table">
+                        <thead id="detailTableHead"></thead>
+                        <tbody id="detailTableBody"></tbody>
+                    </table>
+                </div>
+
+                <div class="d-flex justify-content-between
+                            align-items-center gap-2">
+                    <button type="button" id="detailPrev" class="btn btn-sm btn-outline-secondary">
+                        <i class="fa-solid fa-chevron-left me-1"></i>
+                        Previous
+                    </button>
+
+                    <span class="small text-muted" id="detailPageInfo"></span>
+
+                    <button type="button" id="detailNext" class="btn btn-sm btn-outline-secondary">
+                        Next
+                        <i class="fa-solid fa-chevron-right ms-1"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECONDARY REPORT TABLE -->
+        <div id="detailSecondarySection" class="card reports-card mb-4 d-none">
+
+            <div class="card-header reports-header">
+                <h5 class="fw-semibold mb-0" id="detailSecondaryTitle">
+                    Breakdown
+                </h5>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover
+                              align-middle reports-table mb-0">
+                    <thead id="detailSecondaryHead"></thead>
+                    <tbody id="detailSecondaryBody"></tbody>
+                </table>
+            </div>
+
+        </div>
+
+        <div class="card reports-card">
+            <div class="card-body">
+                <h6 class="fw-semibold">
+                    Report Information
+                </h6>
+                <div id="detailReportNotes" class="reports-note"></div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script defer src="{% static 'js/report_detail.js' %}"></script>
+
+{% endblock %}

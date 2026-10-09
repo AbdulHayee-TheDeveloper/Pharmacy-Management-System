@@ -176,15 +176,13 @@
         <!-- ANALYTICS -->
         <!-- ================================================== -->
 
-        <div class="nav-section-title mt-4">
-            ANALYTICS
-        </div>
-
-
-        <!-- Reports -->
-
-        {% if perms.reports.view_report %}
-        <!-- Reports module will be connected here -->
+        {% if perms.sales.view_sale and perms.purchases.view_purchase and perms.inventory.view_inventorybatch %}
+        <li class="nav-item">
+            <a href="{% url 'reports:dashboard' %}" class="nav-link">
+                <i class="fa-solid fa-chart-line me-2"></i>
+                Reports & Analytics
+            </a>
+        </li>
         {% endif %}
 
 
