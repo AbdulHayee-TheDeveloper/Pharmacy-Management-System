@@ -1,74 +1,190 @@
+
 <header class="topbar">
 
+    <!-- ============================================= -->
+    <!-- LEFT: MENU + BRANDING -->
+    <!-- ============================================= -->
 
-<div class="topbar-left">
+    <div class="topbar-left">
 
-    <button
-        type="button"
-        class="mobile-menu-btn"
-        id="sidebarToggle"
-        aria-label="Toggle sidebar"
-    >
-        <i class="fa-solid fa-bars"></i>
-    </button>
-
-    <div class="global-search">
-        <i class="fa-solid fa-magnifying-glass"></i>
-
-        <input
-            type="search"
-            placeholder="Search anything..."
-            aria-label="Global search"
+        <!-- Mobile Sidebar Toggle -->
+        <button
+            type="button"
+            class="mobile-menu-btn"
+            id="sidebarToggle"
+            aria-label="Toggle sidebar"
+            aria-controls="sidebar"
+            aria-expanded="false"
         >
+            <i class="fa-solid fa-bars"></i>
+        </button>
+
+        <!-- Application Identity -->
+        <div class="d-flex align-items-center gap-3">
+
+            <div class="d-none d-sm-flex align-items-center
+                        justify-content-center rounded-3"
+                 style="
+                    width: 40px;
+                    height: 40px;
+                    background: rgba(13, 148, 136, 0.10);
+                    color: #0d9488;
+                 ">
+                <i class="fa-solid fa-house-medical fs-5"></i>
+            </div>
+
+            <div class="d-flex flex-column">
+
+                <div class="fw-bold lh-sm">
+                    PharmaCare
+                </div>
+
+                <div class="small text-muted mt-1">
+                    Pharmacy Management System
+                </div>
+
+            </div>
+
+        </div>
+
     </div>
 
-</div>
 
+    <!-- ============================================= -->
+    <!-- RIGHT: BRANCH + USER -->
+    <!-- ============================================= -->
 
-<div class="topbar-right">
+    <div class="topbar-right">
 
-    <!-- Notifications -->
-    <button
-        type="button"
-        class="topbar-icon-btn"
-        title="Notifications"
-        aria-label="Notifications"
-    >
-        <i class="fa-regular fa-bell"></i>
-        <span class="notification-dot"></span>
-    </button>
+        <!-- Branch Information -->
+        <div class="d-none d-md-flex align-items-center">
 
+            {% if request.user.is_superuser %}
 
-    <!-- User Profile -->
-    <div class="profile">
+                <div class="d-flex align-items-center gap-2
+                            px-3 py-2 rounded-3 bg-light">
 
-        <div class="profile-avatar">
-            {% if request.user.first_name and request.user.last_name %}
-                {{ request.user.first_name|first|upper }}{{ request.user.last_name|first|upper }}
-            {% elif request.user.first_name %}
-                {{ request.user.first_name|first|upper }}
+                    <i class="fa-solid fa-shield-halved text-success"></i>
+
+                    <div class="d-flex flex-column">
+
+                        <span class="small fw-semibold">
+                            System Administrator
+                        </span>
+
+                        <span class="text-muted"
+                              style="font-size: 11px;">
+                            Owner Access
+                        </span>
+
+                    </div>
+
+                </div>
+
+            {% elif request.user.branch %}
+
+                <div class="d-flex align-items-center gap-2
+                            px-3 py-2 rounded-3 bg-light">
+
+                    <i class="fa-solid fa-store text-success"></i>
+
+                    <div class="d-flex flex-column">
+
+                        <span class="small fw-semibold">
+                            {{ request.user.branch.name }}
+                        </span>
+
+                        <span class="text-muted"
+                              style="font-size: 11px;">
+                            Assigned Pharmacy Location
+                        </span>
+
+                    </div>
+
+                </div>
+
             {% else %}
-                {{ request.user.username|first|upper }}
+
+                <div class="d-flex align-items-center gap-2
+                            px-3 py-2 rounded-3 bg-light">
+
+                    <i class="fa-solid fa-triangle-exclamation
+                              text-warning"></i>
+
+                    <div class="d-flex flex-column">
+
+                        <span class="small fw-semibold text-warning">
+                            No Branch Assigned
+                        </span>
+
+                        <span class="text-muted"
+                              style="font-size: 11px;">
+                            Contact Administrator
+                        </span>
+
+                    </div>
+
+                </div>
+
             {% endif %}
-        </div>
-
-        <div class="profile-info">
-
-            <div class="fw-semibold">
-                {{ request.user.get_full_name|default:request.user.username }}
-            </div>
-
-            <div class="small text-muted">
-                {{ request.user.role.name|default:"User" }}
-            </div>
 
         </div>
 
-        <i class="fa-solid fa-chevron-down profile-arrow"></i>
+
+        <!-- User Profile -->
+        <div class="profile d-flex align-items-center gap-2">
+
+            <!-- Avatar -->
+            <div class="profile-avatar">
+
+                {% if request.user.first_name and request.user.last_name %}
+
+                    {{ request.user.first_name|first|upper }}{{ request.user.last_name|first|upper }}
+
+                {% elif request.user.first_name %}
+
+                    {{ request.user.first_name|first|upper }}
+
+                {% else %}
+
+                    {{ request.user.username|first|upper }}
+
+                {% endif %}
+
+            </div>
+
+
+            <!-- User Information -->
+            <div class="profile-info d-none d-sm-block">
+
+                <div class="fw-semibold">
+
+                    {{ request.user.get_full_name|default:request.user.username }}
+
+                </div>
+
+                <div class="small text-muted">
+
+                    {% if request.user.is_superuser %}
+
+                        Owner / Administrator
+
+                    {% elif request.user.role %}
+
+                        {{ request.user.role.name }}
+
+                    {% else %}
+
+                        No Role Assigned
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+        </div>
 
     </div>
-
-</div>
-
 
 </header>
