@@ -198,6 +198,27 @@
         {% endif %}
 
 
+<!-- ============================================= -->
+<!-- BRANCH MANAGEMENT -->
+<!-- ============================================= -->
+
+
+{% if multi_branch_enabled and request.user.is_superuser %}
+
+<a href="{% url 'branches:list' %}"
+   class="nav-link
+   {% if request.resolver_match.app_name == 'branches' %}
+       active
+   {% endif %}">
+
+    <i class="fa-solid fa-code-branch"></i>
+    <span>Branches</span>
+
+</a>
+
+{% endif %}
+
+
         <!-- ================================================== -->
         <!-- ADMINISTRATION -->
         <!-- ================================================== -->

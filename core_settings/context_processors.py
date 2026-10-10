@@ -4,12 +4,14 @@ from .models import PharmacyProfile
 
 def pharmacy_branding(request):
     """
-    Make the saved pharmacy profile available
-    in Django templates as `pharmacy`.
+    Provide global pharmacy branding and branch mode
+    to authenticated users' templates.
 
-    Anonymous visitors can see the default
-    brand label without initiating a database query.
+    Context variables:
+        pharmacy
+        multi_branch_enabled
     """
+
     default = {
         "name": "PharmaCare",
         "tagline": "Pharmacy Management System",
@@ -20,10 +22,14 @@ def pharmacy_branding(request):
         "registration_number": "",
         "receipt_footer": "Thank you for shopping with us!",
         "currency_code": "PKR",
+        "enable_multi_branch": False,
     }
 
     if not request.user.is_authenticated:
-        return {"pharmacy": default}
+        return {
+            "pharmacy": default,
+            "multi_branch_enabled": False,
+        }
 
     profile = (
         PharmacyProfile.objects
@@ -32,7 +38,10 @@ def pharmacy_branding(request):
     )
 
     if profile is None:
-        return {"pharmacy": default}
+        return {
+            "pharmacy": default,
+            "multi_branch_enabled": False,
+        }
 
     logo_url = ""
 
@@ -53,5 +62,7 @@ def pharmacy_branding(request):
             "registration_number": profile.registration_number,
             "receipt_footer": profile.receipt_footer,
             "currency_code": profile.currency_code,
-        }
+            "enable_multi_branch": profile.enable_multi_branch,
+        },
+        "multi_branch_enabled": profile.enable_multi_branch,
     }

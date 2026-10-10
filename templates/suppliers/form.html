@@ -150,7 +150,7 @@
         </a>
     </div>
 
-    <form method="post" novalidate>
+    <form method="post" id="supplierForm" novalidate>
         {% csrf_token %}
 
         {% if form.non_field_errors %}
@@ -351,7 +351,7 @@
                     Cancel
                 </a>
 
-                <button type="submit" class="btn btn-teal px-4">
+                <button type="submit" id="saveSupplierButton" class="btn btn-teal px-4">
                     <i class="fa-solid fa-floppy-disk me-2"></i>
                     {% if is_edit %}
                         Save Changes
@@ -366,5 +366,30 @@
     </form>
 
 </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const form = document.getElementById("supplierForm");
+    const button = document.getElementById("saveSupplierButton");
+
+    if (!form || !button) return;
+
+    let submitting = false;
+
+    form.addEventListener("submit", function (event) {
+        if (submitting) {
+            event.preventDefault();
+            return;
+        }
+
+        submitting = true;
+        button.disabled = true;
+        button.innerHTML = `
+            <span class="spinner-border spinner-border-sm me-2"></span>
+            Saving...
+        `;
+    });
+});
+</script>
 
 {% endblock %}

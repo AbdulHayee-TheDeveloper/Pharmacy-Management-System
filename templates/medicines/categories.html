@@ -1,0 +1,205 @@
+
+{% extends "base/base.html" %}
+
+{% block title %}Medicine Categories | PharmaCare{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">Medicine Categories</h2>
+            <p class="text-muted mb-0">
+                Organize and manage medicine categories.
+            </p>
+        </div>
+
+        <a href="{% url 'medicines:list' %}"
+           class="btn btn-outline-secondary">
+            <i class="fa-solid fa-arrow-left me-2"></i>
+            Back to Medicines
+        </a>
+    </div>
+
+    <div class="row g-4">
+
+        <!-- CATEGORY FORM -->
+        <div class="col-lg-4">
+            {% if editing_category %}
+                {% if perms.medicines.change_category %}
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <h5 class="fw-bold mb-3">
+                            Edit Category
+                        </h5>
+
+                        <form method="post"
+                              action="{% url 'medicines:category_edit' editing_category.pk %}">
+                            {% csrf_token %}
+
+                            {% for error in form.non_field_errors %}
+                                <div class="alert alert-danger">
+                                    {{ error }}
+                                </div>
+                            {% endfor %}
+
+                            {% for field in form %}
+                                <div class="mb-3">
+                                    <label for="{{ field.id_for_label }}"
+                                           class="form-label fw-semibold">
+                                        {{ field.label }}
+                                    </label>
+
+                                    {{ field }}
+
+                                    {% for error in field.errors %}
+                                        <div class="text-danger small mt-1">
+                                            {{ error }}
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% endfor %}
+
+                            <button type="submit" class="btn btn-success">
+                                Save Changes
+                            </button>
+
+                            <a href="{% url 'medicines:categories' %}"
+                               class="btn btn-light">
+                                Cancel
+                            </a>
+                        </form>
+                    </div>
+                </div>
+                {% endif %}
+            {% elif perms.medicines.add_category %}
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <h5 class="fw-bold mb-3">
+                            Add Category
+                        </h5>
+
+                        <form method="post"
+                              action="{% url 'medicines:category_create' %}">
+                            {% csrf_token %}
+
+                            {% for error in form.non_field_errors %}
+                                <div class="alert alert-danger">
+                                    {{ error }}
+                                </div>
+                            {% endfor %}
+
+                            {% for field in form %}
+                                <div class="mb-3">
+                                    <label for="{{ field.id_for_label }}"
+                                           class="form-label fw-semibold">
+                                        {{ field.label }}
+                                    </label>
+
+                                    {{ field }}
+
+                                    {% for error in field.errors %}
+                                        <div class="text-danger small mt-1">
+                                            {{ error }}
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% endfor %}
+
+                            <button type="submit" class="btn btn-success">
+                                <i class="fa-solid fa-plus me-1"></i>
+                                Add Category
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- CATEGORY LIST -->
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold mb-3">All Categories</h5>
+
+                    <div class="table-responsive">
+                        <table class="table align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Description</th>
+                                    <th>Status</th>
+                                    <th class="text-end">Actions</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                {% for category in categories %}
+                                <tr>
+                                    <td class="fw-semibold">
+                                        {{ category.name }}
+                                    </td>
+
+                                    <td>
+                                        {{ category.description|default:"—"|truncatechars:65 }}
+                                    </td>
+
+                                    <td>
+                                        {% if category.is_active %}
+                                            <span class="badge bg-success">
+                                                Active
+                                            </span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">
+                                                Inactive
+                                            </span>
+                                        {% endif %}
+                                    </td>
+
+                                    <td class="text-end">
+                                        {% if perms.medicines.change_category %}
+                                            <a
+                                                href="{% url 'medicines:category_edit' category.pk %}"
+                                                class="btn btn-sm btn-outline-primary">
+                                                Edit
+                                            </a>
+
+                                            <form
+                                                method="post"
+                                                action="{% url 'medicines:category_toggle_status' category.pk %}"
+                                                class="d-inline"
+                                                onsubmit="return confirm('Change category status?');">
+                                                {% csrf_token %}
+
+                                                <button type="submit"
+                                                        class="btn btn-sm btn-outline-secondary">
+                                                    {% if category.is_active %}
+                                                        Deactivate
+                                                    {% else %}
+                                                        Activate
+                                                    {% endif %}
+                                                </button>
+                                            </form>
+                                        {% else %}
+                                            <span class="text-muted">—</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="4"
+                                        class="text-center text-muted py-4">
+                                        No categories have been created yet.
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

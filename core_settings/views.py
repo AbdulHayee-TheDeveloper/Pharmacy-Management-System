@@ -42,10 +42,11 @@ def pharmacy_settings(request):
     if request.method == "POST":
 
         form = PharmacyProfileForm(
-            request.POST,
-            request.FILES,
-            instance=profile,
-        )
+        request.POST,
+        request.FILES,
+        instance=profile,
+        allow_branch_toggle=request.user.is_superuser,
+    )
 
         if form.is_valid():
 
@@ -63,7 +64,8 @@ def pharmacy_settings(request):
 
     else:
         form = PharmacyProfileForm(
-            instance=profile
+            instance=profile,
+            allow_branch_toggle=request.user.is_superuser,
         )
 
     context = {

@@ -189,7 +189,7 @@
         font-size: 13px;
     }
 
-    /* RECEIPT HISTORY STYLES */
+    /* Receipt history */
 
     .purchase-detail-page .receipt-card {
         border: 1px solid #e7eaee;
@@ -270,9 +270,7 @@
 
 <div class="purchase-detail-page">
 
-    <!-- ========================================
-         PAGE HEADER
-         ======================================== -->
+    <!-- PAGE HEADER -->
 
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
 
@@ -298,11 +296,11 @@
 
             {% if perms.purchases.change_purchase and is_draft %}
 
-                <a href="{% url 'purchases:edit' purchase.pk %}"
-                   class="btn btn-teal">
-                    <i class="fa-solid fa-pen me-2"></i>
-                    Edit Draft
-                </a>
+            <a href="{% url 'purchases:edit' purchase.pk %}"
+               class="btn btn-teal">
+                <i class="fa-solid fa-pen me-2"></i>
+                Edit Draft
+            </a>
 
             {% endif %}
 
@@ -310,19 +308,18 @@
 
             {% if perms.purchases.change_purchase and is_draft %}
 
-                <form method="post"
-                      action="{% url 'purchases:confirm' purchase.pk %}"
-                      class="d-inline"
-                      onsubmit="return confirm('Confirm this purchase order? Once confirmed, the draft cannot be edited.');">
+            <form method="post"
+                  action="{% url 'purchases:confirm' purchase.pk %}"
+                  class="d-inline"
+                  onsubmit="return confirm('Confirm this purchase order? Once confirmed, the draft cannot be edited.');">
 
-                    {% csrf_token %}
+                {% csrf_token %}
 
-                    <button type="submit" class="btn btn-teal">
-                        <i class="fa-solid fa-circle-check me-2"></i>
-                        Confirm Order
-                    </button>
-
-                </form>
+                <button type="submit" class="btn btn-teal">
+                    <i class="fa-solid fa-circle-check me-2"></i>
+                    Confirm Order
+                </button>
+            </form>
 
             {% endif %}
 
@@ -332,25 +329,21 @@
 
                 {% if purchase.status == "ordered" or purchase.status == "partially_received" %}
 
-                    <a href="{% url 'purchases:receive' purchase.pk %}"
-                       class="btn btn-success">
-
-                        <i class="fa-solid fa-boxes-stacked me-2"></i>
-                        Receive Stock
-                    </a>
+                <a href="{% url 'purchases:receive' purchase.pk %}"
+                   class="btn btn-success">
+                    <i class="fa-solid fa-boxes-stacked me-2"></i>
+                    Receive Stock
+                </a>
 
                 {% endif %}
 
             {% endif %}
 
         </div>
-
     </div>
 
 
-    <!-- ========================================
-         PURCHASE STATUS & SUMMARY
-         ======================================== -->
+    <!-- PURCHASE STATUS AND SUMMARY -->
 
     <div class="row g-3 mb-4">
 
@@ -363,44 +356,44 @@
 
                 {% if purchase.status == "draft" %}
 
-                    <span class="status-pill status-draft">
-                        <i class="fa-solid fa-circle fa-2xs"></i>
-                        Draft
-                    </span>
+                <span class="status-pill status-draft">
+                    <i class="fa-solid fa-circle fa-2xs"></i>
+                    Draft
+                </span>
 
                 {% elif purchase.status == "ordered" %}
 
-                    <span class="status-pill status-ordered">
-                        <i class="fa-solid fa-circle fa-2xs"></i>
-                        Ordered
-                    </span>
+                <span class="status-pill status-ordered">
+                    <i class="fa-solid fa-circle fa-2xs"></i>
+                    Ordered
+                </span>
 
                 {% elif purchase.status == "partially_received" %}
 
-                    <span class="status-pill status-partially-received">
-                        <i class="fa-solid fa-circle fa-2xs"></i>
-                        Partially Received
-                    </span>
+                <span class="status-pill status-partially-received">
+                    <i class="fa-solid fa-circle fa-2xs"></i>
+                    Partially Received
+                </span>
 
                 {% elif purchase.status == "received" %}
 
-                    <span class="status-pill status-received">
-                        <i class="fa-solid fa-circle fa-2xs"></i>
-                        Received
-                    </span>
+                <span class="status-pill status-received">
+                    <i class="fa-solid fa-circle fa-2xs"></i>
+                    Received
+                </span>
 
                 {% elif purchase.status == "cancelled" %}
 
-                    <span class="status-pill status-cancelled">
-                        <i class="fa-solid fa-circle fa-2xs"></i>
-                        Cancelled
-                    </span>
+                <span class="status-pill status-cancelled">
+                    <i class="fa-solid fa-circle fa-2xs"></i>
+                    Cancelled
+                </span>
 
                 {% else %}
 
-                    <span class="status-pill status-draft">
-                        {{ purchase.get_status_display }}
-                    </span>
+                <span class="status-pill status-draft">
+                    {{ purchase.get_status_display }}
+                </span>
 
                 {% endif %}
 
@@ -452,16 +445,13 @@
     </div>
 
 
-    <!-- ========================================
-         SUPPLIER & PURCHASE INFORMATION
-         ======================================== -->
+    <!-- SUPPLIER AND PURCHASE INFORMATION -->
 
     <div class="row g-4 mb-4">
 
         <!-- SUPPLIER INFORMATION -->
 
         <div class="col-lg-6">
-
             <div class="detail-card h-100 mb-0">
 
                 <div class="card-header-custom">
@@ -474,88 +464,66 @@
                 <div class="card-body-custom">
 
                     <div class="info-group">
-
                         <div class="info-label">
                             Supplier Name
                         </div>
-
                         <div class="info-value">
                             {{ purchase.supplier.name }}
                         </div>
-
                     </div>
 
                     <div class="info-group">
-
                         <div class="info-label">
                             Supplier Code
                         </div>
-
                         <div class="info-value">
                             {{ purchase.supplier.supplier_code|default:"—" }}
                         </div>
-
                     </div>
 
                     <div class="info-group">
-
                         <div class="info-label">
                             Company
                         </div>
-
                         <div class="info-value">
                             {{ purchase.supplier.company_name|default:"—" }}
                         </div>
-
                     </div>
 
                     <div class="info-group">
-
                         <div class="info-label">
                             Contact Person
                         </div>
-
                         <div class="info-value">
                             {{ purchase.supplier.contact_person|default:"—" }}
                         </div>
-
                     </div>
 
                     <div class="info-group">
-
                         <div class="info-label">
                             Phone
                         </div>
-
                         <div class="info-value">
                             {{ purchase.supplier.phone|default:"—" }}
                         </div>
-
                     </div>
 
                     <div class="info-group mb-0">
-
                         <div class="info-label">
                             City
                         </div>
-
                         <div class="info-value">
                             {{ purchase.supplier.city|default:"—" }}
                         </div>
-
                     </div>
 
                 </div>
-
             </div>
-
         </div>
-
 
         <!-- PURCHASE INFORMATION -->
 
         <div class="col-lg-6">
-
             <div class="detail-card h-100 mb-0">
 
                 <div class="card-header-custom">
@@ -568,47 +536,36 @@
                 <div class="card-body-custom">
 
                     <div class="info-group">
-
                         <div class="info-label">
                             Purchase Number
                         </div>
-
                         <div class="info-value">
                             {{ purchase.purchase_number }}
                         </div>
-
                     </div>
 
                     <div class="info-group">
-
                         <div class="info-label">
                             Branch
                         </div>
-
                         <div class="info-value">
                             {{ purchase.branch.name }}
                         </div>
-
                     </div>
 
                     <div class="info-group">
-
                         <div class="info-label">
                             Purchase Date
                         </div>
-
                         <div class="info-value">
                             {{ purchase.purchase_date|date:"d M Y" }}
                         </div>
-
                     </div>
 
                     <div class="info-group">
-
                         <div class="info-label">
                             Expected Delivery
                         </div>
-
                         <div class="info-value">
 
                             {% if purchase.expected_delivery_date %}
@@ -618,45 +575,202 @@
                             {% endif %}
 
                         </div>
-
                     </div>
 
                     <div class="info-group">
-
                         <div class="info-label">
                             Supplier Invoice Number
                         </div>
-
                         <div class="info-value">
                             {{ purchase.supplier_invoice_number|default:"—" }}
                         </div>
-
                     </div>
 
                     <div class="info-group mb-0">
-
                         <div class="info-label">
                             Created By
                         </div>
-
                         <div class="info-value">
                             {{ purchase.created_by }}
                         </div>
+                    </div>
 
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+
+    <!-- SUPPLIER EMAIL STATUS -->
+
+    <div class="detail-card">
+
+        <div class="card-header-custom">
+            <h5>
+                <i class="fa-solid fa-envelope me-2 text-success"></i>
+                Supplier Email Status
+            </h5>
+        </div>
+
+        <div class="card-body-custom">
+
+            {% if order_email %}
+
+                <div class="info-group">
+
+                    <div class="info-label">
+                        Recipient Email
+                    </div>
+
+                    <div class="info-value">
+                        {{ order_email.recipient_email|default:"Not provided" }}
                     </div>
 
                 </div>
 
-            </div>
+                <div class="info-group">
+
+                    <div class="info-label">
+                        Email Status
+                    </div>
+
+                    {% if order_email.status == "sent" %}
+
+                    <span class="badge bg-success">
+                        <i class="fa-solid fa-check me-1"></i>
+                        Sent
+                    </span>
+
+                    {% elif order_email.status == "failed" %}
+
+                    <span class="badge bg-danger">
+                        <i class="fa-solid fa-xmark me-1"></i>
+                        Failed
+                    </span>
+
+                    {% elif order_email.status == "sending" %}
+
+                    <span class="badge bg-info text-dark">
+                        <i class="fa-solid fa-paper-plane me-1"></i>
+                        Sending
+                    </span>
+
+                    {% elif order_email.status == "pending" %}
+
+                    <span class="badge bg-warning text-dark">
+                        <i class="fa-solid fa-clock me-1"></i>
+                        Pending
+                    </span>
+
+                    {% else %}
+
+                    <span class="badge bg-secondary">
+                        {{ order_email.get_status_display }}
+                    </span>
+
+                    {% endif %}
+
+                </div>
+
+                <div class="info-group">
+                    <div class="info-label">
+                        Sending Attempts
+                    </div>
+                    <div class="info-value">
+                        {{ order_email.attempts }}
+                    </div>
+                </div>
+
+                {% if order_email.sent_at %}
+
+                <div class="info-group mb-0">
+                    <div class="info-label">
+                        Last Sent At
+                    </div>
+                    <div class="info-value">
+                        {{ order_email.sent_at|date:"d M Y, h:i A" }}
+                    </div>
+                </div>
+
+                {% endif %}
+
+                {% if order_email.status == "failed" %}
+
+                <div class="alert alert-danger mt-3">
+                    <i class="fa-solid fa-triangle-exclamation me-2"></i>
+                    Email sending failed. Check the email settings
+                    and server logs before retrying.
+                </div>
+
+                {% endif %}
+
+                <!-- RETRY EMAIL: CORRECT POSITION -->
+
+                {% if order_email.status == "failed" or order_email.status == "pending" %}
+
+                    {% if perms.purchases.change_purchase %}
+
+                        {% if purchase.status != "draft" and purchase.status != "cancelled" %}
+
+                        <form
+                            method="post"
+                            action="{% url 'purchases:retry_email' purchase.pk %}"
+                            class="mt-3"
+                            id="retryEmailForm"
+                        >
+                            {% csrf_token %}
+
+                            <button
+                                type="submit"
+                                class="btn btn-outline-primary"
+                                id="retryEmailButton"
+                            >
+                                <i class="fa-solid fa-rotate-right me-2"></i>
+                                Retry Email
+                            </button>
+
+                            <div class="form-text mt-2">
+                                Before retrying, verify whether the supplier
+                                has already received this order.
+                            </div>
+
+                        </form>
+
+                        {% endif %}
+
+                    {% endif %}
+
+                {% endif %}
+
+                <!-- END RETRY EMAIL -->
+
+            {% else %}
+
+                <p class="text-muted mb-0">
+
+                    {% if is_draft %}
+
+                        Supplier email will be prepared when this
+                        purchase order is confirmed.
+
+                    {% else %}
+
+                        No supplier email notification record
+                        is available for this purchase order.
+
+                    {% endif %}
+
+                </p>
+
+            {% endif %}
 
         </div>
 
     </div>
 
 
-    <!-- ========================================
-         PURCHASE ITEMS
-         ======================================== -->
+    <!-- PURCHASED MEDICINES -->
 
     <div class="detail-card">
 
@@ -689,98 +803,71 @@
 
                     {% for item in items %}
 
-                        <tr>
+                    <tr>
 
-                            <td>
+                        <td>
+                            <div class="medicine-name">
+                                {{ item.medicine.name }}
+                            </div>
 
-                                <div class="medicine-name">
-                                    {{ item.medicine.name }}
-                                </div>
+                            <div class="muted-text">
+                                {{ item.medicine.generic_name|default:"—" }}
+                            </div>
 
-                                <div class="muted-text">
-                                    {{ item.medicine.generic_name|default:"—" }}
-                                </div>
+                            {% if item.notes %}
+                            <div class="muted-text mt-1">
+                                {{ item.notes }}
+                            </div>
+                            {% endif %}
+                        </td>
 
-                                {% if item.notes %}
+                        <td>
+                            {{ item.pack_size }}
+                            <div class="muted-text">
+                                units / pack
+                            </div>
+                        </td>
 
-                                    <div class="muted-text mt-1">
-                                        {{ item.notes }}
-                                    </div>
+                        <td>
+                            <strong>{{ item.ordered_packs }}</strong>
+                            <div class="muted-text">packs</div>
+                        </td>
 
-                                {% endif %}
+                        <td>
+                            {{ item.received_packs }}
+                            <div class="muted-text">packs</div>
+                        </td>
 
-                            </td>
+                        <td>
+                            <strong>{{ item.remaining_packs }}</strong>
+                            <div class="muted-text">packs</div>
+                        </td>
 
-                            <td>
+                        <td class="money">
+                            Rs. {{ item.purchase_price|floatformat:2 }}
+                        </td>
 
-                                {{ item.pack_size }}
+                        <td class="money">
+                            Rs. {{ item.selling_price|floatformat:2 }}
+                        </td>
 
-                                <div class="muted-text">
-                                    units / pack
-                                </div>
+                        <td class="money">
+                            Rs. {{ item.discount_amount|floatformat:2 }}
+                        </td>
 
-                            </td>
+                        <td class="text-end money fw-bold">
+                            Rs. {{ item.line_total|floatformat:2 }}
+                        </td>
 
-                            <td>
-
-                                <strong>
-                                    {{ item.ordered_packs }}
-                                </strong>
-
-                                <div class="muted-text">
-                                    packs
-                                </div>
-
-                            </td>
-
-                            <td>
-
-                                {{ item.received_packs }}
-
-                                <div class="muted-text">
-                                    packs
-                                </div>
-
-                            </td>
-
-                            <td>
-
-                                <strong>
-                                    {{ item.remaining_packs }}
-                                </strong>
-
-                                <div class="muted-text">
-                                    packs
-                                </div>
-
-                            </td>
-
-                            <td class="money">
-                                Rs. {{ item.purchase_price|floatformat:2 }}
-                            </td>
-
-                            <td class="money">
-                                Rs. {{ item.selling_price|floatformat:2 }}
-                            </td>
-
-                            <td class="money">
-                                Rs. {{ item.discount_amount|floatformat:2 }}
-                            </td>
-
-                            <td class="text-end money fw-bold">
-                                Rs. {{ item.line_total|floatformat:2 }}
-                            </td>
-
-                        </tr>
+                    </tr>
 
                     {% empty %}
 
-                        <tr>
-                            <td colspan="9"
-                                class="text-center text-muted py-5">
-                                No medicines have been added.
-                            </td>
-                        </tr>
+                    <tr>
+                        <td colspan="9" class="text-center text-muted py-5">
+                            No medicines have been added.
+                        </td>
+                    </tr>
 
                     {% endfor %}
 
@@ -793,9 +880,7 @@
     </div>
 
 
-    <!-- ========================================
-         PURCHASE NOTES & FINANCIAL SUMMARY
-         ======================================== -->
+    <!-- NOTES AND FINANCIAL SUMMARY -->
 
     <div class="row g-4 mb-4">
 
@@ -832,7 +917,6 @@
 
         </div>
 
-
         <!-- FINANCIAL SUMMARY -->
 
         <div class="col-lg-5">
@@ -849,55 +933,42 @@
                 <div class="card-body-custom">
 
                     <div class="total-row">
-
                         <span class="text-muted">
                             Items Subtotal
                         </span>
-
                         <strong class="money">
                             Rs. {{ purchase.subtotal|floatformat:2 }}
                         </strong>
-
                     </div>
 
                     <div class="total-row">
-
                         <span class="text-muted">
                             Order Discount
                         </span>
-
                         <strong class="money">
                             − Rs. {{ purchase.discount_amount|floatformat:2 }}
                         </strong>
-
                     </div>
 
                     <div class="total-row">
-
                         <span class="text-muted">
                             Tax
                         </span>
-
                         <strong class="money">
                             Rs. {{ purchase.tax_amount|floatformat:2 }}
                         </strong>
-
                     </div>
 
                     <div class="total-row">
-
                         <strong>
                             Grand Total
                         </strong>
-
                         <span class="grand-total money">
                             Rs. {{ purchase.total_amount|floatformat:2 }}
                         </span>
-
                     </div>
 
                 </div>
-
             </div>
 
         </div>
@@ -905,9 +976,7 @@
     </div>
 
 
-    <!-- ========================================
-         STOCK RECEIVING STATUS
-         ======================================== -->
+    <!-- STOCK RECEIVING STATUS -->
 
     <div class="receiving-note mb-4">
 
@@ -923,48 +992,48 @@
 
                 {% if purchase.status == "draft" %}
 
-                    <p class="mb-0">
-                        This purchase is currently a draft.
-                        Confirm the purchase order before
-                        receiving supplier stock.
-                    </p>
+                <p class="mb-0">
+                    This purchase is currently a draft.
+                    Confirm the purchase order before
+                    receiving supplier stock.
+                </p>
 
                 {% elif purchase.status == "ordered" %}
 
-                    <p class="mb-0">
-                        This purchase order is confirmed
-                        and ready for stock receiving.
-                        Use the Receive Stock button to
-                        record delivered medicines,
-                        batches and expiry dates.
-                    </p>
+                <p class="mb-0">
+                    This purchase order is confirmed
+                    and ready for stock receiving.
+                    Use the Receive Stock button to
+                    record delivered medicines,
+                    batches and expiry dates.
+                </p>
 
                 {% elif purchase.status == "partially_received" %}
 
-                    <p class="mb-0">
-                        This purchase has been partially
-                        received. You can continue receiving
-                        its remaining medicines.
-                        Previous deliveries are recorded
-                        in the history below.
-                    </p>
+                <p class="mb-0">
+                    This purchase has been partially
+                    received. You can continue receiving
+                    its remaining medicines.
+                    Previous deliveries are recorded
+                    in the history below.
+                </p>
 
                 {% elif purchase.status == "received" %}
 
-                    <p class="mb-0">
-                        This purchase has been fully received.
-                        All ordered packs have been recorded
-                        in inventory.
-                        Receiving history is available below.
-                    </p>
+                <p class="mb-0">
+                    This purchase has been fully received.
+                    All ordered packs have been recorded
+                    in inventory. Receiving history
+                    is available below.
+                </p>
 
                 {% elif purchase.status == "cancelled" %}
 
-                    <p class="mb-0">
-                        This purchase has been cancelled.
-                        Stock receiving is not permitted
-                        for cancelled purchases.
-                    </p>
+                <p class="mb-0">
+                    This purchase has been cancelled.
+                    Stock receiving is not permitted
+                    for cancelled purchases.
+                </p>
 
                 {% endif %}
 
@@ -975,9 +1044,7 @@
     </div>
 
 
-    <!-- ========================================
-         PHASE 7.8.6 — STOCK RECEIVING HISTORY
-         ======================================== -->
+    <!-- STOCK RECEIVING HISTORY -->
 
     <div class="detail-card">
 
@@ -1002,247 +1069,208 @@
 
             {% for receipt in receipts %}
 
-                <div class="receipt-card">
+            <div class="receipt-card">
 
-                    <!-- RECEIPT HEADER -->
+                <!-- RECEIPT HEADER -->
 
-                    <div class="receipt-header">
+                <div class="receipt-header">
 
-                        <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+                    <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
 
-                            <div>
+                        <div>
 
-                                <div class="receipt-number">
-                                    <i class="fa-solid fa-receipt me-2"></i>
-                                    {{ receipt.receipt_number }}
-                                </div>
-
-                                <div class="receipt-meta mt-2">
-
-                                    <i class="fa-regular fa-calendar me-1"></i>
-                                    {{ receipt.received_at|date:"d M Y, h:i A" }}
-
-                                </div>
-
-                                <div class="receipt-meta mt-1">
-
-                                    <i class="fa-regular fa-user me-1"></i>
-                                    Received by:
-                                    <strong>{{ receipt.received_by }}</strong>
-
-                                </div>
-
+                            <div class="receipt-number">
+                                <i class="fa-solid fa-receipt me-2"></i>
+                                {{ receipt.receipt_number }}
                             </div>
 
-                            <span class="receipt-badge">
+                            <div class="receipt-meta mt-2">
+                                <i class="fa-regular fa-calendar me-1"></i>
+                                {{ receipt.received_at|date:"d M Y, h:i A" }}
+                            </div>
 
-                                <i class="fa-solid fa-check-circle me-1"></i>
-                                Stock Received
-
-                            </span>
+                            <div class="receipt-meta mt-1">
+                                <i class="fa-regular fa-user me-1"></i>
+                                Received by:
+                                <strong>{{ receipt.received_by }}</strong>
+                            </div>
 
                         </div>
 
-                        <!-- DELIVERY NOTE -->
-
-                        {% if receipt.supplier_delivery_note %}
-
-                            <div class="mt-3">
-
-                                <span class="muted-text">
-                                    Supplier Delivery Note:
-                                </span>
-
-                                <strong class="small">
-                                    {{ receipt.supplier_delivery_note }}
-                                </strong>
-
-                            </div>
-
-                        {% endif %}
-
-                        <!-- RECEIVING NOTES -->
-
-                        {% if receipt.notes %}
-
-                            <div class="mt-2">
-
-                                <span class="muted-text">
-                                    Receiving Notes:
-                                </span>
-
-                                <div class="small mt-1" style="white-space: pre-wrap;">{{ receipt.notes }}</div>
-
-                            </div>
-
-                        {% endif %}
+                        <span class="receipt-badge">
+                            <i class="fa-solid fa-check-circle me-1"></i>
+                            Stock Received
+                        </span>
 
                     </div>
 
+                    {% if receipt.supplier_delivery_note %}
 
-                    <!-- RECEIVED MEDICINE BATCHES -->
-
-                    <div class="table-responsive">
-
-                        <table class="table receipt-items-table">
-
-                            <thead>
-
-                                <tr>
-                                    <th>Medicine</th>
-                                    <th>Batch Number</th>
-                                    <th>Expiry Date</th>
-                                    <th>Received Packs</th>
-                                    <th>Pack Size</th>
-                                    <th>Total Units</th>
-                                    <th>Purchase Price</th>
-                                    <th>Selling Price</th>
-                                </tr>
-
-                            </thead>
-
-                            <tbody>
-
-                                {% for receipt_item in receipt.items.all %}
-
-                                    <tr>
-
-                                        <td>
-
-                                            <div class="medicine-name">
-                                                {{ receipt_item.purchase_item.medicine.name }}
-                                            </div>
-
-                                            <div class="muted-text">
-                                                {{ receipt_item.purchase_item.medicine.generic_name|default:"—" }}
-                                            </div>
-
-                                        </td>
-
-                                        <td>
-
-                                            <span class="fw-semibold">
-                                                {{ receipt_item.batch_number }}
-                                            </span>
-
-                                        </td>
-
-                                        <td>
-
-                                            {{ receipt_item.expiry_date|date:"d M Y" }}
-
-                                        </td>
-
-                                        <td>
-
-                                            <strong class="text-success">
-                                                {{ receipt_item.received_packs }}
-                                            </strong>
-
-                                            <div class="muted-text">
-                                                packs
-                                            </div>
-
-                                        </td>
-
-                                        <td>
-
-                                            {{ receipt_item.pack_size }}
-
-                                            <div class="muted-text">
-                                                units / pack
-                                            </div>
-
-                                        </td>
-
-                                        <td>
-
-                                            <strong>
-                                                {{ receipt_item.received_units }}
-                                            </strong>
-
-                                            <div class="muted-text">
-                                                units
-                                            </div>
-
-                                        </td>
-
-                                        <td class="money">
-
-                                            Rs. {{ receipt_item.purchase_price|floatformat:2 }}
-
-                                        </td>
-
-                                        <td class="money">
-
-                                            Rs. {{ receipt_item.selling_price|floatformat:2 }}
-
-                                        </td>
-
-                                    </tr>
-
-                                {% empty %}
-
-                                    <tr>
-                                        <td colspan="8"
-                                            class="text-center text-muted py-4">
-                                            No receipt items found.
-                                        </td>
-                                    </tr>
-
-                                {% endfor %}
-
-                            </tbody>
-
-                        </table>
-
+                    <div class="mt-3">
+                        <span class="muted-text">
+                            Supplier Delivery Note:
+                        </span>
+                        <strong class="small">
+                            {{ receipt.supplier_delivery_note }}
+                        </strong>
                     </div>
 
+                    {% endif %}
 
-                    <!-- RECEIPT FOOTER -->
+                    {% if receipt.notes %}
 
-                    <div class="receipt-summary">
+                    <div class="mt-2">
+                        <span class="muted-text">
+                            Receiving Notes:
+                        </span>
+                        <div class="small mt-1" style="white-space: pre-wrap;">{{ receipt.notes }}</div>
+                    </div>
 
-                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    {% endif %}
 
-                            <span class="text-muted small">
+                </div>
 
-                                <i class="fa-solid fa-boxes-stacked me-1"></i>
-                                Total Received in This Delivery
 
-                            </span>
+                <!-- RECEIVED MEDICINE BATCHES -->
 
-                            <span class="fw-bold text-success">
-                                {{ receipt.total_received_packs }} Pack(s)
-                            </span>
+                <div class="table-responsive">
 
-                        </div>
+                    <table class="table receipt-items-table">
+
+                        <thead>
+                            <tr>
+                                <th>Medicine</th>
+                                <th>Batch Number</th>
+                                <th>Expiry Date</th>
+                                <th>Received Packs</th>
+                                <th>Pack Size</th>
+                                <th>Total Units</th>
+                                <th>Purchase Price</th>
+                                <th>Selling Price</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+                            {% for receipt_item in receipt.items.all %}
+
+                            <tr>
+
+                                <td>
+                                    <div class="medicine-name">
+                                        {{ receipt_item.purchase_item.medicine.name }}
+                                    </div>
+
+                                    <div class="muted-text">
+                                        {{ receipt_item.purchase_item.medicine.generic_name|default:"—" }}
+                                    </div>
+                                </td>
+
+                                <td>
+                                    <span class="fw-semibold">
+                                        {{ receipt_item.batch_number }}
+                                    </span>
+                                </td>
+
+                                <td>
+                                    {{ receipt_item.expiry_date|date:"d M Y" }}
+                                </td>
+
+                                <td>
+                                    <strong class="text-success">
+                                        {{ receipt_item.received_packs }}
+                                    </strong>
+                                    <div class="muted-text">
+                                        packs
+                                    </div>
+                                </td>
+
+                                <td>
+                                    {{ receipt_item.pack_size }}
+                                    <div class="muted-text">
+                                        units / pack
+                                    </div>
+                                </td>
+
+                                <td>
+                                    <strong>
+                                        {{ receipt_item.received_units }}
+                                    </strong>
+                                    <div class="muted-text">
+                                        units
+                                    </div>
+                                </td>
+
+                                <td class="money">
+                                    Rs. {{ receipt_item.purchase_price|floatformat:2 }}
+                                </td>
+
+                                <td class="money">
+                                    Rs. {{ receipt_item.selling_price|floatformat:2 }}
+                                </td>
+
+                            </tr>
+
+                            {% empty %}
+
+                            <tr>
+                                <td colspan="8"
+                                    class="text-center text-muted py-4">
+                                    No receipt items found.
+                                </td>
+                            </tr>
+
+                            {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+
+                <!-- RECEIPT FOOTER -->
+
+                <div class="receipt-summary">
+
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+
+                        <span class="text-muted small">
+                            <i class="fa-solid fa-boxes-stacked me-1"></i>
+                            Total Received in This Delivery
+                        </span>
+
+                        <span class="fw-bold text-success">
+                            {{ receipt.total_received_packs }} Pack(s)
+                        </span>
 
                     </div>
 
                 </div>
+
+            </div>
 
             {% empty %}
 
-                <!-- NO RECEIVING HISTORY -->
+            <!-- NO RECEIVING HISTORY -->
 
-                <div class="empty-receipts">
+            <div class="empty-receipts">
 
-                    <i class="fa-solid fa-box-open d-block"></i>
+                <i class="fa-solid fa-box-open d-block"></i>
 
-                    <h6 class="fw-bold mb-2">
-                        No Stock Receiving History
-                    </h6>
+                <h6 class="fw-bold mb-2">
+                    No Stock Receiving History
+                </h6>
 
-                    <p class="text-muted small mb-0">
-                        No supplier deliveries have been
-                        recorded against this purchase yet.
-                        Once stock is received, all receiving
-                        records and medicine batches will
-                        appear here.
-                    </p>
+                <p class="text-muted small mb-0">
+                    No supplier deliveries have been
+                    recorded against this purchase yet.
+                    Once stock is received, all receiving
+                    records and medicine batches
+                    will appear here.
+                </p>
 
-                </div>
+            </div>
 
             {% endfor %}
 
@@ -1251,9 +1279,7 @@
     </div>
 
 
-    <!-- ========================================
-         AUDIT INFORMATION
-         ======================================== -->
+    <!-- AUDIT INFORMATION -->
 
     <div class="text-muted small mb-3">
 
@@ -1268,5 +1294,44 @@
     </div>
 
 </div>
+
+
+<!-- RETRY EMAIL DOUBLE-SUBMIT PROTECTION -->
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const form = document.getElementById("retryEmailForm");
+    const button = document.getElementById("retryEmailButton");
+
+    if (!form || !button) {
+        return;
+    }
+
+    let submitting = false;
+
+    form.addEventListener("submit", function (event) {
+
+        if (submitting) {
+            event.preventDefault();
+            return;
+        }
+
+        submitting = true;
+
+        button.disabled = true;
+        button.innerHTML = `
+            <span
+                class="spinner-border spinner-border-sm me-2"
+                role="status"
+                aria-hidden="true"
+            ></span>
+            Sending...
+        `;
+
+    });
+
+});
+</script>
 
 {% endblock %}

@@ -6,7 +6,7 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
-
+from core_settings.models import PharmacyProfile
 from branches.models import Branch
 from customers.models import (
     Customer,
@@ -24,6 +24,9 @@ class CustomerManagementTests(TestCase):
 
     @classmethod
     def setUpTestData(cls):
+        profile = PharmacyProfile.get_profile()
+        profile.enable_multi_branch = True
+        profile.save(update_fields=["enable_multi_branch"])
 
         User = get_user_model()
 

@@ -7,6 +7,8 @@ from .payment_services import (
     get_sale_outstanding,
     receive_sale_payment,
 )
+from core_settings.models import PharmacyProfile
+from branches.services import ensure_single_pharmacy_branch
 from core_settings.tax import (
     get_default_tax_rate,
     get_effective_tax_rate,
@@ -32,29 +34,45 @@ from .services import CheckoutError, checkout_sale
 # ================================================================
 
 
+
 def get_pos_branch(user):
     """
-    Return the branch assigned to the logged-in user.
+    Resolve the branch used for POS operations.
 
-    POS operations require a branch because inventory and sales
-    are branch-specific.
+    Single Pharmacy Mode:
+        Automatically use the default pharmacy branch.
+
+    Multi-Branch Mode:
+        Use the employee's assigned branch.
+        Owner must explicitly select/assign a branch
+        before performing branch-specific POS operations.
     """
-    return getattr(user, "branch", None)
+
+    profile = PharmacyProfile.get_profile()
+
+    if not profile.enable_multi_branch:
+        return ensure_single_pharmacy_branch()
+
+    branch = getattr(user, "branch", None)
+
+    if branch is None or not branch.is_active:
+        return None
+
+    return branch
+
 
 
 
 def get_sales_queryset_for_user(user):
     """
-    Branch-safe sales queryset.
+    Return sales accessible to the current user.
 
-    Superuser:
-        Can view all branches.
+    Single Pharmacy Mode:
+        All authorized users can access MAIN branch sales.
 
-    Normal users:
-        Can only view assigned branch sales.
-
-    Users without a branch:
-        Cannot view any sales.
+    Multi-Branch Mode:
+        Superuser can access all branches.
+        Employees can access only their assigned branch.
     """
 
     queryset = Sale.objects.select_related(
@@ -65,14 +83,28 @@ def get_sales_queryset_for_user(user):
     if not user.is_authenticated or not user.is_active:
         return queryset.none()
 
+    # Owner can view sales from all branches.
     if user.is_superuser:
         return queryset
 
-    if user.branch_id is None:
+    profile = PharmacyProfile.get_profile()
+
+    # Single Pharmacy Mode: resolve MAIN automatically.
+    if not profile.enable_multi_branch:
+        branch = ensure_single_pharmacy_branch()
+
+        return queryset.filter(
+            branch=branch,
+        )
+
+    # Multi-Branch Mode: enforce employee branch isolation.
+    branch = getattr(user, "branch", None)
+
+    if branch is None or not branch.is_active:
         return queryset.none()
 
     return queryset.filter(
-        branch_id=user.branch_id
+        branch=branch,
     )
 
 
@@ -82,14 +114,22 @@ def get_sales_queryset_for_user(user):
 # ================================================================
 
 
+
 @login_required
 @role_permission_required("sales.add_sale")
 @ensure_csrf_cookie
 def pos(request):
+
+    branch = get_pos_branch(request.user)
+
     return render(
         request,
         "sales/pos.html",
+        {
+            "branch": branch,
+        },
     )
+
 
 
 # ================================================================
@@ -448,6 +488,7 @@ def checkout(request):
 @role_permission_required("sales.view_sale")
 @require_GET
 def sale_history(request):
+    branch = get_pos_branch(request.user)
     sales = get_sales_queryset_for_user(
         request.user
     )
@@ -606,7 +647,7 @@ def sale_history(request):
     context = {
         "page_obj": page_obj,
         "sales": page_obj.object_list,
-
+        "branch": branch,
         "query": query,
         "selected_payment_method": (
             payment_method

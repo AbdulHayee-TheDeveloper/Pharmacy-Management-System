@@ -695,3 +695,41 @@ class PurchaseReceiptItem(models.Model):
             Decimal(self.received_packs)
             * self.purchase_price
         )
+
+class PurchaseOrderEmail(models.Model):
+
+    class Status(models.TextChoices):
+        PENDING = "pending", "Pending"
+        SENDING = "sending", "Sending"
+        SENT = "sent", "Sent"
+        FAILED = "failed", "Failed"
+
+    purchase = models.OneToOneField(
+        "purchases.Purchase",
+        on_delete=models.PROTECT,
+        related_name="order_email",
+    )
+
+    recipient_email = models.EmailField()
+
+    status = models.CharField(
+        max_length=10,
+        choices=Status.choices,
+        default=Status.PENDING,
+        db_index=True,
+    )
+
+    attempts = models.PositiveIntegerField(default=0)
+
+    last_error = models.TextField(blank=True)
+
+    sent_at = models.DateTimeField(
+        null=True,
+        blank=True,
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.purchase} - {self.get_status_display()}"

@@ -393,7 +393,7 @@ Sale History | PharmaCare
                                             {{ sale.invoice_number }}
                                         </a>
 
-                                        {% if not request.user.branch %}
+                                        {% if not branch %}
                                             <div class="small text-muted">
                                                 {{ sale.branch.name }}
                                             </div>

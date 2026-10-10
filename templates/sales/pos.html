@@ -55,18 +55,12 @@ Sales / POS | PharmaCare
     <!-- NO BRANCH WARNING -->
     <!-- ====================================================== -->
 
-    {% if not request.user.branch %}
-
+ {% if not branch %}
     <div class="alert alert-warning">
-
-        <i class="fa-solid fa-triangle-exclamation me-2"></i>
-
-        Your account is not assigned to a branch.
-        Assign a branch before processing sales.
-
+        Your account is not assigned to an operational branch.
+        Contact the administrator before processing sales.
     </div>
-
-    {% endif %}
+{% endif %}
 
 
     <div class="row g-4">
@@ -100,7 +94,7 @@ Sales / POS | PharmaCare
                             <input type="search" id="posMedicineSearch" class="form-control" placeholder="
                                     Medicine, generic name,
                                     barcode, SKU or batch...
-                                " autocomplete="off" {% if not request.user.branch %} disabled {% endif %}>
+                                " autocomplete="off" {% if not branch %} disabled {% endif %}>
 
                         </div>
 

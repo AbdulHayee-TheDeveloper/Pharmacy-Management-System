@@ -1239,41 +1239,24 @@
                 <!-- BRANCH -->
                 <!-- ================================================= -->
 
+
+                {% if not single_branch_mode %}
+
                 <div class="col-md-6">
-
-
                     <label for="{{ form.branch.id_for_label }}" class="form-label">
-
-                        Branch
-
-                        <span class="text-danger">
-                            *
-                        </span>
-
+                        Branch <span class="text-danger">*</span>
                     </label>
-
 
                     {{ form.branch }}
 
-
-                    {% if form.branch.errors %}
-
+                    {% for error in form.branch.errors %}
                     <div class="text-danger small mt-1">
-
-                        {% for error in form.branch.errors %}
-
-                        <div>
-                            {{ error }}
-                        </div>
-
-                        {% endfor %}
-
+                        {{ error }}
                     </div>
-
-                    {% endif %}
-
-
+                    {% endfor %}
                 </div>
+
+                {% endif %}
 
 
                 <!-- ================================================= -->
@@ -1598,7 +1581,8 @@
                             fa-solid
                             fa-boxes-stacked
                             me-2
-                        "></i>
+                        "
+                        id="saveInventoryButton"></i>
 
                     {{ submit_text }}
 
@@ -1615,5 +1599,43 @@
 
 
 </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const form = document.querySelector(
+        'form[method="post"]'
+    );
+
+    const saveButton = document.getElementById(
+        "saveInventoryButton"
+    );
+
+    if (!form || !saveButton) {
+        return;
+    }
+
+    let isSubmitting = false;
+
+    form.addEventListener("submit", function (event) {
+        if (isSubmitting) {
+            event.preventDefault();
+            return;
+        }
+
+        isSubmitting = true;
+
+        saveButton.disabled = true;
+
+        saveButton.innerHTML = `
+            <span
+                class="spinner-border spinner-border-sm me-2"
+                role="status"
+                aria-hidden="true"
+            ></span>
+            Saving...
+        `;
+    });
+});
+</script>
 
 {% endblock %}

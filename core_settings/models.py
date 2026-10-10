@@ -124,6 +124,17 @@ class PharmacyProfile(models.Model):
         blank=True,
         default="Thank you for shopping with us!",
     )
+    
+    enable_multi_branch = models.BooleanField(
+        default=False,
+        verbose_name="Enable Multi-Branch Management",
+        help_text=(
+            "Enable management of multiple pharmacy branches. "
+            "When disabled, the system operates in "
+            "single-pharmacy mode."
+        ),
+    )
+
 
     updated_at = models.DateTimeField(
         auto_now=True,

@@ -1,44 +1,10 @@
 from django import forms
-
+from django.db.models import Q
 from .models import Category, Medicine
-
-
-class CategoryForm(forms.ModelForm):
-    class Meta:
-        model = Category
-
-        fields = [
-            "name",
-            "description",
-            "is_active",
-        ]
-
-        widgets = {
-            "name": forms.TextInput(
-                attrs={
-                    "class": "form-control",
-                    "placeholder": "e.g. Antibiotics",
-                }
-            ),
-            "description": forms.Textarea(
-                attrs={
-                    "class": "form-control",
-                    "rows": 3,
-                    "placeholder": "Optional category description",
-                }
-            ),
-            "is_active": forms.CheckboxInput(
-                attrs={
-                    "class": "form-check-input",
-                }
-            ),
-        }
-
 
 class MedicineForm(forms.ModelForm):
     class Meta:
         model = Medicine
-
         fields = [
             "name",
             "generic_name",
@@ -65,7 +31,6 @@ class MedicineForm(forms.ModelForm):
             "is_active",
             "use_pharmacy_default_tax",
         ]
-
         widgets = {
             "name": forms.TextInput(
                 attrs={
@@ -213,7 +178,6 @@ class MedicineForm(forms.ModelForm):
                 attrs={"class": "form-check-input"}
             ),
         }
-
         labels = {
             "name": "Brand Name",
             "generic_name": "Generic Name",
@@ -231,47 +195,46 @@ class MedicineForm(forms.ModelForm):
             "controlled_medicine": "Controlled Medicine",
             "storage_condition": "Storage Condition",
         }
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        
+        # Catalog-only medicine creation:
+        # Actual prices are entered later in Inventory.
+        if self.instance.pk is None:
+            self.fields.pop("purchase_price", None)
+            self.fields.pop("selling_price", None)
 
-        self.fields["category"].queryset = Category.objects.filter(
-            is_active=True
-        ).order_by("name")
-
+        categories = Category.objects.filter(is_active=True)
+        if self.instance and self.instance.pk and self.instance.category_id:
+            # Keep the current category when it was deactivated after assignment.
+            categories = Category.objects.filter(
+                Q(is_active=True) | Q(pk=self.instance.category_id)
+            )
+        self.fields["category"].queryset = categories.order_by("name")
         self.has_inventory_batches = False
-
         if self.instance and self.instance.pk:
             self.has_inventory_batches = (
                 self.instance.inventory_batches.exists()
             )
-
         if self.has_inventory_batches:
             self.fields["unit"].disabled = True
             self.fields["pack_size"].disabled = True
-
             self.fields["unit"].help_text = (
                 "This field cannot be changed because stock batches "
                 "already exist for this medicine."
             )
-
             self.fields["pack_size"].help_text = (
                 "This field cannot be changed because stock batches "
                 "already exist for this medicine."
             )
-
     def clean(self):
         cleaned_data = super().clean()
-
         purchase_price = cleaned_data.get("purchase_price")
         selling_price = cleaned_data.get("selling_price")
-
         minimum_stock = cleaned_data.get("minimum_stock_level")
         reorder_level = cleaned_data.get("reorder_level")
-
         pack_size = cleaned_data.get("pack_size")
         allow_loose_sale = cleaned_data.get("allow_loose_sale")
-
         if (
             purchase_price is not None
             and selling_price is not None
@@ -284,7 +247,6 @@ class MedicineForm(forms.ModelForm):
                     "the purchase price."
                 ),
             )
-
         if (
             minimum_stock is not None
             and reorder_level is not None
@@ -297,7 +259,6 @@ class MedicineForm(forms.ModelForm):
                     "than the minimum stock level."
                 ),
             )
-
         if (
             allow_loose_sale
             and pack_size is not None
@@ -310,5 +271,36 @@ class MedicineForm(forms.ModelForm):
                     "when loose sale is enabled."
                 ),
             )
-
         return cleaned_data
+
+class CategoryForm(forms.ModelForm):
+    class Meta:
+        model = Category
+        fields = ["name", "description"]
+        widgets = {
+            "name": forms.TextInput(attrs={
+                "class": "form-control",
+                "placeholder": "e.g. Pain Relief",
+            }),
+            "description": forms.Textarea(attrs={
+                "class": "form-control",
+                "rows": 3,
+                "placeholder": "Optional category description",
+            }),
+        }
+    def clean_name(self):
+        name = self.cleaned_data["name"].strip()
+        if not name:
+            raise forms.ValidationError(
+                "Category name is required."
+            )
+        duplicate = Category.objects.filter(
+            name__iexact=name
+        )
+        if self.instance.pk:
+            duplicate = duplicate.exclude(pk=self.instance.pk)
+        if duplicate.exists():
+            raise forms.ValidationError(
+                "A category with this name already exists."
+            )
+        return name

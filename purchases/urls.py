@@ -1,6 +1,6 @@
 
 from django.urls import path
-
+from .views import purchase_retry_email
 from . import views
 
 
@@ -37,4 +37,9 @@ urlpatterns = [
         views.purchase_receive,
         name="receive",
     ),
+    path(
+    "<int:pk>/retry-email/",
+    purchase_retry_email,
+    name="retry_email",
+),
 ]

@@ -1,8 +1,8 @@
 from django.http import JsonResponse
 from django.template.loader import render_to_string
-
+from .models import PurchaseOrderEmail
+from .email_services import send_purchase_order_email
 from decimal import Decimal
-
 from django.views.decorators.http import require_POST
 
 from django.contrib import messages
@@ -743,10 +743,11 @@ def purchase_detail(request, pk):
     .order_by("-received_at", "-pk")
 
 )
-
+    order_email = PurchaseOrderEmail.objects.filter(purchase=purchase).first()
     context = {
     "purchase": purchase,
     "items": items,
+    "order_email": order_email,
     "total_ordered_packs": total_ordered_packs,
     "total_received_packs": total_received_packs,
     "is_draft": (
@@ -1176,6 +1177,20 @@ def purchase_confirm(request, pk):
             ]
 
         )
+    
+        # Prepare one email notification for this order.
+        notification, _ = PurchaseOrderEmail.objects.get_or_create(
+            purchase=purchase,
+            defaults={
+                "recipient_email": purchase.supplier.email or "",
+            },
+        )
+
+        # Send only after purchase confirmation is committed.
+        transaction.on_commit(
+            lambda email_id=notification.pk:
+                send_purchase_order_email(email_id)
+        )
 
     messages.success(
 
@@ -1481,4 +1496,99 @@ def purchase_receive(request, pk):
 
         context,
 
+    )
+
+@login_required
+@role_permission_required("purchases.change_purchase")
+@require_POST
+def purchase_retry_email(request, pk):
+
+    with transaction.atomic():
+        purchase = get_object_or_404(
+            get_purchase_queryset(request.user)
+            .select_for_update()
+            .select_related("supplier"),
+            pk=pk,
+        )
+
+        if purchase.status == Purchase.Status.DRAFT:
+            messages.error(
+                request,
+                "Draft purchase orders cannot be emailed.",
+            )
+            return redirect("purchases:detail", pk=pk)
+
+        if purchase.status == Purchase.Status.CANCELLED:
+            messages.error(
+                request,
+                "Cancelled purchase orders cannot be emailed.",
+            )
+            return redirect("purchases:detail", pk=pk)
+
+        notification = (
+            PurchaseOrderEmail.objects
+            .select_for_update()
+            .filter(purchase=purchase)
+            .first()
+        )
+
+        if notification is None:
+            messages.error(
+                request,
+                "No email notification record exists for this order.",
+            )
+            return redirect("purchases:detail", pk=pk)
+
+        if notification.status == PurchaseOrderEmail.Status.SENT:
+            messages.info(
+                request,
+                "This purchase order email is already marked as sent.",
+            )
+            return redirect("purchases:detail", pk=pk)
+
+        if notification.status == PurchaseOrderEmail.Status.SENDING:
+            messages.warning(
+                request,
+                "This email is already being processed.",
+            )
+            return redirect("purchases:detail", pk=pk)
+
+        if notification.status not in (
+            PurchaseOrderEmail.Status.FAILED,
+            PurchaseOrderEmail.Status.PENDING,
+        ):
+            messages.error(
+                request,
+                "This email cannot be retried in its current state.",
+            )
+            return redirect("purchases:detail", pk=pk)
+
+        # Use the stored recipient from the original order.
+        if not notification.recipient_email:
+            messages.error(
+                request,
+                "No recipient email is recorded for this order.",
+            )
+            return redirect("purchases:detail", pk=pk)
+
+        notification_id = notification.pk
+
+    # Email is sent after the database transaction closes.
+    success = send_purchase_order_email(notification_id)
+
+    if success:
+        messages.success(
+            request,
+            "Purchase order email sent successfully.",
+        )
+    else:
+        messages.error(
+            request,
+            "Email could not be sent. Check the email status and "
+            "server logs before trying again.",
+        )
+
+    return redirect(
+        "purchases:detail",
+        pk=pk,
     )

@@ -1,29 +1,35 @@
-# Virtual Environment
+# Environment and secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Virtual environments
 venv/
+.venv/
+myvenv/
 
 # Python
 __pycache__/
 *.py[cod]
+.pytest_cache/
+.mypy_cache/
 
 # Django
 db.sqlite3
-
-# Environment
-.env
-
-# Media
 media/
-
-# Static
 staticfiles/
+*.log
 
-# IDE
+# Database backups
+backups/
+*.backup
+*.dump
+*.sql
+
+# IDE / OS
 .vscode/
 .idea/
-
-# OS
-Thumbs.db
 .DS_Store
-
-# Logs
-*.log
+Thumbs.db
